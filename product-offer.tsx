@@ -8,8 +8,8 @@ export default function ProductOffer() {
       <div className="max-w-4xl mx-auto space-y-12">
         {/* Title Section */}
         <div className="text-center space-y-4">
-          <h1 className="text-4xl md:text-5xl font-bold text-black leading-tight">Tag rastreamento + App Petloo</h1>
-          <p className="text-gray-700 text-xl font-medium">Localize, registre e segure seu pet</p>
+          <h1 className="text-4xl md:text-5xl font-bold text-black leading-tight">Perder seu pet não é mais uma opção. Chegou a Tag de Rastreamento Petloo</h1>
+          <p className="text-gray-700 text-xl font-medium">Mais segurança para seu pet com rastreamento completo, RG digital, cartão de vacinas com lembretes e seguro saúde gratuito no app Petloo.</p>
         </div>
 
         {/* Main Content */}
