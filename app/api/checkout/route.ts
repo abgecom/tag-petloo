@@ -83,26 +83,24 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Step 2: Determine Price ID based on shipping cost
-    const shippingPriceId = body.shipping_price === 1887 ? PRICE_IDS.SHIPPING_1887 : PRICE_IDS.SHIPPING_2990
-
-    // Step 3: Create PaymentIntent for shipping cost
+    // Step 2: Create PaymentIntent for shipping cost (without payment method)
     const paymentIntent = await stripe.paymentIntents.create({
       amount: body.shipping_price,
       currency: "brl",
       customer: customer.id,
+      automatic_payment_methods: {
+        enabled: true,
+        allow_redirects: "never",
+      },
       metadata: {
         type: "shipping",
         customer_name: body.name,
         customer_email: body.email,
         shipping_price: body.shipping_price.toString(),
       },
-      automatic_payment_methods: {
-        enabled: true,
-      },
     })
 
-    // Step 4: Create Subscription with 30-day trial
+    // Step 3: Create Subscription with 30-day trial
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
       items: [
@@ -123,7 +121,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Step 5: Return response with client_secret and success status
+    // Step 4: Return response with client_secret and success status
     return NextResponse.json({
       success: true,
       client_secret: paymentIntent.client_secret,
