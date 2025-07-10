@@ -2,6 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import "./globals.css"
 import Script from "next/script"
+import PageViewTracker from "@/components/PageViewTracker"
 
 export const metadata: Metadata = {
   title: "Tag de Rastreamento Petloo - Nunca mais perca seu pet",
@@ -43,6 +44,10 @@ export default function RootLayout({
             style={{ display: "none", visibility: "hidden" }}
           />
         </noscript>
+
+        {/* Page View Tracker - Tracks all page views automatically */}
+        <PageViewTracker />
+
         {children}
       </body>
     </html>
