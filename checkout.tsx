@@ -10,6 +10,7 @@ import { loadStripe } from "@stripe/stripe-js"
 import { Elements, useStripe, useElements, CardElement } from "@stripe/react-stripe-js"
 import { fetchAddressByCEP } from "@/utils/fetchAddressByCEP"
 import { useRouter } from "next/navigation"
+import InitiateCheckoutTracker from "@/components/InitiateCheckoutTracker"
 
 // Initialize Stripe
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
@@ -423,6 +424,9 @@ function CheckoutForm() {
 
   return (
     <div className="min-h-screen bg-white">
+      {/* Initiate Checkout Tracker - Fires when checkout page loads */}
+      <InitiateCheckoutTracker />
+
       {/* Alert Banner */}
       <div className="bg-red-500 text-white text-center py-2 px-4 text-sm">
         <strong>ATENÇÃO:</strong> O prazo de entrega dos produtos personalizados inclui o tempo de frete + o prazo de
