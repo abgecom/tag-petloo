@@ -15,6 +15,9 @@ export default function PixPurchaseTracker() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
+    // Verificar se estamos no cliente
+    if (typeof window === "undefined") return
+
     const handlePixPurchase = () => {
       // Obter dados da URL ou sessionStorage
       const orderId = searchParams.get("orderId")

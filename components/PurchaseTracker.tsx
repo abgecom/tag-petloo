@@ -24,6 +24,9 @@ export default function PurchaseTracker() {
   const searchParams = useSearchParams()
 
   useEffect(() => {
+    // Verificar se estamos no cliente
+    if (typeof window === "undefined") return
+
     // Função para obter dados da compra
     const getPurchaseData = (): PurchaseData => {
       // Tentar obter dados do sessionStorage primeiro
