@@ -2,10 +2,59 @@
 
 import { Check, ShoppingCart, Shield, Truck, RotateCcw, Award, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import Link from "next/link"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { useState } from "react"
+import PersonalizationPopup from "@/components/PersonalizationPopup"
+import ColorSelectionPopup from "@/components/ColorSelectionPopup"
 
 export default function ProductOffer() {
+  const [isPersonalizationPopupOpen, setIsPersonalizationPopupOpen] = useState(false)
+  const [isColorSelectionPopupOpen, setIsColorSelectionPopupOpen] = useState(false)
+
+  const openPersonalizationPopup = () => setIsPersonalizationPopupOpen(true)
+  const closePersonalizationPopup = () => setIsPersonalizationPopupOpen(false)
+  const openColorSelectionPopup = () => setIsColorSelectionPopupOpen(true)
+  const closeColorSelectionPopup = () => setIsColorSelectionPopupOpen(false)
+
+  const handlePersonalize = () => {
+    closePersonalizationPopup()
+    openColorSelectionPopup()
+  }
+
+  const handleSkipPersonalization = () => {
+    closePersonalizationPopup()
+    // Use replace instead of href for faster navigation
+    window.location.replace("/checkout")
+  }
+
+  const handleFinalizePurchase = (color: "orange" | "purple") => {
+    closeColorSelectionPopup()
+
+    // Definir o price_id baseado na cor escolhida
+    const priceId = color === "orange" ? "price_1RjRxWRtGASrDbfeP7jp0wb0" : "price_1RjRyURtGASrDbfeuppcCqtm"
+
+    // Pre-save data to sessionStorage before navigation for faster loading
+    sessionStorage.setItem(
+      "personalizedProduct",
+      JSON.stringify({
+        color,
+        priceId,
+        amount: 3990,
+        name: `Tag ${color === "orange" ? "Laranja" : "Roxa"} Personalizada + App`,
+      }),
+    )
+
+    // Use replace for faster navigation
+    const params = new URLSearchParams({
+      personalized: "true",
+      color: color,
+      priceId: priceId,
+      amount: "3990",
+    })
+
+    window.location.replace(`/checkout?${params.toString()}`)
+  }
+
   return (
     <div className="min-h-screen py-12 px-4" style={{ backgroundColor: "#F1E9DB" }}>
       <div className="max-w-4xl mx-auto space-y-12">
@@ -260,15 +309,14 @@ export default function ProductOffer() {
 
         {/* CTA Button */}
         <div className="text-center">
-          <Link href="/checkout">
-            <Button
-              className="text-white px-20 py-8 text-2xl font-bold rounded-xl shadow-lg hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: "#24B14C" }}
-            >
-              <ShoppingCart className="w-8 h-8 mr-4" />
-              Pedir agora
-            </Button>
-          </Link>
+          <Button
+            onClick={openPersonalizationPopup}
+            className="text-white px-20 py-8 text-2xl font-bold rounded-xl shadow-lg hover:opacity-90 transition-opacity"
+            style={{ backgroundColor: "#24B14C" }}
+          >
+            <ShoppingCart className="w-8 h-8 mr-4" />
+            Pedir agora
+          </Button>
           <p className="text-gray-600 text-sm mt-3">Cancele a qualquer momento </p>
         </div>
 
@@ -569,6 +617,20 @@ export default function ProductOffer() {
     }
   }
 `}</style>
+
+        {/* Pop-ups */}
+        <PersonalizationPopup
+          isOpen={isPersonalizationPopupOpen}
+          onClose={closePersonalizationPopup}
+          onPersonalize={handlePersonalize}
+          onSkipPersonalization={handleSkipPersonalization}
+        />
+
+        <ColorSelectionPopup
+          isOpen={isColorSelectionPopupOpen}
+          onClose={closeColorSelectionPopup}
+          onFinalizePurchase={handleFinalizePurchase}
+        />
       </div>
     </div>
   )

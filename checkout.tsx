@@ -1,19 +1,28 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { ChevronUp, ChevronDown, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
 import { loadStripe } from "@stripe/stripe-js"
-import { Elements, useStripe, useElements, CardElement } from "@stripe/react-stripe-js"
+import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js"
 import { fetchAddressByCEP } from "@/utils/fetchAddressByCEP"
 import { useRouter } from "next/navigation"
 import InitiateCheckoutTracker from "@/components/InitiateCheckoutTracker"
+import { Elements } from "@stripe/react-stripe-js"
 
-// Initialize Stripe
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
+// Initialize Stripe with preload
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!, {
+  // Preload Stripe.js to improve performance
+  stripeAccount: undefined,
+})
+
+// Preload Stripe immediately
+if (typeof window !== "undefined") {
+  stripePromise
+}
 
 // Mask functions for credit card fields
 const formatCardNumber = (value: string) => {
@@ -80,25 +89,80 @@ function OrderSummaryContent({
 }: { quantity: number; setQuantity: (q: number) => void; shippingMethod: string; addressFound: boolean }) {
   // Calculate shipping cost based on shipping method
   const getShippingCost = () => {
+    // Verificar se é produto personalizado
+    const personalizedData = sessionStorage.getItem("personalizedProduct")
+    if (personalizedData) {
+      try {
+        const data = JSON.parse(personalizedData)
+        const basePrice = data.amount / 100 // R$ 39,90
+
+        if (!addressFound) return basePrice
+
+        // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
+        if (shippingMethod === "express") {
+          return basePrice + 10.52 // R$ 39,90 + R$ 10,52 = R$ 50,42
+        }
+        return basePrice // R$ 39,90 (frete grátis)
+      } catch (error) {
+        console.error("Erro ao parsear produto personalizado:", error)
+      }
+    }
+
+    // Lógica original para produtos não personalizados
     if (!addressFound) return 0
     return shippingMethod === "express" ? 29.39 : 18.87
   }
 
   const shippingCost = getShippingCost()
-  const subtotal = shippingCost
+  const personalizedProductData = sessionStorage.getItem("personalizedProduct")
+  let productPrice = 0
+  let shippingPrice = 0
+
+  if (personalizedProductData) {
+    try {
+      const data = JSON.parse(personalizedProductData)
+      productPrice = data.amount / 100 // R$ 39,90
+      shippingPrice = shippingMethod === "express" ? 10.52 : 0 // Frete grátis ou R$ 10,52
+    } catch (error) {
+      console.error("Erro ao parsear produto personalizado:", error)
+    }
+  } else {
+    // Para produto genérico: produto grátis, cliente paga apenas o frete
+    productPrice = 0
+    shippingPrice = addressFound ? (shippingMethod === "express" ? 29.39 : 18.87) : 0
+  }
+
+  const subtotal = productPrice + shippingPrice
   const total = subtotal
+
+  const productData = personalizedProductData ? JSON.parse(personalizedProductData) : null
+  const productName = productData ? productData.name : "Tag rastreamento Petloo + App"
+
+  // Definir a imagem baseada na cor escolhida
+  let productImage =
+    "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/image%20594-rIMxV2I0SZADJI938HxomgyWIUjTGg.png"
+
+  if (productData) {
+    if (productData.color === "orange") {
+      productImage =
+        "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_16.png"
+    } else if (productData.color === "purple") {
+      productImage =
+        "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_18.png"
+    }
+  }
 
   return (
     <div className="space-y-6">
       {/* Product 1 */}
       <div className="flex gap-4">
         <img
-          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/image%20594-rIMxV2I0SZADJI938HxomgyWIUjTGg.png"
+          src={productImage || "/placeholder.svg"}
           alt="Tag rastreamento Petloo + App"
           className="w-20 h-20 rounded-lg object-cover"
         />
         <div className="flex-1">
-          <h3 className="font-medium">Tag rastreamento Petloo + App</h3>
+          <h3 className="font-medium">{productName}</h3>
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
@@ -116,7 +180,9 @@ function OrderSummaryContent({
           </div>
         </div>
         <div className="text-right">
-          <p className="font-semibold">R$ 0,00</p>
+          <p className="font-semibold">
+            {personalizedProductData ? `R$ ${productPrice.toFixed(2).replace(".", ",")}` : "Grátis"}
+          </p>
         </div>
       </div>
 
@@ -131,9 +197,17 @@ function OrderSummaryContent({
 
       {/* Totals */}
       <div className="border-t pt-4 space-y-2">
+        {personalizedProductData && (
+          <div className="flex justify-between">
+            <span>Produto</span>
+            <span className="font-semibold">R$ {productPrice.toFixed(2).replace(".", ",")}</span>
+          </div>
+        )}
         <div className="flex justify-between">
-          <span>Subtotal</span>
-          <span className="font-semibold">R$ {subtotal.toFixed(2).replace(".", ",")}</span>
+          <span>Frete</span>
+          <span className="font-semibold">
+            {shippingPrice === 0 ? "Grátis" : `R$ ${shippingPrice.toFixed(2).replace(".", ",")}`}
+          </span>
         </div>
         <div className="flex justify-between text-lg font-bold">
           <span>Total</span>
@@ -150,10 +224,10 @@ function CheckoutForm() {
   const elements = useElements()
   const router = useRouter()
 
+  // All hooks must be called before any conditional returns
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false)
   const [quantity, setQuantity] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState("credit")
-
   const [addressData, setAddressData] = useState({
     cep: "",
     street: "",
@@ -163,17 +237,14 @@ function CheckoutForm() {
   })
   const [addressFound, setAddressFound] = useState(false)
   const [shippingMethod, setShippingMethod] = useState("standard")
-
   const [cardData, setCardData] = useState({
     number: "",
     name: "",
     expiry: "",
     cvv: "",
   })
-
   const [isProcessing, setIsProcessing] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
-
   const [pixPaymentData, setPixPaymentData] = useState<{
     qr_code: string
     qr_code_url: string
@@ -183,15 +254,69 @@ function CheckoutForm() {
   } | null>(null)
   const [showPixPayment, setShowPixPayment] = useState(false)
   const [copyFeedback, setCopyFeedback] = useState("")
+  const [isLoading, setIsLoading] = useState(true)
 
-  // Adicionar após as outras declarações de estado, antes das funções
+  // Initialize loading state
   useEffect(() => {
-    // Scroll to top quando a página carregar
-    window.scrollTo(0, 0)
+    const timer = setTimeout(() => {
+      setIsLoading(false)
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [])
+
+  // Handle URL params and personalized product data
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search)
+    const isPersonalized = urlParams.get("personalized") === "true"
+
+    if (isPersonalized) {
+      const color = urlParams.get("color")
+      const priceId = urlParams.get("priceId")
+      const amount = urlParams.get("amount")
+
+      if (color && priceId && amount) {
+        const productData = {
+          color,
+          priceId,
+          amount: Number(amount),
+          name: `Tag ${color === "orange" ? "Laranja" : "Roxa"} Personalizada + App`,
+        }
+
+        if ("requestIdleCallback" in window) {
+          requestIdleCallback(() => {
+            sessionStorage.setItem("personalizedProduct", JSON.stringify(productData))
+          })
+        } else {
+          setTimeout(() => {
+            sessionStorage.setItem("personalizedProduct", JSON.stringify(productData))
+          }, 0)
+        }
+      }
+    }
   }, [])
 
   // Mover esta função para dentro do CheckoutForm, antes do return
   const getShippingCost = () => {
+    // Verificar se é produto personalizado
+    const personalizedData = sessionStorage.getItem("personalizedProduct")
+    if (personalizedData) {
+      try {
+        const data = JSON.parse(personalizedData)
+        const basePrice = data.amount / 100 // R$ 39,90
+
+        if (!addressFound) return basePrice
+
+        // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
+        if (shippingMethod === "express") {
+          return basePrice + 10.52 // R$ 39,90 + R$ 10,52 = R$ 50,42
+        }
+        return basePrice // R$ 39,90 (frete grátis)
+      } catch (error) {
+        console.error("Erro ao parsear produto personalizado:", error)
+      }
+    }
+
+    // Lógica original para produtos não personalizados
     if (!addressFound) return 0
     return shippingMethod === "express" ? 29.39 : 18.87
   }
@@ -380,8 +505,31 @@ function CheckoutForm() {
         return
       }
 
+      const personalizedProductData = sessionStorage.getItem("personalizedProduct")
+      let productInfo = {
+        amount: shippingMethod === "express" ? 2939 : 1887,
+        name: "Tag rastreamento Petloo + App",
+        sku: shippingMethod === "express" ? "TAG-APP-2939" : "TAG-APP-1887",
+      }
+
+      if (personalizedProductData) {
+        try {
+          const data = JSON.parse(personalizedProductData)
+          const baseAmount = data.amount // R$ 39,90 = 3990 centavos
+          const expressShipping = 1052 // R$ 10,52 = 1052 centavos
+
+          productInfo = {
+            amount: shippingMethod === "express" ? baseAmount + expressShipping : baseAmount,
+            name: data.name,
+            sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
+          }
+        } catch (error) {
+          console.error("Erro ao parsear produto personalizado:", error)
+        }
+      }
+
       if (paymentMethod === "pix") {
-        // Processar pagamento PIX - VALOR FIXO 1887 centavos (R$ 18,87)
+        // Processar pagamento PIX
         const pixData = {
           name,
           email,
@@ -396,60 +544,80 @@ function CheckoutForm() {
             city: addressData.city,
             state: addressData.state,
           },
-          shipping_price: shippingMethod === "express" ? 2939 : 1887, // Valor em centavos
+          shipping_price: productInfo.amount, // Valor em centavos
         }
 
         console.log("=== DADOS ENVIADOS PARA PIX API ===")
         console.log("PIX Data:", JSON.stringify(pixData, null, 2))
 
-        const response = await fetch("/api/pix", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(pixData),
-        })
+        try {
+          const response = await fetch("/api/pix", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(pixData),
+          })
 
-        const result = await response.json()
-        console.log("=== RESPOSTA DA PIX API ===")
+          console.log("=== RESPOSTA DA PIX API ===")
+          console.log("Status:", response.status)
+          console.log("Content-Type:", response.headers.get("content-type"))
 
-        if (!response.ok) {
-          throw new Error(result.error || "Erro ao gerar pagamento via PIX. Tente novamente.")
-        }
-
-        // Verificar se temos os dados PIX diretamente na resposta
-        if (result.success && result.qrcode && result.copiacola) {
-          console.log("✅ DADOS PIX RECEBIDOS DIRETAMENTE!")
-          console.log("QR Code:", result.qrcode ? "✅ Presente" : "❌ Ausente")
-          console.log("Copia e Cola:", result.copiacola ? "✅ Presente" : "❌ Ausente")
-
-          // Salvar dados PIX no sessionStorage para evitar URL muito longa
-          const pixData = {
-            orderId: result.order_id,
-            amount: result.amount,
-            qrcode: result.qrcode,
-            copiacola: result.copiacola,
-            expiration_date: result.expiration_date || "",
+          // Verificar se a resposta é JSON válido
+          const contentType = response.headers.get("content-type")
+          if (!contentType || !contentType.includes("application/json")) {
+            const textResponse = await response.text()
+            console.error("Resposta não é JSON:", textResponse)
+            throw new Error("Erro no servidor. Resposta inválida recebida.")
           }
 
-          sessionStorage.setItem("pixPaymentData", JSON.stringify(pixData))
+          const result = await response.json()
+          console.log("Result:", JSON.stringify(result, null, 2))
 
-          // Redirecionar apenas com o order ID
-          router.push(`/pix-payment?orderId=${result.order_id}&amount=${result.amount}`)
-        } else {
-          // Fallback para o fluxo antigo se necessário
-          const orderId = result.order_id
-          const amount = result.amount || 1887
-
-          if (!orderId) {
-            throw new Error("ID do pedido não foi retornado pela API")
+          if (!response.ok) {
+            throw new Error(result.error || `Erro HTTP ${response.status}: ${result.message || "Erro desconhecido"}`)
           }
 
-          console.log("=== REDIRECIONANDO PARA PIX PAYMENT ===")
-          console.log("Order ID:", orderId)
-          console.log("Amount:", amount)
+          // Verificar se temos os dados PIX diretamente na resposta
+          if (result.success && result.qrcode && result.copiacola) {
+            console.log("✅ DADOS PIX RECEBIDOS DIRETAMENTE!")
+            console.log("QR Code:", result.qrcode ? "✅ Presente" : "❌ Ausente")
+            console.log("Copia e Cola:", result.copiacola ? "✅ Presente" : "❌ Ausente")
 
-          router.push(`/pix-payment?orderId=${orderId}&amount=${amount}`)
+            // Salvar dados PIX no sessionStorage para evitar URL muito longa
+            const pixData = {
+              orderId: result.order_id,
+              amount: result.amount,
+              qrcode: result.qrcode,
+              copiacola: result.copiacola,
+              expiration_date: result.expiration_date || "",
+            }
+
+            sessionStorage.setItem("pixPaymentData", JSON.stringify(pixData))
+
+            // Redirecionar apenas com o order ID
+            router.push(`/pix-payment?orderId=${result.order_id}&amount=${result.amount}`)
+          } else {
+            // Fallback para o fluxo antigo se necessário
+            const orderId = result.order_id
+            const amount = result.amount || 1887
+
+            if (!orderId) {
+              throw new Error("ID do pedido não foi retornado pela API")
+            }
+
+            console.log("=== REDIRECIONANDO PARA PIX PAYMENT ===")
+            console.log("Order ID:", orderId)
+            console.log("Amount:", amount)
+
+            router.push(`/pix-payment?orderId=${orderId}&amount=${amount}`)
+          }
+        } catch (fetchError) {
+          console.error("Erro na requisição PIX:", fetchError)
+          if (fetchError instanceof TypeError && fetchError.message.includes("Failed to fetch")) {
+            throw new Error("Erro de conexão. Verifique sua internet e tente novamente.")
+          }
+          throw fetchError
         }
       } else {
         // Processar pagamento com cartão (código existente)
@@ -472,73 +640,92 @@ function CheckoutForm() {
           cidade: addressData.city,
           estado: addressData.state,
           complemento: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-          shipping_price: shippingMethod === "express" ? 2939 : 1887, // Valor fixo também para cartão
+          shipping_price: productInfo.amount, // Valor fixo também para cartão
         }
 
         console.log("Dados enviados para API:", checkoutData)
 
-        // Chamar API de checkout
-        const response = await fetch("/api/checkout", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(checkoutData),
-        })
-
-        const result = await response.json()
-        console.log("Resposta da API:", result)
-
-        if (!response.ok) {
-          throw new Error(result.error || "Erro no processamento do pagamento")
-        }
-
-        // Processar pagamento com cartão usando Stripe
-        console.log("Confirmando pagamento com client_secret:", result.client_secret)
-
-        const { error, paymentIntent } = await stripe.confirmCardPayment(result.client_secret, {
-          payment_method: {
-            card: cardElement,
-            billing_details: {
-              name: name,
-              email: email,
-              phone: phone.replace(/\D/g, ""),
+        try {
+          // Chamar API de checkout
+          const response = await fetch("/api/checkout", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
             },
-          },
-        })
-
-        console.log("=== RESPOSTA DO STRIPE ===")
-        console.log("Error:", error)
-        console.log("PaymentIntent:", paymentIntent)
-
-        if (error) {
-          console.error("Erro no pagamento:", error)
-          setCheckoutMessage({
-            type: "error",
-            text: `Erro no pagamento: ${error.message}`,
+            body: JSON.stringify(checkoutData),
           })
-        } else if (paymentIntent && paymentIntent.status === "succeeded") {
-          console.log("✅ PAGAMENTO CONFIRMADO!")
 
-          // Salvar dados do pedido para a página de obrigado
-          const orderSummary = {
-            orderId: paymentIntent.id,
-            customerName: name,
-            customerEmail: email,
-            amount: 1887,
-            paymentMethod: "Cartão de Crédito",
+          console.log("Status da resposta:", response.status)
+          console.log("Content-Type:", response.headers.get("content-type"))
+
+          // Verificar se a resposta é JSON válido
+          const contentType = response.headers.get("content-type")
+          if (!contentType || !contentType.includes("application/json")) {
+            const textResponse = await response.text()
+            console.error("Resposta não é JSON:", textResponse)
+            throw new Error("Erro no servidor. Resposta inválida recebida.")
           }
 
-          sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))
+          const result = await response.json()
+          console.log("Resposta da API:", result)
 
-          // Redirecionar para página de obrigado
-          router.push("/obrigado")
-        } else {
-          console.log("Status do pagamento:", paymentIntent?.status)
-          setCheckoutMessage({
-            type: "error",
-            text: "Pagamento não foi processado. Tente novamente.",
+          if (!response.ok) {
+            throw new Error(result.error || `Erro HTTP ${response.status}: ${result.message || "Erro desconhecido"}`)
+          }
+
+          // Processar pagamento com cartão usando Stripe
+          console.log("Confirmando pagamento com client_secret:", result.client_secret)
+
+          const { error, paymentIntent } = await stripe.confirmCardPayment(result.client_secret, {
+            payment_method: {
+              card: cardElement,
+              billing_details: {
+                name: name,
+                email: email,
+                phone: phone.replace(/\D/g, ""),
+              },
+            },
           })
+
+          console.log("=== RESPOSTA DO STRIPE ===")
+          console.log("Error:", error)
+          console.log("PaymentIntent:", paymentIntent)
+
+          if (error) {
+            console.error("Erro no pagamento:", error)
+            setCheckoutMessage({
+              type: "error",
+              text: `Erro no pagamento: ${error.message}`,
+            })
+          } else if (paymentIntent && paymentIntent.status === "succeeded") {
+            console.log("✅ PAGAMENTO CONFIRMADO!")
+
+            // Salvar dados do pedido para a página de obrigado
+            const orderSummary = {
+              orderId: paymentIntent.id,
+              customerName: name,
+              customerEmail: email,
+              amount: 1887,
+              paymentMethod: "Cartão de Crédito",
+            }
+
+            sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))
+
+            // Redirecionar para página de obrigado
+            router.push("/obrigado")
+          } else {
+            console.log("Status do pagamento:", paymentIntent?.status)
+            setCheckoutMessage({
+              type: "error",
+              text: "Pagamento não foi processado. Tente novamente.",
+            })
+          }
+        } catch (fetchError) {
+          console.error("Erro na requisição checkout:", fetchError)
+          if (fetchError instanceof TypeError && fetchError.message.includes("Failed to fetch")) {
+            throw new Error("Erro de conexão. Verifique sua internet e tente novamente.")
+          }
+          throw fetchError
         }
       }
     } catch (error) {
@@ -550,6 +737,96 @@ function CheckoutForm() {
     } finally {
       setIsProcessing(false)
     }
+  }
+
+  // Show loading state with better animation and messaging
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-white">
+        {/* Initiate Checkout Tracker - Fires when checkout page loads */}
+        <InitiateCheckoutTracker />
+
+        {/* Alert Banner - mesmo durante loading */}
+        <div className="bg-red-500 text-white text-center py-2 px-4 text-sm">
+          <strong>ATENÇÃO:</strong> O prazo de entrega dos produtos personalizados inclui o tempo de frete + o prazo de
+          produção (2 a 3 semanas).
+        </div>
+
+        <div className="min-h-screen bg-white flex items-center justify-center p-4">
+          <div className="text-center max-w-md w-full">
+            {/* Logo durante loading */}
+            <div className="mb-8">
+              <img
+                src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Petloosemfundo%202-wiHpYOGK6l8BekDtGwMXaJxrq0maQN.png"
+                alt="Petloo Logo"
+                className="h-12 mx-auto mb-4"
+              />
+            </div>
+
+            {/* Animação de loading mais elaborada */}
+            <div className="relative mb-6">
+              {/* Círculo principal */}
+              <div className="w-16 h-16 mx-auto relative">
+                <div className="absolute inset-0 border-4 border-orange-200 rounded-full"></div>
+                <div className="absolute inset-0 border-4 border-orange-500 rounded-full border-t-transparent animate-spin"></div>
+              </div>
+
+              {/* Pontos animados */}
+              <div className="flex justify-center mt-4 space-x-1">
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "0ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "150ms" }}
+                ></div>
+                <div
+                  className="w-2 h-2 bg-orange-500 rounded-full animate-bounce"
+                  style={{ animationDelay: "300ms" }}
+                ></div>
+              </div>
+            </div>
+
+            {/* Mensagens de loading */}
+            <div className="space-y-3">
+              <h2 className="text-2xl font-bold text-gray-800">Preparando seu checkout</h2>
+              <p className="text-gray-600">Carregando informações de pagamento seguro...</p>
+
+              {/* Barra de progresso simulada */}
+              <div className="w-full bg-gray-200 rounded-full h-2 mt-4">
+                <div className="bg-orange-500 h-2 rounded-full animate-pulse" style={{ width: "70%" }}></div>
+              </div>
+
+              <p className="text-sm text-gray-500 mt-3">
+                ⚡ Aguarde alguns segundos, estamos preparando tudo para você
+              </p>
+            </div>
+
+            {/* Ícones de segurança durante loading */}
+            <div className="mt-8 flex justify-center items-center gap-4 opacity-60">
+              <img
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-KSAVnVrLk1AvbhF07h55u42sGHYCX4.png"
+                alt="Site Seguro"
+                className="h-8"
+              />
+              <div className="flex gap-2">
+                <img
+                  src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/visa-BRBd7AI7oDhyBwzy47g6H1kt5cjCOs.svg"
+                  alt="Visa"
+                  className="h-6"
+                />
+                <img
+                  src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/mastercard-RHKlJLfpzUysKGBW778wrPcURdL1Vs.svg"
+                  alt="Mastercard"
+                  className="h-6"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -763,67 +1040,148 @@ function CheckoutForm() {
               <div className="mb-8">
                 <h2 className="text-lg font-semibold mb-2">Método de envio</h2>
                 <div className="space-y-3">
-                  {/* Frete Padrão */}
-                  <div
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                      shippingMethod === "standard"
-                        ? "border-orange-300 bg-orange-50/30"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => setShippingMethod("standard")}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          id="standard"
-                          name="shipping"
-                          value="standard"
-                          checked={shippingMethod === "standard"}
-                          onChange={(e) => setShippingMethod(e.target.value)}
-                          className="pointer-events-none"
-                        />
-                        <div>
-                          <label htmlFor="standard" className="font-medium cursor-pointer">
-                            Frete Padrão
-                          </label>
-                          <p className="text-sm text-gray-600">15 a 20 dias (Produção) + 4 a 12 dias (Entrega)</p>
-                        </div>
-                      </div>
-                      <span className="font-semibold">R$ 18,87</span>
-                    </div>
-                  </div>
+                  {(() => {
+                    const personalizedData = sessionStorage.getItem("personalizedProduct")
+                    const isPersonalized = !!personalizedData
 
-                  {/* Frete Expresso */}
-                  <div
-                    className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                      shippingMethod === "express"
-                        ? "border-orange-300 bg-orange-50/30"
-                        : "border-gray-200 hover:border-gray-300"
-                    }`}
-                    onClick={() => setShippingMethod("express")}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <input
-                          type="radio"
-                          id="express"
-                          name="shipping"
-                          value="express"
-                          checked={shippingMethod === "express"}
-                          onChange={(e) => setShippingMethod(e.target.value)}
-                          className="pointer-events-none"
-                        />
-                        <div>
-                          <label htmlFor="express" className="font-medium cursor-pointer">
-                            Frete Expresso
-                          </label>
-                          <p className="text-sm text-gray-600">15 a 20 dias (Produção) + 1 a 3 dias (Entrega)</p>
-                        </div>
-                      </div>
-                      <span className="font-semibold">R$ 29,39</span>
-                    </div>
-                  </div>
+                    if (isPersonalized) {
+                      return (
+                        <>
+                          {/* Frete Grátis para produto personalizado */}
+                          <div
+                            className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                              shippingMethod === "standard"
+                                ? "border-green-300 bg-green-50/30"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            onClick={() => setShippingMethod("standard")}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="radio"
+                                  id="standard"
+                                  name="shipping"
+                                  value="standard"
+                                  checked={shippingMethod === "standard"}
+                                  onChange={(e) => setShippingMethod(e.target.value)}
+                                  className="pointer-events-none"
+                                />
+                                <div>
+                                  <label htmlFor="standard" className="font-medium cursor-pointer">
+                                    Frete Grátis
+                                  </label>
+                                  <p className="text-sm text-gray-600">
+                                    15 a 20 dias (Produção) + 4 a 12 dias (Entrega)
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="font-semibold text-green-600">Grátis</span>
+                            </div>
+                          </div>
+
+                          {/* Frete Expresso para produto personalizado */}
+                          <div
+                            className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                              shippingMethod === "express"
+                                ? "border-orange-300 bg-orange-50/30"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            onClick={() => setShippingMethod("express")}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="radio"
+                                  id="express"
+                                  name="shipping"
+                                  value="express"
+                                  checked={shippingMethod === "express"}
+                                  onChange={(e) => setShippingMethod(e.target.value)}
+                                  className="pointer-events-none"
+                                />
+                                <div>
+                                  <label htmlFor="express" className="font-medium cursor-pointer">
+                                    Frete Expresso
+                                  </label>
+                                  <p className="text-sm text-gray-600">
+                                    15 a 20 dias (Produção) + 1 a 3 dias (Entrega)
+                                  </p>
+                                </div>
+                              </div>
+                              <span className="font-semibold">R$ 10,52</span>
+                            </div>
+                          </div>
+                        </>
+                      )
+                    } else {
+                      return (
+                        <>
+                          {/* Frete Padrão para produto não personalizado */}
+                          <div
+                            className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                              shippingMethod === "standard"
+                                ? "border-orange-300 bg-orange-50/30"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            onClick={() => setShippingMethod("standard")}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="radio"
+                                  id="standard"
+                                  name="shipping"
+                                  value="standard"
+                                  checked={shippingMethod === "standard"}
+                                  onChange={(e) => setShippingMethod(e.target.value)}
+                                  className="pointer-events-none"
+                                />
+                                <div>
+                                  <label htmlFor="standard" className="font-medium cursor-pointer">
+                                    Frete Padrão
+                                  </label>
+                                  <p className="text-sm text-gray-600">10 a 12 dias (Entrega)</p>
+                                </div>
+                              </div>
+                              <span className="font-semibold">R$ 18,87</span>
+                            </div>
+                          </div>
+
+                          {/* Frete Expresso para produto não personalizado */}
+                          <div
+                            className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                              shippingMethod === "express"
+                                ? "border-orange-300 bg-orange-50/30"
+                                : "border-gray-200 hover:border-gray-300"
+                            }`}
+                            onClick={() => setShippingMethod("express")}
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                <input
+                                  type="radio"
+                                  id="express"
+                                  name="shipping"
+                                  value="express"
+                                  checked={shippingMethod === "express"}
+                                  onChange={(e) => setShippingMethod(e.target.value)}
+                                  className="pointer-events-none"
+                                />
+                                <div>
+                                  <label htmlFor="express" className="font-medium cursor-pointer">
+                                    Frete Expresso
+                                  </label>
+                                  <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
+                                </div>
+                              </div>
+                              <span className="font-semibold">R$ 29,39</span>
+                            </div>
+                          </div>
+                        </>
+                      )
+                    }
+                  })()}
                 </div>
               </div>
             )}
@@ -864,14 +1222,16 @@ function CheckoutForm() {
                     </div>
                   </div>
 
+                  {/* Lazy load CardElement only when credit card is selected */}
                   {paymentMethod === "credit" && (
                     <div className="space-y-4">
-                      {/* Stripe CardElement for secure processing */}
                       <div className="p-3 border rounded-lg bg-gray-50">
                         <Label className="text-sm font-medium mb-2 block text-gray-600">
                           Processamento seguro (preencha os dados do cartão aqui)
                         </Label>
-                        <CardElement options={cardElementOptions} />
+                        <Suspense fallback={<div className="h-10 bg-gray-200 animate-pulse rounded"></div>}>
+                          <CardElement options={cardElementOptions} />
+                        </Suspense>
                       </div>
 
                       <select className="w-full p-3 border rounded-lg bg-white" defaultValue="">
@@ -1024,71 +1384,42 @@ function CheckoutForm() {
 
                   {/* PIX Code */}
                   <div className="space-y-2">
-                    <label className="block text-sm font-medium text-gray-700">Código PIX (Copia e Cola)</label>
-                    <div className="flex gap-2">
-                      <input
+                    <label className="text-sm font-medium text-gray-700 block">Código PIX Copia e Cola:</label>
+                    <div className="relative">
+                      <Input
                         type="text"
-                        value={pixPaymentData.qr_code}
+                        value={pixPaymentData.qr_code_url}
                         readOnly
-                        className="flex-1 p-3 border rounded-lg bg-gray-50 text-sm font-mono"
+                        className="w-full p-3 border rounded-lg bg-gray-50"
                       />
                       <Button
-                        onClick={() => copyToClipboard(pixPaymentData.qr_code)}
-                        className="bg-green-500 hover:bg-green-600 text-white px-4"
+                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm"
+                        onClick={() => copyToClipboard(pixPaymentData.qr_code_url)}
                       >
                         Copiar
                       </Button>
                     </div>
-                    {copyFeedback && (
-                      <p className={`text-sm ${copyFeedback.includes("copiado") ? "text-green-600" : "text-red-600"}`}>
-                        {copyFeedback}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Payment Info */}
-                  <div className="bg-gray-50 p-4 rounded-lg space-y-2">
-                    <div className="flex justify-between">
-                      <span className="font-medium">Valor:</span>
-                      <span className="font-bold text-green-600">{pixPaymentData.valor_formatted}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="font-medium">ID do pedido:</span>
-                      <span className="text-sm text-gray-600">{pixPaymentData.order_id}</span>
-                    </div>
-                  </div>
-
-                  {/* Instructions */}
-                  <div className="text-left bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-blue-800 mb-2">Como pagar:</h4>
-                    <ol className="text-sm text-blue-700 space-y-1">
-                      <li>1. Abra o app do seu banco</li>
-                      <li>2. Escaneie o QR Code ou cole o código PIX</li>
-                      <li>3. Confirme o pagamento</li>
-                      <li>4. Aguarde a confirmação por email</li>
-                    </ol>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3">
-                    <Button
-                      onClick={() => {
-                        setShowPixPayment(false)
-                        setPixPaymentData(null)
-                      }}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      Voltar ao checkout
-                    </Button>
-                    <Button
-                      onClick={() => window.location.reload()}
-                      className="flex-1 bg-green-500 hover:bg-green-600 text-white"
-                    >
-                      Novo pedido
-                    </Button>
+                    {copyFeedback && <p className="text-green-600 text-sm">{copyFeedback}</p>}
                   </div>
                 </div>
+
+                <p className="text-gray-600">
+                  O pagamento expira em:{" "}
+                  {new Date(pixPaymentData.expires_at).toLocaleDateString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+
+                <Button
+                  className="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 rounded-md"
+                  onClick={() => setShowPixPayment(false)}
+                >
+                  Fechar
+                </Button>
               </div>
             </div>
           </div>
@@ -1098,7 +1429,7 @@ function CheckoutForm() {
   )
 }
 
-export default function Checkout() {
+export default function CheckoutPage() {
   return (
     <Elements stripe={stripePromise}>
       <CheckoutForm />

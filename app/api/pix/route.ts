@@ -74,8 +74,11 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate shipping price
-    if (body.shipping_price !== 1887 && body.shipping_price !== 2939) {
-      return NextResponse.json({ error: "Valor de frete inválido. Deve ser 1887 ou 2939 centavos." }, { status: 400 })
+    if (![1887, 2939, 3990, 5042].includes(body.shipping_price)) {
+      return NextResponse.json(
+        { error: "Valor inválido. Deve ser 1887, 2939, 3990 ou 5042 centavos." },
+        { status: 400 },
+      )
     }
 
     // Validate email format
@@ -107,9 +110,18 @@ export async function POST(request: NextRequest) {
     console.log("Token configurado:", appmaxToken ? "✅ Sim" : "❌ Não")
 
     // Convert shipping price from cents to decimal
-    const productPrice = body.shipping_price / 100 // Valor em formato decimal (18.87 ou 29.39)
-    const productName = "Tag rastreamento Petloo + App"
-    const productSku = body.shipping_price === 1887 ? "TAG-APP-1887" : "TAG-APP-2939"
+    const productPrice = body.shipping_price / 100 // Valor em formato decimal
+    let productName = "Tag rastreamento Petloo + App"
+    let productSku = `TAG-APP-${body.shipping_price}`
+
+    // Se for produto personalizado
+    if (body.shipping_price === 3990) {
+      productName = "Tag Personalizada + App (Frete Grátis)"
+      productSku = `TAG-PERSONALIZADA-FREE-${body.shipping_price}`
+    } else if (body.shipping_price === 5042) {
+      productName = "Tag Personalizada + App (Frete Expresso)"
+      productSku = `TAG-PERSONALIZADA-EXPRESS-${body.shipping_price}`
+    }
 
     // Split name into firstname and lastname
     const [firstname, ...rest] = body.name.split(" ")
