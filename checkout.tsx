@@ -184,6 +184,124 @@ function CheckoutForm() {
   const [showPixPayment, setShowPixPayment] = useState(false)
   const [copyFeedback, setCopyFeedback] = useState("")
 
+  // Função para salvar cookies para GTM
+  const saveCookiesForGTM = (email: string, name: string, phone: string) => {
+    if (typeof document !== "undefined") {
+      // Dividir nome em primeiro e último nome
+      const nameParts = name.trim().split(" ")
+      const firstName = nameParts[0] || ""
+      const lastName = nameParts.slice(1).join(" ") || ""
+
+      // Salvar cookies com duração de 30 dias (2592000 segundos)
+      const maxAge = "max-age=2592000"
+      const path = "path=/"
+
+      document.cookie = `ploo_email=${encodeURIComponent(email)}; ${path}; ${maxAge}`
+      document.cookie = `ploo_first_name=${encodeURIComponent(firstName)}; ${path}; ${maxAge}`
+      document.cookie = `ploo_last_name=${encodeURIComponent(lastName)}; ${path}; ${maxAge}`
+      document.cookie = `ploo_phone=${encodeURIComponent(phone.replace(/\D/g, ""))}; ${path}; ${maxAge}`
+
+      console.log("🍪 Cookies salvos para GTM:", {
+        email: email,
+        firstName: firstName,
+        lastName: lastName,
+        phone: phone.replace(/\D/g, ""),
+      })
+    }
+  }
+
+  // Função para disparar eventos de add_payment_info
+  const handleAddressFound = () => {
+    const value = 18.87 // Valor real do produto
+    const items = [
+      {
+        item_id: "tag-petloo",
+        item_name: "Tag rastreamento Petloo + App",
+        category: "Pet Tracking",
+        quantity: 1,
+        price: 18.87,
+      },
+    ]
+
+    // Obter dados do formulário
+    const email = (document.getElementById("email") as HTMLInputElement)?.value || ""
+    const name = (document.getElementById("name") as HTMLInputElement)?.value || ""
+    const phone = (document.getElementById("phone") as HTMLInputElement)?.value || ""
+
+    if (email && name && phone) {
+      // Salvar cookies para GTM
+      saveCookiesForGTM(email, name, phone)
+
+      // Dividir nome para Meta Pixel
+      const nameParts = name.trim().split(" ")
+      const firstName = nameParts[0] || ""
+      const lastName = nameParts.slice(1).join(" ") || ""
+
+      if (typeof window !== "undefined") {
+        // 📊 GA4 via GTM - Add Payment Info
+        window.dataLayer = window.dataLayer || []
+        window.dataLayer.push({
+          event: "add_payment_info",
+          ecommerce: {
+            currency: "BRL",
+            value: value,
+            items: items,
+          },
+          // Dados adicionais do usuário
+          user_data: {
+            email: email,
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone.replace(/\D/g, ""),
+          },
+          page_location: window.location.href,
+          timestamp: new Date().toISOString(),
+        })
+
+        console.log("📊 GTM Add Payment Info Event:", {
+          event: "add_payment_info",
+          value: value,
+          currency: "BRL",
+          items: items,
+        })
+
+        // 📱 Meta Pixel - AddPaymentInfo
+        if (typeof window.fbq !== "undefined") {
+          window.fbq("track", "AddPaymentInfo", {
+            value: value,
+            currency: "BRL",
+            content_type: "product",
+            content_ids: ["tag-petloo"],
+            content_name: "Tag rastreamento Petloo + App",
+            content_category: "Pet Tracking",
+            num_items: 1,
+            // Advanced Matching para Meta Pixel
+            em: email,
+            fn: firstName,
+            ln: lastName,
+            ph: phone.replace(/\D/g, ""),
+          })
+
+          console.log("📱 Meta Pixel AddPaymentInfo Event:", {
+            value: value,
+            currency: "BRL",
+            em: email,
+            fn: firstName,
+            ln: lastName,
+          })
+        } else {
+          console.warn("⚠️ Meta Pixel (fbq) not found - AddPaymentInfo event not sent")
+        }
+      }
+    } else {
+      console.warn("⚠️ Dados do formulário incompletos - eventos não disparados:", {
+        email: !!email,
+        name: !!name,
+        phone: !!phone,
+      })
+    }
+  }
+
   const formatPhone = (value: string) => {
     const cleaned = value.replace(/\D/g, "")
     const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/)
@@ -542,6 +660,10 @@ function CheckoutForm() {
                           if (address) {
                             setAddressData(address)
                             setAddressFound(true)
+                            // 🎯 DISPARAR EVENTOS QUANDO ENDEREÇO FOR ENCONTRADO
+                            setTimeout(() => {
+                              handleAddressFound()
+                            }, 500) // Pequeno delay para garantir que os campos estejam preenchidos
                           } else {
                             setAddressFound(false)
                           }
