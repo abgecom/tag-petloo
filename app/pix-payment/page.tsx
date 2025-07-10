@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Copy, ArrowLeft, RotateCcw, CheckCircle } from "lucide-react"
 import Link from "next/link"
+import PixPurchaseTracker from "@/components/PixPurchaseTracker"
 
 export default function PixPaymentPage() {
   const searchParams = useSearchParams()
@@ -218,6 +219,9 @@ export default function PixPaymentPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      {/* PIX Purchase Tracker - Dispara evento de compra quando PIX é exibido */}
+      <PixPurchaseTracker />
+
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">

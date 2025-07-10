@@ -42,15 +42,21 @@ export default function PurchaseTracker() {
         customerName: searchParams.get("name") || undefined,
         customerEmail: searchParams.get("email") || undefined,
         amount: searchParams.get("amount") ? Number(searchParams.get("amount")) : 1887,
-        paymentMethod: searchParams.get("method") || "PIX",
+        paymentMethod: searchParams.get("method") || "Cartão de Crédito",
       }
     }
 
     const handleSuccessfulPayment = () => {
       const purchaseData = getPurchaseData()
 
+      // Só disparar para pagamentos com cartão (PIX já foi disparado na página do PIX)
+      if (purchaseData.paymentMethod === "PIX") {
+        console.log("⚠️ Purchase PIX já foi rastreado na página do PIX - pulando evento duplicado")
+        return
+      }
+
       // Gerar transaction_id único se não existir
-      const transactionId = purchaseData.transactionId || purchaseData.orderId || `TX-PETLOO-${new Date().getTime()}`
+      const transactionId = purchaseData.transactionId || purchaseData.orderId || `CARD-PETLOO-${new Date().getTime()}`
 
       const value = (purchaseData.amount || 1887) / 100 // Converter centavos para reais
       const items = [
@@ -81,7 +87,7 @@ export default function PurchaseTracker() {
       const phone = getCookieValue("ploo_phone") || ""
 
       if (typeof window !== "undefined") {
-        // 📊 GA4 via GTM - Purchase Event
+        // 📊 GA4 via GTM - Purchase Event (Cartão)
         window.dataLayer = window.dataLayer || []
         window.dataLayer.push({
           event: "purchase",
@@ -98,13 +104,14 @@ export default function PurchaseTracker() {
             last_name: lastName,
             phone: phone,
           },
-          payment_method: purchaseData.paymentMethod || "PIX",
+          payment_method: purchaseData.paymentMethod || "Cartão de Crédito",
+          payment_status: "completed", // Cartão já foi processado
           page_location: window.location.href,
           page_title: document.title,
           timestamp: new Date().toISOString(),
         })
 
-        console.log("📊 GTM Purchase Event:", {
+        console.log("📊 GTM Card Purchase Event:", {
           event: "purchase",
           transaction_id: transactionId,
           value: value,
@@ -113,7 +120,7 @@ export default function PurchaseTracker() {
           payment_method: purchaseData.paymentMethod,
         })
 
-        // 📱 Meta Pixel - Purchase Event
+        // 📱 Meta Pixel - Purchase Event (Cartão)
         if (typeof window.fbq !== "undefined") {
           window.fbq("track", "Purchase", {
             value: value,
@@ -129,17 +136,19 @@ export default function PurchaseTracker() {
             fn: firstName,
             ln: lastName,
             ph: phone,
+            // Card specific data
+            payment_method: "card",
           })
 
-          console.log("📱 Meta Pixel Purchase Event:", {
+          console.log("📱 Meta Pixel Card Purchase Event:", {
             value: value,
             currency: "BRL",
             transaction_id: transactionId,
+            payment_method: "card",
             em: userEmail ? "✅ Presente" : "❌ Ausente",
-            fn: firstName ? "✅ Presente" : "❌ Ausente",
           })
         } else {
-          console.warn("⚠️ Meta Pixel (fbq) not found - Purchase event not sent")
+          console.warn("⚠️ Meta Pixel (fbq) not found - Card Purchase event not sent")
         }
 
         // 🎯 Evento personalizado para remarketing
@@ -148,12 +157,13 @@ export default function PurchaseTracker() {
           customer_lifetime_value: value,
           product_category: "Pet Tracking",
           purchase_timestamp: new Date().toISOString(),
+          payment_method: "card",
         })
 
-        console.log("✅ Purchase tracking completed successfully!")
+        console.log("✅ Card Purchase tracking completed successfully!")
         console.log("Transaction ID:", transactionId)
         console.log("Value:", `R$ ${value.toFixed(2)}`)
-        console.log("Customer Email:", userEmail ? "✅ Presente" : "❌ Não encontrado")
+        console.log("Payment Method:", purchaseData.paymentMethod)
       }
     }
 
