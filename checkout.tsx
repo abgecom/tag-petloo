@@ -388,10 +388,20 @@ function CheckoutForm() {
           })
         } else if (paymentIntent && paymentIntent.status === "succeeded") {
           console.log("✅ PAGAMENTO CONFIRMADO!")
-          setCheckoutMessage({
-            type: "success",
-            text: "Pagamento processado com sucesso! Você receberá a confirmação por email.",
-          })
+
+          // Salvar dados do pedido para a página de obrigado
+          const orderSummary = {
+            orderId: paymentIntent.id,
+            customerName: name,
+            customerEmail: email,
+            amount: 1887,
+            paymentMethod: "Cartão de Crédito",
+          }
+
+          sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))
+
+          // Redirecionar para página de obrigado
+          router.push("/obrigado")
         } else {
           console.log("Status do pagamento:", paymentIntent?.status)
           setCheckoutMessage({

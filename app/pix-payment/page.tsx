@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Copy, ArrowLeft, RotateCcw } from "lucide-react"
+import { Copy, ArrowLeft, RotateCcw, CheckCircle } from "lucide-react"
+import Link from "next/link"
 
 export default function PixPaymentPage() {
   const searchParams = useSearchParams()
@@ -325,15 +326,26 @@ export default function PixPaymentPage() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 mb-6">
-          <Button onClick={handleBackToCheckout} variant="outline" className="flex-1 bg-transparent">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Voltar ao checkout
-          </Button>
-          <Button onClick={() => router.push("/")} className="flex-1 bg-green-500 hover:bg-green-600 text-white">
-            <RotateCcw className="w-4 h-4 mr-2" />
-            Novo pedido
-          </Button>
+        <div className="space-y-3 mb-6">
+          {/* Botão principal - Já efetuei o pagamento */}
+          <Link href="/obrigado" className="block">
+            <Button className="w-full bg-green-500 hover:bg-green-600 text-white py-4 text-lg font-semibold">
+              <CheckCircle className="w-5 h-5 mr-2" />
+              Já efetuei o pagamento
+            </Button>
+          </Link>
+
+          {/* Botões secundários */}
+          <div className="flex gap-3">
+            <Button onClick={handleBackToCheckout} variant="outline" className="flex-1 bg-transparent">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Voltar ao checkout
+            </Button>
+            <Button onClick={() => router.push("/")} variant="outline" className="flex-1 bg-transparent">
+              <RotateCcw className="w-4 h-4 mr-2" />
+              Novo pedido
+            </Button>
+          </div>
         </div>
 
         {/* Footer */}
