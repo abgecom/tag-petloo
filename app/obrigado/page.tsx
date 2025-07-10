@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { CheckCircle, Mail, Smartphone, Home } from "lucide-react"
 import Link from "next/link"
+import PurchaseTracker from "@/components/PurchaseTracker"
 
 interface OrderSummary {
   orderId?: string
@@ -32,8 +33,7 @@ export default function ObrigadoPage() {
       try {
         const parsedData = JSON.parse(savedOrderData)
         setOrderData(parsedData)
-        // Limpar dados após usar
-        sessionStorage.removeItem("orderSummary")
+        // NÃO limpar dados aqui - deixar para o PurchaseTracker usar
         return
       } catch (error) {
         console.error("Erro ao parsear dados do pedido:", error)
@@ -59,6 +59,9 @@ export default function ObrigadoPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4">
+      {/* Purchase Tracker - Dispara eventos de compra concluída */}
+      <PurchaseTracker />
+
       <div className="max-w-2xl mx-auto">
         {/* Header com Logo */}
         <div className="text-center mb-8">
