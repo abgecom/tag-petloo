@@ -26,7 +26,7 @@ interface CheckoutRequestBody {
 const PRICE_IDS = {
   SHIPPING_1887: "price_1Rj0n7RtGASrDbfe40z60yvg", // R$ 18,87
   SHIPPING_2990: "price_1Rj0p5RtGASrDbfe9s1cHmhC", // R$ 29,90
-  SUBSCRIPTION: "price_1Rj0tfRtGASrDbfeyLKwgqZP", // Monthly subscription
+  SUBSCRIPTION: "price_1RjOGMRtGASrDbfemNmh2FzT", // Monthly subscription
 }
 
 export async function POST(request: NextRequest) {
