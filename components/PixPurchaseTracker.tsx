@@ -19,53 +19,53 @@ export default function PixPurchaseTracker() {
     if (typeof window === "undefined") return
 
     const handlePixPurchase = () => {
-      // Obter dados da URL ou sessionStorage
-      const orderId = searchParams.get("orderId")
-      const amount = searchParams.get("amount") || "1887"
+      try {
+        // Obter dados da URL ou sessionStorage
+        const orderId = searchParams.get("orderId")
+        const amount = searchParams.get("amount") || "1887"
 
-      // Tentar obter dados PIX do sessionStorage
-      const savedPixData = sessionStorage.getItem("pixPaymentData")
-      let pixData = null
-      if (savedPixData) {
-        try {
-          pixData = JSON.parse(savedPixData)
-        } catch (error) {
-          console.error("Erro ao parsear dados PIX:", error)
-        }
-      }
-
-      // Gerar transaction_id único
-      const transactionId = orderId || pixData?.orderId || `PIX-PETLOO-${new Date().getTime()}`
-      const value = Number(amount) / 100 // Converter centavos para reais
-
-      const items = [
-        {
-          item_id: "tag-petloo",
-          item_name: "Tag rastreamento Petloo + App",
-          category: "Pet Tracking",
-          quantity: 1,
-          price: value,
-        },
-      ]
-
-      // Obter dados do usuário dos cookies (salvos no checkout)
-      const getCookieValue = (name: string): string => {
-        if (typeof document !== "undefined") {
-          const value = `; ${document.cookie}`
-          const parts = value.split(`; ${name}=`)
-          if (parts.length === 2) {
-            return decodeURIComponent(parts.pop()?.split(";").shift() || "")
+        // Tentar obter dados PIX do sessionStorage
+        const savedPixData = sessionStorage.getItem("pixPaymentData")
+        let pixData = null
+        if (savedPixData) {
+          try {
+            pixData = JSON.parse(savedPixData)
+          } catch (error) {
+            console.error("Erro ao parsear dados PIX:", error)
           }
         }
-        return ""
-      }
 
-      const userEmail = getCookieValue("ploo_email")
-      const firstName = getCookieValue("ploo_first_name")
-      const lastName = getCookieValue("ploo_last_name")
-      const phone = getCookieValue("ploo_phone")
+        // Gerar transaction_id único
+        const transactionId = orderId || pixData?.orderId || `PIX-PETLOO-${new Date().getTime()}`
+        const value = Number(amount) / 100 // Converter centavos para reais
 
-      if (typeof window !== "undefined") {
+        const items = [
+          {
+            item_id: "tag-petloo",
+            item_name: "Tag rastreamento Petloo + App",
+            category: "Pet Tracking",
+            quantity: 1,
+            price: value,
+          },
+        ]
+
+        // Obter dados do usuário dos cookies (salvos no checkout)
+        const getCookieValue = (name: string): string => {
+          if (typeof document !== "undefined") {
+            const value = `; ${document.cookie}`
+            const parts = value.split(`; ${name}=`)
+            if (parts.length === 2) {
+              return decodeURIComponent(parts.pop()?.split(";").shift() || "")
+            }
+          }
+          return ""
+        }
+
+        const userEmail = getCookieValue("ploo_email")
+        const firstName = getCookieValue("ploo_first_name")
+        const lastName = getCookieValue("ploo_last_name")
+        const phone = getCookieValue("ploo_phone")
+
         // 📊 GA4 via GTM - Purchase Event (PIX)
         window.dataLayer = window.dataLayer || []
         window.dataLayer.push({
@@ -143,6 +143,8 @@ export default function PixPurchaseTracker() {
         console.log("Transaction ID:", transactionId)
         console.log("Value:", `R$ ${value.toFixed(2)}`)
         console.log("Payment Method: PIX")
+      } catch (error) {
+        console.error("Erro no PIX Purchase Tracker:", error)
       }
     }
 
@@ -152,7 +154,7 @@ export default function PixPurchaseTracker() {
     }, 1500)
 
     return () => clearTimeout(timer)
-  }, []) // Executar apenas uma vez
+  }, [searchParams]) // Executar quando searchParams mudar
 
   return null
 }
