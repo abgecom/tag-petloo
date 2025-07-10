@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { ChevronUp, ChevronDown, Minus, Plus } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -78,10 +78,10 @@ function OrderSummaryContent({
   shippingMethod,
   addressFound,
 }: { quantity: number; setQuantity: (q: number) => void; shippingMethod: string; addressFound: boolean }) {
-  // Calculate shipping cost only if address is found - VALOR FIXO R$ 18,87
+  // Calculate shipping cost based on shipping method
   const getShippingCost = () => {
     if (!addressFound) return 0
-    return 18.87 // Valor fixo conforme solicitado
+    return shippingMethod === "express" ? 29.39 : 18.87
   }
 
   const shippingCost = getShippingCost()
@@ -183,6 +183,18 @@ function CheckoutForm() {
   } | null>(null)
   const [showPixPayment, setShowPixPayment] = useState(false)
   const [copyFeedback, setCopyFeedback] = useState("")
+
+  // Adicionar após as outras declarações de estado, antes das funções
+  useEffect(() => {
+    // Scroll to top quando a página carregar
+    window.scrollTo(0, 0)
+  }, [])
+
+  // Mover esta função para dentro do CheckoutForm, antes do return
+  const getShippingCost = () => {
+    if (!addressFound) return 0
+    return shippingMethod === "express" ? 29.39 : 18.87
+  }
 
   // Função para salvar cookies para GTM
   const saveCookiesForGTM = (email: string, name: string, phone: string) => {
@@ -384,7 +396,7 @@ function CheckoutForm() {
             city: addressData.city,
             state: addressData.state,
           },
-          shipping_price: 1887, // Valor fixo conforme solicitado
+          shipping_price: shippingMethod === "express" ? 2939 : 1887, // Valor em centavos
         }
 
         console.log("=== DADOS ENVIADOS PARA PIX API ===")
@@ -460,7 +472,7 @@ function CheckoutForm() {
           cidade: addressData.city,
           estado: addressData.state,
           complemento: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-          shipping_price: 1887, // Valor fixo também para cartão
+          shipping_price: shippingMethod === "express" ? 2939 : 1887, // Valor fixo também para cartão
         }
 
         console.log("Dados enviados para API:", checkoutData)
@@ -746,21 +758,70 @@ function CheckoutForm() {
               </div>
             </div>
 
-            {/* Shipping Method - REMOVIDO POIS VALOR É FIXO */}
+            {/* Shipping Method */}
             {addressFound && (
               <div className="mb-8">
                 <h2 className="text-lg font-semibold mb-2">Método de envio</h2>
                 <div className="space-y-3">
-                  <div className="border-2 border-orange-300 bg-orange-50/30 rounded-lg p-4">
+                  {/* Frete Padrão */}
+                  <div
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                      shippingMethod === "standard"
+                        ? "border-orange-300 bg-orange-50/30"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => setShippingMethod("standard")}
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <input type="radio" checked readOnly className="pointer-events-none" />
+                        <input
+                          type="radio"
+                          id="standard"
+                          name="shipping"
+                          value="standard"
+                          checked={shippingMethod === "standard"}
+                          onChange={(e) => setShippingMethod(e.target.value)}
+                          className="pointer-events-none"
+                        />
                         <div>
-                          <label className="font-medium">Frete Padrão</label>
+                          <label htmlFor="standard" className="font-medium cursor-pointer">
+                            Frete Padrão
+                          </label>
                           <p className="text-sm text-gray-600">15 a 20 dias (Produção) + 4 a 12 dias (Entrega)</p>
                         </div>
                       </div>
                       <span className="font-semibold">R$ 18,87</span>
+                    </div>
+                  </div>
+
+                  {/* Frete Expresso */}
+                  <div
+                    className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                      shippingMethod === "express"
+                        ? "border-orange-300 bg-orange-50/30"
+                        : "border-gray-200 hover:border-gray-300"
+                    }`}
+                    onClick={() => setShippingMethod("express")}
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <input
+                          type="radio"
+                          id="express"
+                          name="shipping"
+                          value="express"
+                          checked={shippingMethod === "express"}
+                          onChange={(e) => setShippingMethod(e.target.value)}
+                          className="pointer-events-none"
+                        />
+                        <div>
+                          <label htmlFor="express" className="font-medium cursor-pointer">
+                            Frete Expresso
+                          </label>
+                          <p className="text-sm text-gray-600">15 a 20 dias (Produção) + 1 a 3 dias (Entrega)</p>
+                        </div>
+                      </div>
+                      <span className="font-semibold">R$ 29,39</span>
                     </div>
                   </div>
                 </div>
@@ -813,8 +874,11 @@ function CheckoutForm() {
                         <CardElement options={cardElementOptions} />
                       </div>
 
-                      <select className="w-full p-3 border rounded-lg bg-white">
-                        <option>1x de R$ 18,87</option>
+                      <select className="w-full p-3 border rounded-lg bg-white" defaultValue="">
+                        <option value="" disabled>
+                          Selecione o parcelamento
+                        </option>
+                        <option value="1x">1x de R$ {getShippingCost().toFixed(2).replace(".", ",")}</option>
                       </select>
                     </div>
                   )}

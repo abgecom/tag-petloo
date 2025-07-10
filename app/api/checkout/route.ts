@@ -25,7 +25,7 @@ interface CheckoutRequestBody {
 // Define Price IDs based on shipping cost
 const PRICE_IDS = {
   SHIPPING_1887: "price_1Rj0n7RtGASrDbfe40z60yvg", // R$ 18,87
-  SHIPPING_2990: "price_1Rj0p5RtGASrDbfe9s1cHmhC", // R$ 29,90
+  SHIPPING_2939: "price_1Rj0p5RtGASrDbfe9s1cHmhC", // R$ 29,39
   SUBSCRIPTION: "price_1RjOGMRtGASrDbfemNmh2FzT", // Monthly subscription
 }
 
@@ -56,8 +56,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate shipping price
-    if (body.shipping_price !== 1887 && body.shipping_price !== 2990) {
-      return NextResponse.json({ error: "Valor de frete inválido. Deve ser 1887 ou 2990 centavos." }, { status: 400 })
+    if (body.shipping_price !== 1887 && body.shipping_price !== 2939) {
+      return NextResponse.json({ error: "Valor de frete inválido. Deve ser 1887 ou 2939 centavos." }, { status: 400 })
     }
 
     // Validate email format

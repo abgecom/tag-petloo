@@ -74,8 +74,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate shipping price
-    if (body.shipping_price !== 1887 && body.shipping_price !== 2990) {
-      return NextResponse.json({ error: "Valor de frete inválido. Deve ser 1887 ou 2990 centavos." }, { status: 400 })
+    if (body.shipping_price !== 1887 && body.shipping_price !== 2939) {
+      return NextResponse.json({ error: "Valor de frete inválido. Deve ser 1887 ou 2939 centavos." }, { status: 400 })
     }
 
     // Validate email format
@@ -106,10 +106,10 @@ export async function POST(request: NextRequest) {
     console.log("=== INICIANDO FLUXO PIX APPMAX ===")
     console.log("Token configurado:", appmaxToken ? "✅ Sim" : "❌ Não")
 
-    // Convert shipping price from cents to decimal - VALOR FIXO R$ 18,87
-    const productPrice = 18.87 // Valor em formato decimal
+    // Convert shipping price from cents to decimal
+    const productPrice = body.shipping_price / 100 // Valor em formato decimal (18.87 ou 29.39)
     const productName = "Tag rastreamento Petloo + App"
-    const productSku = "TAG-APP-1887"
+    const productSku = body.shipping_price === 1887 ? "TAG-APP-1887" : "TAG-APP-2939"
 
     // Split name into firstname and lastname
     const [firstname, ...rest] = body.name.split(" ")
@@ -333,7 +333,7 @@ export async function POST(request: NextRequest) {
       success: true,
       order_id: orderId,
       customer_id: customerId,
-      amount: 1887, // Valor fixo em centavos (R$ 18,87)
+      amount: body.shipping_price, // Valor dinâmico em centavos
       qrcode: pix_qrcode,
       copiacola: pix_emv,
       expiration_date: pix_expiration_date,

@@ -17,6 +17,7 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
     const orderId = searchParams.get("orderId")
+    const amount = searchParams.get("amount") || "1887" // Default para frete padrão
 
     if (!orderId) {
       return NextResponse.json(
@@ -159,7 +160,7 @@ export async function GET(request: NextRequest) {
       success: true,
       qrcode: pix_qrcode,
       copiacola: pix_emv, // Renomeado conforme solicitado
-      amount: 1887, // Valor fixo em centavos (R$ 18,87)
+      amount: Number(amount), // Usar o valor passado como parâmetro
       orderId: orderId,
       pix_payment_link: pix_payment_link || null,
       message: "Dados PIX disponíveis",
