@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     const orderData: OrderData = await request.json()
 
     // URL do Webhook do Make.com (substitua pela sua URL)
-    const MAKE_WEBHOOK_URL = "https://hook.eu1.make.com/abc123def456"
+    const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k"
 
     console.log("=== ENVIANDO DADOS PARA MAKE.COM ===")
     console.log("Dados:", JSON.stringify(orderData, null, 2))
