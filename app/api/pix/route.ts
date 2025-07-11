@@ -16,6 +16,11 @@ interface PixRequestBody {
     state: string
   }
   shipping_price: number // Value in cents: 1887 or 2990
+  // 🎯 NOVOS CAMPOS DO PRODUTO
+  product_type: string
+  product_color: string
+  product_quantity: number
+  product_sku: string
 }
 
 // Define Appmax Customer Creation Response
@@ -48,47 +53,6 @@ interface AppmaxPixResponse {
     pix_emv: string
     pix_expiration_date: string
     order_id: string
-  }
-}
-
-// Função para determinar o tipo e cor do produto
-function getProductInfo(shippingPrice: number) {
-  switch (shippingPrice) {
-    case 1887: // R$ 18,87 - Frete padrão
-      return {
-        type: "Tag Genérica",
-        color: "Não se aplica",
-        name: "Tag rastreamento Petloo + App (Frete Padrão)",
-        sku: "TAG-APP-1887",
-      }
-    case 2939: // R$ 29,39 - Frete expresso
-      return {
-        type: "Tag Genérica",
-        color: "Não se aplica",
-        name: "Tag rastreamento Petloo + App (Frete Expresso)",
-        sku: "TAG-APP-2939",
-      }
-    case 3990: // R$ 39,90 - Tag personalizada frete grátis
-      return {
-        type: "Tag Personalizada",
-        color: "A definir", // Será atualizado depois
-        name: "Tag Personalizada + App (Frete Grátis)",
-        sku: "TAG-PERSONALIZADA-FREE-3990",
-      }
-    case 5042: // R$ 50,42 - Tag personalizada frete expresso
-      return {
-        type: "Tag Personalizada",
-        color: "A definir", // Será atualizado depois
-        name: "Tag Personalizada + App (Frete Expresso)",
-        sku: "TAG-PERSONALIZADA-EXPRESS-5042",
-      }
-    default:
-      return {
-        type: "Produto Desconhecido",
-        color: "Não se aplica",
-        name: "Produto não identificado",
-        sku: `UNKNOWN-${shippingPrice}`,
-      }
   }
 }
 
@@ -148,6 +112,11 @@ export async function POST(request: NextRequest) {
     console.log("Telefone:", body.phone)
     console.log("Endereço completo:", JSON.stringify(body.address, null, 2))
     console.log("Valor do frete:", body.shipping_price)
+    console.log("🎯 DADOS DO PRODUTO:")
+    console.log("Tipo:", body.product_type)
+    console.log("Cor:", body.product_color)
+    console.log("Quantidade:", body.product_quantity)
+    console.log("SKU:", body.product_sku)
 
     // Check if Appmax access token is configured
     const appmaxToken = process.env.APPMAX_ACCESS_TOKEN
@@ -161,25 +130,6 @@ export async function POST(request: NextRequest) {
 
     // Convert shipping price from cents to decimal
     const productPrice = body.shipping_price / 100 // Valor em formato decimal
-
-    // Obter informações do produto
-    const productInfo = getProductInfo(body.shipping_price)
-
-    // Tentar obter cor específica do sessionStorage se for produto personalizado
-    if (typeof window !== "undefined" && (body.shipping_price === 3990 || body.shipping_price === 5042)) {
-      try {
-        const personalizedData = sessionStorage.getItem("personalizedProduct")
-        if (personalizedData) {
-          const data = JSON.parse(personalizedData)
-          if (data.color) {
-            productInfo.color = data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color
-            productInfo.sku = `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${body.shipping_price === 3990 ? "FREE" : "EXPRESS"}`
-          }
-        }
-      } catch (error) {
-        console.warn("Não foi possível obter cor do produto personalizado:", error)
-      }
-    }
 
     // Split name into firstname and lastname
     const [firstname, ...rest] = body.name.split(" ")
@@ -290,9 +240,9 @@ export async function POST(request: NextRequest) {
       customer_id: customerId.toString(),
       products: [
         {
-          name: productInfo.name,
-          sku: productInfo.sku,
-          qty: 1,
+          name: `${body.product_type} - ${body.product_color}`,
+          sku: body.product_sku,
+          qty: body.product_quantity,
           price: productPrice,
         },
       ],
@@ -456,11 +406,11 @@ export async function POST(request: NextRequest) {
         order_amount: productPrice,
         payment_method: "PIX",
         order_status: "Pendente",
-        // Novos campos do produto
-        product_type: productInfo.type,
-        product_color: productInfo.color,
-        product_quantity: 1,
-        product_sku: productInfo.sku,
+        // 🎯 USAR DADOS REAIS DO PRODUTO
+        product_type: body.product_type,
+        product_color: body.product_color,
+        product_quantity: body.product_quantity,
+        product_sku: body.product_sku,
       }
 
       // Enviar para API de planilha (não aguardar resposta para não atrasar o PIX)
@@ -474,7 +424,7 @@ export async function POST(request: NextRequest) {
         console.warn("⚠️ Erro ao salvar na planilha (não crítico):", error)
       })
 
-      console.log("📊 Dados enviados para planilha Google")
+      console.log("📊 Dados enviados para planilha Google com informações corretas do produto")
     } catch (error) {
       console.warn("⚠️ Erro ao preparar dados para planilha:", error)
     }

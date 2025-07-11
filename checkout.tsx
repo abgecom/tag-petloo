@@ -255,6 +255,12 @@ function CheckoutForm() {
   const [showPixPayment, setShowPixPayment] = useState(false)
   const [copyFeedback, setCopyFeedback] = useState("")
   const [isLoading, setIsLoading] = useState(true)
+  const [productInfo, setProductInfo] = useState<{
+    type: string
+    color: string
+    amount: number
+    sku: string
+  } | null>(null)
 
   // Initialize loading state
   useEffect(() => {
@@ -282,6 +288,14 @@ function CheckoutForm() {
           name: `Tag ${color === "orange" ? "Laranja" : "Roxa"} Personalizada + App`,
         }
 
+        // Salvar no estado local também
+        setProductInfo({
+          type: "Tag Personalizada",
+          color: color === "orange" ? "Laranja" : "Roxa",
+          amount: Number(amount),
+          sku: `TAG-PERSONALIZADA-${color.toUpperCase()}`,
+        })
+
         if ("requestIdleCallback" in window) {
           requestIdleCallback(() => {
             sessionStorage.setItem("personalizedProduct", JSON.stringify(productData))
@@ -292,6 +306,14 @@ function CheckoutForm() {
           }, 0)
         }
       }
+    } else {
+      // Produto genérico
+      setProductInfo({
+        type: "Tag Genérica",
+        color: "Não se aplica",
+        amount: 1887, // Valor padrão
+        sku: "TAG-APP-1887",
+      })
     }
   }, [])
 
@@ -510,6 +532,8 @@ function CheckoutForm() {
         amount: shippingMethod === "express" ? 2939 : 1887,
         name: "Tag rastreamento Petloo + App",
         sku: shippingMethod === "express" ? "TAG-APP-2939" : "TAG-APP-1887",
+        type: "Tag Genérica",
+        color: "Não se aplica",
       }
 
       if (personalizedProductData) {
@@ -522,6 +546,8 @@ function CheckoutForm() {
             amount: shippingMethod === "express" ? baseAmount + expressShipping : baseAmount,
             name: data.name,
             sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
+            type: "Tag Personalizada",
+            color: data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color,
           }
         } catch (error) {
           console.error("Erro ao parsear produto personalizado:", error)
@@ -545,6 +571,11 @@ function CheckoutForm() {
             state: addressData.state,
           },
           shipping_price: productInfo.amount, // Valor em centavos
+          // 🎯 ADICIONAR DADOS DO PRODUTO
+          product_type: productInfo.type,
+          product_color: productInfo.color,
+          product_quantity: quantity,
+          product_sku: productInfo.sku,
         }
 
         console.log("=== DADOS ENVIADOS PARA PIX API ===")
@@ -641,6 +672,11 @@ function CheckoutForm() {
           estado: addressData.state,
           complemento: (document.getElementById("complement") as HTMLInputElement)?.value || "",
           shipping_price: productInfo.amount, // Valor fixo também para cartão
+          // 🎯 ADICIONAR DADOS DO PRODUTO
+          product_type: productInfo.type,
+          product_color: productInfo.color,
+          product_quantity: quantity,
+          product_sku: productInfo.sku,
         }
 
         console.log("Dados enviados para API:", checkoutData)
