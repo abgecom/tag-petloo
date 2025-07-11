@@ -89,45 +89,65 @@ function OrderSummaryContent({
 }: { quantity: number; setQuantity: (q: number) => void; shippingMethod: string; addressFound: boolean }) {
   // Calculate shipping cost based on shipping method
   const getShippingCost = () => {
-    // Verificar se é produto personalizado
+    // Verificar se é produto personalizado de forma mais rigorosa
     const personalizedData = sessionStorage.getItem("personalizedProduct")
+    let isPersonalized = false
+
     if (personalizedData) {
       try {
         const data = JSON.parse(personalizedData)
-        const basePrice = data.amount / 100 // R$ 39,90
-
-        if (!addressFound) return basePrice
-
-        // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
-        if (shippingMethod === "express") {
-          return basePrice + 10.52 // R$ 39,90 + R$ 10,52 = R$ 50,42
-        }
-        return basePrice // R$ 39,90 (frete grátis)
+        // Verificar se realmente tem os dados de personalização
+        isPersonalized = !!(data.color && data.amount && data.petName)
       } catch (error) {
         console.error("Erro ao parsear produto personalizado:", error)
+        isPersonalized = false
       }
     }
 
-    // Lógica original para produtos não personalizados
+    if (isPersonalized) {
+      const data = JSON.parse(personalizedData)
+      const basePrice = data.amount / 100 // R$ 39,90
+
+      if (!addressFound) return basePrice
+
+      // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
+      if (shippingMethod === "express") {
+        return basePrice + 10.52 // R$ 39,90 + R$ 10,52 = R$ 50,42
+      }
+      return basePrice // R$ 39,90 (frete grátis)
+    }
+
+    // Lógica para produtos genéricos (NÃO personalizados)
     if (!addressFound) return 0
     return shippingMethod === "express" ? 29.39 : 18.87
   }
 
   const shippingCost = getShippingCost()
+
+  // Verificar se é produto personalizado de forma mais rigorosa
   const personalizedProductData = sessionStorage.getItem("personalizedProduct")
+  let isPersonalized = false
   let productPrice = 0
   let shippingPrice = 0
 
   if (personalizedProductData) {
     try {
       const data = JSON.parse(personalizedProductData)
-      productPrice = data.amount / 100 // R$ 39,90
-      shippingPrice = shippingMethod === "express" ? 10.52 : 0 // Frete grátis ou R$ 10,52
+      // Verificar se realmente tem os dados de personalização
+      isPersonalized = !!(data.color && data.amount && data.petName)
+
+      if (isPersonalized) {
+        productPrice = data.amount / 100 // R$ 39,90
+        shippingPrice = shippingMethod === "express" ? 10.52 : 0 // Frete grátis ou R$ 10,52
+      }
     } catch (error) {
       console.error("Erro ao parsear produto personalizado:", error)
+      isPersonalized = false
     }
-  } else {
-    // Para produto genérico: produto grátis, cliente paga apenas o frete
+  }
+
+  // Para produto genérico: produto grátis, cliente paga apenas o frete
+  if (!isPersonalized) {
     productPrice = 0
     shippingPrice = addressFound ? (shippingMethod === "express" ? 29.39 : 18.87) : 0
   }
@@ -135,20 +155,25 @@ function OrderSummaryContent({
   const subtotal = productPrice + shippingPrice
   const total = subtotal
 
-  const productData = personalizedProductData ? JSON.parse(personalizedProductData) : null
-  const productName = productData ? productData.name : "Tag rastreamento Petloo + App"
-
-  // Definir a imagem baseada na cor escolhida
+  // Definir nome e imagem do produto baseado no tipo
+  let productName = "Tag rastreamento Petloo + App"
   let productImage =
     "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/image%20594-rIMxV2I0SZADJI938HxomgyWIUjTGg.png"
 
-  if (productData) {
-    if (productData.color === "orange") {
-      productImage =
-        "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_16.png"
-    } else if (productData.color === "purple") {
-      productImage =
-        "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_18.png"
+  if (isPersonalized && personalizedProductData) {
+    try {
+      const data = JSON.parse(personalizedProductData)
+      productName = data.name || `Tag ${data.color === "orange" ? "Laranja" : "Roxa"} Personalizada + App`
+
+      if (data.color === "orange") {
+        productImage =
+          "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_16.png"
+      } else if (data.color === "purple") {
+        productImage =
+          "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_18.png"
+      }
+    } catch (error) {
+      console.error("Erro ao parsear dados do produto personalizado:", error)
     }
   }
 
@@ -181,7 +206,7 @@ function OrderSummaryContent({
         </div>
         <div className="text-right">
           <p className="font-semibold">
-            {personalizedProductData ? `R$ ${productPrice.toFixed(2).replace(".", ",")}` : "Grátis"}
+            {isPersonalized ? `R$ ${productPrice.toFixed(2).replace(".", ",")}` : "Grátis"}
           </p>
         </div>
       </div>
@@ -197,7 +222,7 @@ function OrderSummaryContent({
 
       {/* Totals */}
       <div className="border-t pt-4 space-y-2">
-        {personalizedProductData && (
+        {isPersonalized && (
           <div className="flex justify-between">
             <span>Produto</span>
             <span className="font-semibold">R$ {productPrice.toFixed(2).replace(".", ",")}</span>
@@ -324,26 +349,35 @@ function CheckoutForm() {
 
   // Mover esta função para dentro do CheckoutForm, antes do return
   const getShippingCost = () => {
-    // Verificar se é produto personalizado
+    // Verificar se é produto personalizado de forma mais rigorosa
     const personalizedData = sessionStorage.getItem("personalizedProduct")
+    let isPersonalized = false
+
     if (personalizedData) {
       try {
         const data = JSON.parse(personalizedData)
-        const basePrice = data.amount / 100 // R$ 39,90
-
-        if (!addressFound) return basePrice
-
-        // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
-        if (shippingMethod === "express") {
-          return basePrice + 10.52 // R$ 39,90 + R$ 10,52 = R$ 50,42
-        }
-        return basePrice // R$ 39,90 (frete grátis)
+        // Verificar se realmente tem os dados de personalização
+        isPersonalized = !!(data.color && data.amount && data.petName)
       } catch (error) {
         console.error("Erro ao parsear produto personalizado:", error)
+        isPersonalized = false
       }
     }
 
-    // Lógica original para produtos não personalizados
+    if (isPersonalized) {
+      const data = JSON.parse(personalizedData)
+      const basePrice = data.amount / 100 // R$ 39,90
+
+      if (!addressFound) return basePrice
+
+      // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
+      if (shippingMethod === "express") {
+        return basePrice + 10.52 // R$ 39,90 + R$ 10,52 = R$ 50,42
+      }
+      return basePrice // R$ 39,90 (frete grátis)
+    }
+
+    // Lógica para produtos genéricos (NÃO personalizados)
     if (!addressFound) return 0
     return shippingMethod === "express" ? 29.39 : 18.87
   }
@@ -1087,7 +1121,18 @@ function CheckoutForm() {
                 <div className="space-y-3">
                   {(() => {
                     const personalizedData = sessionStorage.getItem("personalizedProduct")
-                    const isPersonalized = !!personalizedData
+                    let isPersonalized = false
+
+                    if (personalizedData) {
+                      try {
+                        const data = JSON.parse(personalizedData)
+                        // Verificar se realmente tem os dados de personalização
+                        isPersonalized = !!(data.color && data.amount && data.petName)
+                      } catch (error) {
+                        console.error("Erro ao parsear produto personalizado:", error)
+                        isPersonalized = false
+                      }
+                    }
 
                     if (isPersonalized) {
                       return (
@@ -1337,7 +1382,7 @@ function CheckoutForm() {
                       <div className="bg-gray-50 p-3 rounded-lg">
                         <h4 className="font-medium text-gray-800 mb-2">Informações sobre o pagamento via PIX:</h4>
                         <ul className="text-sm text-gray-700 space-y-1">
-                          <li>• Valor à vista R$ 18,87;</li>
+                          <li>• Valor à vista R$ {getShippingCost().toFixed(2).replace(".", ",")};</li>
                           <li>
                             • <strong>Não pode ser parcelado!</strong> Use cartão de crédito para parcelar sua compra;
                           </li>
