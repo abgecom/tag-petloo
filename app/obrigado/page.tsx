@@ -45,15 +45,21 @@ export default function ObrigadoPage() {
       orderId: orderId || undefined,
       customerName: customerName || undefined,
       customerEmail: customerEmail || undefined,
-      amount: amount ? Number(amount) : 1887, // Default R$ 18,87
+      amount: amount ? Number(amount) : 1887, // Manter em centavos como padrão
       paymentMethod: paymentMethod || "PIX",
     })
   }, []) // Empty dependency array - run only once on mount
 
   const formatCurrency = (amount: number) => {
-    return (amount / 100).toLocaleString("pt-BR", {
+    // Se o valor for muito pequeno (menor que 10), provavelmente já está em reais
+    // Se for maior que 100, provavelmente está em centavos e precisa ser convertido
+    const valueInReais = amount > 100 ? amount / 100 : amount
+
+    return valueInReais.toLocaleString("pt-BR", {
       style: "currency",
       currency: "BRL",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
     })
   }
 

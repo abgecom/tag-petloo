@@ -33,7 +33,13 @@ export default function PurchaseTracker() {
       const savedOrderData = sessionStorage.getItem("orderSummary")
       if (savedOrderData) {
         try {
-          return JSON.parse(savedOrderData)
+          const parsedData = JSON.parse(savedOrderData)
+          // Se o valor for maior que 100, está em centavos, senão já está em reais
+          const amountInCentavos = parsedData.amount > 100 ? parsedData.amount : parsedData.amount * 100
+          return {
+            ...parsedData,
+            amount: amountInCentavos, // Garantir que está em centavos para o tracker
+          }
         } catch (error) {
           console.error("Erro ao parsear dados do pedido:", error)
         }
@@ -61,7 +67,7 @@ export default function PurchaseTracker() {
       // Gerar transaction_id único se não existir
       const transactionId = purchaseData.transactionId || purchaseData.orderId || `CARD-PETLOO-${new Date().getTime()}`
 
-      const value = (purchaseData.amount || 1887) / 100 // Converter centavos para reais
+      const value = (purchaseData.amount || 1887) / 100 // Sempre converter centavos para reais aqui
       const items = [
         {
           item_id: "tag-petloo",

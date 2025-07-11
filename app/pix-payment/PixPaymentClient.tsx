@@ -7,6 +7,9 @@ import { Copy, ArrowLeft, RotateCcw, CheckCircle } from "lucide-react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
 
+// Adicionar import no topo do arquivo
+import PaymentStatusChecker from "@/components/PaymentStatusChecker"
+
 // Importar o tracker dinamicamente
 const PixPurchaseTracker = dynamic(() => import("@/components/PixPurchaseTracker"), {
   ssr: false,
@@ -247,6 +250,17 @@ export default function PixPaymentPageClient() {
     <div className="min-h-screen bg-gray-50 py-8 px-4">
       {/* PIX Purchase Tracker - Dispara evento de compra quando PIX é exibido */}
       <PixPurchaseTracker />
+
+      {/* Payment Status Checker - Verifica automaticamente o status do pagamento */}
+      {pixData && (
+        <PaymentStatusChecker
+          orderId={pixData.orderId}
+          amount={pixData.amount}
+          onPaymentConfirmed={() => {
+            console.log("🎉 Pagamento confirmado via verificação automática!")
+          }}
+        />
+      )}
 
       <div className="max-w-md mx-auto">
         {/* Header */}
