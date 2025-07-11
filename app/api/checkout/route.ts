@@ -105,6 +105,39 @@ export async function POST(request: NextRequest) {
       },
     })
 
+    // Salvar dados na planilha Google via Zapier
+    try {
+      const orderDataForSheets = {
+        order_id: paymentIntent.id,
+        customer_name: body.name,
+        customer_email: body.email,
+        customer_phone: body.telefone,
+        customer_cpf: body.cpf,
+        customer_address: `${body.endereco}, ${body.numero}${body.complemento ? `, ${body.complemento}` : ""}, ${body.bairro}`,
+        customer_cep: body.cep,
+        customer_city: body.cidade,
+        customer_state: body.estado,
+        order_amount: body.shipping_price / 100, // Converter centavos para reais
+        payment_method: "Cartão de Crédito",
+        order_status: "Processando",
+      }
+
+      // Enviar para API de planilha (não aguardar resposta)
+      fetch(`${request.url.replace("/api/checkout", "/api/save-to-sheets")}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderDataForSheets),
+      }).catch((error) => {
+        console.warn("⚠️ Erro ao salvar na planilha (não crítico):", error)
+      })
+
+      console.log("📊 Dados enviados para planilha Google")
+    } catch (error) {
+      console.warn("⚠️ Erro ao preparar dados para planilha:", error)
+    }
+
     // Step 3: Create Subscription with 30-day trial
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,

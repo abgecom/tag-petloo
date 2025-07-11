@@ -392,6 +392,39 @@ export async function POST(request: NextRequest) {
     console.log("EMV (Copia e Cola):", pix_emv ? "✅ Presente" : "❌ Ausente")
     console.log("Expiração:", pix_expiration_date || "Não informado")
 
+    // Salvar dados na planilha Google via Zapier
+    try {
+      const orderDataForSheets = {
+        order_id: orderId.toString(),
+        customer_name: body.name,
+        customer_email: body.email,
+        customer_phone: body.phone,
+        customer_cpf: cleanCPF,
+        customer_address: `${body.address.street}, ${body.address.number}${body.address.complement ? `, ${body.address.complement}` : ""}, ${body.address.district}`,
+        customer_cep: body.address.cep,
+        customer_city: body.address.city,
+        customer_state: body.address.state,
+        order_amount: productPrice,
+        payment_method: "PIX",
+        order_status: "Pendente",
+      }
+
+      // Enviar para API de planilha (não aguardar resposta para não atrasar o PIX)
+      fetch(`${request.url.replace("/api/pix", "/api/save-to-sheets")}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderDataForSheets),
+      }).catch((error) => {
+        console.warn("⚠️ Erro ao salvar na planilha (não crítico):", error)
+      })
+
+      console.log("📊 Dados enviados para planilha Google")
+    } catch (error) {
+      console.warn("⚠️ Erro ao preparar dados para planilha:", error)
+    }
+
     // Return success response with PIX data
     return NextResponse.json({
       success: true,
