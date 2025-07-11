@@ -25,6 +25,7 @@ interface CheckoutRequestBody {
   product_color: string
   product_quantity: number
   product_sku: string
+  pet_name?: string // Adicionar nome do pet
 }
 
 // Define Price IDs based on shipping cost
@@ -82,6 +83,7 @@ export async function POST(request: NextRequest) {
     console.log("Cor:", body.product_color)
     console.log("Quantidade:", body.product_quantity)
     console.log("SKU:", body.product_sku)
+    console.log("Nome do Pet:", body.pet_name || "Não informado")
 
     // Step 1: Create Customer in Stripe
     const customer = await stripe.customers.create({
@@ -102,6 +104,7 @@ export async function POST(request: NextRequest) {
         product_color: body.product_color,
         product_quantity: body.product_quantity.toString(),
         product_sku: body.product_sku,
+        pet_name: body.pet_name || "", // Adicionar nome do pet
       },
     })
 
@@ -147,6 +150,7 @@ export async function POST(request: NextRequest) {
         product_color: body.product_color,
         product_quantity: body.product_quantity,
         product_sku: body.product_sku,
+        pet_name: body.pet_name || "", // Adicionar nome do pet
       }
 
       // Enviar para API de planilha (não aguardar resposta)

@@ -21,6 +21,7 @@ interface PixRequestBody {
   product_color: string
   product_quantity: number
   product_sku: string
+  pet_name?: string // Adicionar nome do pet
 }
 
 // Define Appmax Customer Creation Response
@@ -117,6 +118,7 @@ export async function POST(request: NextRequest) {
     console.log("Cor:", body.product_color)
     console.log("Quantidade:", body.product_quantity)
     console.log("SKU:", body.product_sku)
+    console.log("Nome do Pet:", body.pet_name || "Não informado")
 
     // Check if Appmax access token is configured
     const appmaxToken = process.env.APPMAX_ACCESS_TOKEN
@@ -411,6 +413,7 @@ export async function POST(request: NextRequest) {
         product_color: body.product_color,
         product_quantity: body.product_quantity,
         product_sku: body.product_sku,
+        pet_name: body.pet_name || "", // Adicionar nome do pet
       }
 
       // Enviar para API de planilha (não aguardar resposta para não atrasar o PIX)

@@ -27,7 +27,7 @@ export default function ProductOffer() {
     window.location.replace("/checkout")
   }
 
-  const handleFinalizePurchase = (color: "orange" | "purple") => {
+  const handleFinalizePurchase = (color: "orange" | "purple", petName: string) => {
     closeColorSelectionPopup()
 
     // Definir o price_id baseado na cor escolhida
@@ -41,6 +41,7 @@ export default function ProductOffer() {
         priceId,
         amount: 3990,
         name: `Tag ${color === "orange" ? "Laranja" : "Roxa"} Personalizada + App`,
+        petName: petName, // Adicionar nome do pet
       }),
     )
 
@@ -50,6 +51,7 @@ export default function ProductOffer() {
       color: color,
       priceId: priceId,
       amount: "3990",
+      petName: encodeURIComponent(petName), // Adicionar à URL também
     })
 
     window.location.replace(`/checkout?${params.toString()}`)

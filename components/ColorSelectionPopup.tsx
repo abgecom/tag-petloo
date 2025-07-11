@@ -8,11 +8,12 @@ import { Button } from "@/components/ui/button"
 interface ColorSelectionPopupProps {
   isOpen: boolean
   onClose: () => void
-  onFinalizePurchase: (color: "orange" | "purple") => void
+  onFinalizePurchase: (color: "orange" | "purple", petName: string) => void
 }
 
 export default function ColorSelectionPopup({ isOpen, onClose, onFinalizePurchase }: ColorSelectionPopupProps) {
   const [selectedColor, setSelectedColor] = useState<"orange" | "purple" | null>(null)
+  const [petName, setPetName] = useState("")
 
   if (!isOpen) return null
 
@@ -23,8 +24,8 @@ export default function ColorSelectionPopup({ isOpen, onClose, onFinalizePurchas
   }
 
   const handleFinalize = () => {
-    if (selectedColor) {
-      onFinalizePurchase(selectedColor)
+    if (selectedColor && petName.trim()) {
+      onFinalizePurchase(selectedColor, petName.trim())
     }
   }
 
@@ -101,14 +102,32 @@ export default function ColorSelectionPopup({ isOpen, onClose, onFinalizePurchas
             </div>
           </div>
 
+          {/* Pet Name Input */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Diga-nos o nome do seu pet para personalização
+            </label>
+            <input
+              type="text"
+              value={petName}
+              onChange={(e) => setPetName(e.target.value)}
+              placeholder="Digite aqui o nome do pet"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-400 shadow-sm"
+              maxLength={20}
+            />
+            {petName.length > 15 && (
+              <p className="text-sm text-amber-600">⚠️ Nomes muito longos podem não caber na tag</p>
+            )}
+          </div>
+
           {/* Finalize Button */}
           <Button
             onClick={handleFinalize}
-            disabled={!selectedColor}
+            disabled={!selectedColor || !petName.trim()}
             className="w-full rounded-xl px-6 py-3 text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: "#F1542E" }}
           >
-            Finalizar compra
+            {!selectedColor ? "Escolha uma cor" : !petName.trim() ? "Digite o nome do pet" : "Finalizar compra"}
           </Button>
         </div>
       </div>

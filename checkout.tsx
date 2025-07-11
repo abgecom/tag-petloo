@@ -260,6 +260,7 @@ function CheckoutForm() {
     color: string
     amount: number
     sku: string
+    petName?: string
   } | null>(null)
 
   // Initialize loading state
@@ -279,6 +280,7 @@ function CheckoutForm() {
       const color = urlParams.get("color")
       const priceId = urlParams.get("priceId")
       const amount = urlParams.get("amount")
+      const petName = urlParams.get("petName") // Obter nome do pet da URL
 
       if (color && priceId && amount) {
         const productData = {
@@ -286,6 +288,7 @@ function CheckoutForm() {
           priceId,
           amount: Number(amount),
           name: `Tag ${color === "orange" ? "Laranja" : "Roxa"} Personalizada + App`,
+          petName: petName ? decodeURIComponent(petName) : "", // Decodificar nome do pet
         }
 
         // Salvar no estado local também
@@ -294,6 +297,7 @@ function CheckoutForm() {
           color: color === "orange" ? "Laranja" : "Roxa",
           amount: Number(amount),
           sku: `TAG-PERSONALIZADA-${color.toUpperCase()}`,
+          petName: petName ? decodeURIComponent(petName) : "", // Adicionar ao estado
         })
 
         if ("requestIdleCallback" in window) {
@@ -313,6 +317,7 @@ function CheckoutForm() {
         color: "Não se aplica",
         amount: 1887, // Valor padrão
         sku: "TAG-APP-1887",
+        petName: "", // Produto genérico não tem nome do pet
       })
     }
   }, [])
@@ -576,6 +581,7 @@ function CheckoutForm() {
           product_color: productInfo.color,
           product_quantity: quantity,
           product_sku: productInfo.sku,
+          pet_name: productInfo.petName || "", // Adicionar nome do pet
         }
 
         console.log("=== DADOS ENVIADOS PARA PIX API ===")
@@ -677,6 +683,7 @@ function CheckoutForm() {
           product_color: productInfo.color,
           product_quantity: quantity,
           product_sku: productInfo.sku,
+          pet_name: productInfo.petName || "", // Adicionar nome do pet
         }
 
         console.log("Dados enviados para API:", checkoutData)
