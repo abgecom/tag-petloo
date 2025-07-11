@@ -14,6 +14,11 @@ interface OrderData {
   order_amount: number
   payment_method: string
   order_status: string
+  // Novos campos do produto
+  product_type: string
+  product_color: string
+  product_quantity: number
+  product_sku: string
 }
 
 export async function POST(request: NextRequest) {

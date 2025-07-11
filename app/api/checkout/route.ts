@@ -31,6 +31,47 @@ const PRICE_IDS = {
   SUBSCRIPTION: "price_1RjOGMRtGASrDbfemNmh2FzT", // Monthly subscription
 }
 
+// Função para determinar o tipo e cor do produto
+function getProductInfo(shippingPrice: number) {
+  switch (shippingPrice) {
+    case 1887: // R$ 18,87 - Frete padrão
+      return {
+        type: "Tag Genérica",
+        color: "Não se aplica",
+        name: "Tag rastreamento Petloo + App (Frete Padrão)",
+        sku: "TAG-APP-1887",
+      }
+    case 2939: // R$ 29,39 - Frete expresso
+      return {
+        type: "Tag Genérica",
+        color: "Não se aplica",
+        name: "Tag rastreamento Petloo + App (Frete Expresso)",
+        sku: "TAG-APP-2939",
+      }
+    case 3990: // R$ 39,90 - Tag personalizada frete grátis
+      return {
+        type: "Tag Personalizada",
+        color: "A definir", // Será atualizado depois
+        name: "Tag Personalizada + App (Frete Grátis)",
+        sku: "TAG-PERSONALIZADA-FREE-3990",
+      }
+    case 5042: // R$ 50,42 - Tag personalizada frete expresso
+      return {
+        type: "Tag Personalizada",
+        color: "A definir", // Será atualizado depois
+        name: "Tag Personalizada + App (Frete Expresso)",
+        sku: "TAG-PERSONALIZADA-EXPRESS-5042",
+      }
+    default:
+      return {
+        type: "Produto Desconhecido",
+        color: "Não se aplica",
+        name: "Produto não identificado",
+        sku: `UNKNOWN-${shippingPrice}`,
+      }
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Parse request body
@@ -71,6 +112,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Email inválido" }, { status: 400 })
     }
 
+    // Obter informações do produto
+    const productInfo = getProductInfo(body.shipping_price)
+
+    // Tentar obter cor específica do sessionStorage se for produto personalizado
+    if (typeof window !== "undefined" && (body.shipping_price === 3990 || body.shipping_price === 5042)) {
+      try {
+        const personalizedData = sessionStorage.getItem("personalizedProduct")
+        if (personalizedData) {
+          const data = JSON.parse(personalizedData)
+          if (data.color) {
+            productInfo.color = data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color
+            productInfo.sku = `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${body.shipping_price === 3990 ? "FREE" : "EXPRESS"}`
+          }
+        }
+      } catch (error) {
+        console.warn("Não foi possível obter cor do produto personalizado:", error)
+      }
+    }
+
     // Step 1: Create Customer in Stripe
     const customer = await stripe.customers.create({
       name: body.name,
@@ -105,7 +165,7 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Salvar dados na planilha Google via Zapier
+    // Salvar dados na planilha Google via Make.com
     try {
       const orderDataForSheets = {
         order_id: paymentIntent.id,
@@ -120,6 +180,11 @@ export async function POST(request: NextRequest) {
         order_amount: body.shipping_price / 100, // Converter centavos para reais
         payment_method: "Cartão de Crédito",
         order_status: "Processando",
+        // Novos campos do produto
+        product_type: productInfo.type,
+        product_color: productInfo.color,
+        product_quantity: 1,
+        product_sku: productInfo.sku,
       }
 
       // Enviar para API de planilha (não aguardar resposta)

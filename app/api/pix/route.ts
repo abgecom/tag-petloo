@@ -51,6 +51,47 @@ interface AppmaxPixResponse {
   }
 }
 
+// Função para determinar o tipo e cor do produto
+function getProductInfo(shippingPrice: number) {
+  switch (shippingPrice) {
+    case 1887: // R$ 18,87 - Frete padrão
+      return {
+        type: "Tag Genérica",
+        color: "Não se aplica",
+        name: "Tag rastreamento Petloo + App (Frete Padrão)",
+        sku: "TAG-APP-1887",
+      }
+    case 2939: // R$ 29,39 - Frete expresso
+      return {
+        type: "Tag Genérica",
+        color: "Não se aplica",
+        name: "Tag rastreamento Petloo + App (Frete Expresso)",
+        sku: "TAG-APP-2939",
+      }
+    case 3990: // R$ 39,90 - Tag personalizada frete grátis
+      return {
+        type: "Tag Personalizada",
+        color: "A definir", // Será atualizado depois
+        name: "Tag Personalizada + App (Frete Grátis)",
+        sku: "TAG-PERSONALIZADA-FREE-3990",
+      }
+    case 5042: // R$ 50,42 - Tag personalizada frete expresso
+      return {
+        type: "Tag Personalizada",
+        color: "A definir", // Será atualizado depois
+        name: "Tag Personalizada + App (Frete Expresso)",
+        sku: "TAG-PERSONALIZADA-EXPRESS-5042",
+      }
+    default:
+      return {
+        type: "Produto Desconhecido",
+        color: "Não se aplica",
+        name: "Produto não identificado",
+        sku: `UNKNOWN-${shippingPrice}`,
+      }
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     // Parse request body
@@ -120,16 +161,24 @@ export async function POST(request: NextRequest) {
 
     // Convert shipping price from cents to decimal
     const productPrice = body.shipping_price / 100 // Valor em formato decimal
-    let productName = "Tag rastreamento Petloo + App"
-    let productSku = `TAG-APP-${body.shipping_price}`
 
-    // Se for produto personalizado
-    if (body.shipping_price === 3990) {
-      productName = "Tag Personalizada + App (Frete Grátis)"
-      productSku = `TAG-PERSONALIZADA-FREE-${body.shipping_price}`
-    } else if (body.shipping_price === 5042) {
-      productName = "Tag Personalizada + App (Frete Expresso)"
-      productSku = `TAG-PERSONALIZADA-EXPRESS-${body.shipping_price}`
+    // Obter informações do produto
+    const productInfo = getProductInfo(body.shipping_price)
+
+    // Tentar obter cor específica do sessionStorage se for produto personalizado
+    if (typeof window !== "undefined" && (body.shipping_price === 3990 || body.shipping_price === 5042)) {
+      try {
+        const personalizedData = sessionStorage.getItem("personalizedProduct")
+        if (personalizedData) {
+          const data = JSON.parse(personalizedData)
+          if (data.color) {
+            productInfo.color = data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color
+            productInfo.sku = `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${body.shipping_price === 3990 ? "FREE" : "EXPRESS"}`
+          }
+        }
+      } catch (error) {
+        console.warn("Não foi possível obter cor do produto personalizado:", error)
+      }
     }
 
     // Split name into firstname and lastname
@@ -241,8 +290,8 @@ export async function POST(request: NextRequest) {
       customer_id: customerId.toString(),
       products: [
         {
-          name: productName,
-          sku: productSku,
+          name: productInfo.name,
+          sku: productInfo.sku,
           qty: 1,
           price: productPrice,
         },
@@ -392,7 +441,7 @@ export async function POST(request: NextRequest) {
     console.log("EMV (Copia e Cola):", pix_emv ? "✅ Presente" : "❌ Ausente")
     console.log("Expiração:", pix_expiration_date || "Não informado")
 
-    // Salvar dados na planilha Google via Zapier
+    // Salvar dados na planilha Google via Make.com
     try {
       const orderDataForSheets = {
         order_id: orderId.toString(),
@@ -407,6 +456,11 @@ export async function POST(request: NextRequest) {
         order_amount: productPrice,
         payment_method: "PIX",
         order_status: "Pendente",
+        // Novos campos do produto
+        product_type: productInfo.type,
+        product_color: productInfo.color,
+        product_quantity: 1,
+        product_sku: productInfo.sku,
       }
 
       // Enviar para API de planilha (não aguardar resposta para não atrasar o PIX)
