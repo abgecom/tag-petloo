@@ -11,6 +11,8 @@ import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js"
 import { fetchAddressByCEP } from "@/utils/fetchAddressByCEP"
 import { useRouter } from "next/navigation"
 import InitiateCheckoutTracker from "@/components/InitiateCheckoutTracker"
+import AbandonedCartTracker from "@/components/AbandonedCartTracker"
+import LeadCaptureTracker from "@/components/LeadCaptureTracker"
 import { Elements } from "@stripe/react-stripe-js"
 
 // Initialize Stripe with preload
@@ -912,6 +914,15 @@ function CheckoutForm() {
     <div className="min-h-screen bg-white">
       {/* Initiate Checkout Tracker - Fires when checkout page loads */}
       <InitiateCheckoutTracker />
+
+      {/* Abandoned Cart Tracker - Monitors cart abandonment */}
+      <AbandonedCartTracker
+        abandonmentTimeSeconds={300} // 5 minutos
+        trackPageExit={true}
+      />
+
+      {/* Lead Capture Tracker - Captures leads when user fills form */}
+      <LeadCaptureTracker />
 
       {/* Alert Banner */}
       <div className="bg-red-500 text-white text-center py-2 px-4 text-sm">
