@@ -581,7 +581,8 @@ function CheckoutForm() {
           product_color: productInfo.color,
           product_quantity: quantity,
           product_sku: productInfo.sku,
-          pet_name: productInfo.petName || "", // Adicionar nome do pet
+          pet_name:
+            productInfo?.petName || (personalizedProductData ? JSON.parse(personalizedProductData).petName : "") || "", // Adicionar nome do pet
         }
 
         console.log("=== DADOS ENVIADOS PARA PIX API ===")
@@ -683,7 +684,8 @@ function CheckoutForm() {
           product_color: productInfo.color,
           product_quantity: quantity,
           product_sku: productInfo.sku,
-          pet_name: productInfo.petName || "", // Adicionar nome do pet
+          pet_name:
+            productInfo?.petName || (personalizedProductData ? JSON.parse(personalizedProductData).petName : "") || "", // Adicionar nome do pet
         }
 
         console.log("Dados enviados para API:", checkoutData)

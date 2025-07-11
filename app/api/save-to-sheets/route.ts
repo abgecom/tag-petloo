@@ -19,6 +19,7 @@ interface OrderData {
   product_color: string
   product_quantity: number
   product_sku: string
+  pet_name: string // Adicionar este campo
 }
 
 export async function POST(request: NextRequest) {
