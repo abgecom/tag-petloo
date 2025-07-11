@@ -193,23 +193,50 @@ export async function POST(request: NextRequest) {
 
     console.log("✅ Cliente criado com sucesso! ID:", customerId)
 
-    // Step 2: Create order WITH SHIPPING ADDRESS
-    console.log("=== STEP 2: CRIANDO PEDIDO COM ENDEREÇO DE ENTREGA ===")
+    // Step 1.5: Update customer with address
+    console.log("=== STEP 1.5: ATUALIZANDO CLIENTE COM ENDEREÇO ===")
 
-    // Preparar dados de endereço em múltiplos formatos para garantir compatibilidade
-    const shippingAddress = {
+    const customerUpdatePayload = {
       firstname: firstname,
       lastname: lastname,
+      email: body.email,
+      document: cleanCPF,
+      telephone: cleanPhone,
       postcode: body.address.cep.replace(/\D/g, ""),
-      address_1: body.address.street,
-      address_2: body.address.complement || "",
-      address_number: body.address.number,
-      address_district: body.address.district,
-      city: body.address.city,
-      state: body.address.state,
-      country: "BR",
+      address_street: body.address.street,
+      address_street_number: body.address.number,
+      address_street_complement: body.address.complement || "",
+      address_street_district: body.address.district,
+      address_city: body.address.city,
+      address_state: body.address.state,
     }
 
+    console.log("Customer Update Payload:", JSON.stringify(customerUpdatePayload, null, 2))
+
+    const customerUpdateResponse = await fetch(`https://admin.appmax.com.br/api/v3/customer/${customerId}`, {
+      method: "PUT",
+      headers: {
+        "access-token": appmaxToken,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(customerUpdatePayload),
+    })
+
+    const customerUpdateData = await customerUpdateResponse.json()
+
+    console.log("=== RESPOSTA ATUALIZAÇÃO CLIENTE ===")
+    console.log("Status:", customerUpdateResponse.status)
+    console.log("Customer Update Data:", JSON.stringify(customerUpdateData, null, 2))
+
+    if (!customerUpdateResponse.ok) {
+      console.warn("⚠️ Falha ao atualizar endereço do cliente, mas continuando...")
+      console.warn("Status Code:", customerUpdateResponse.status)
+      console.warn("Response Body:", customerUpdateData)
+    } else {
+      console.log("✅ Endereço do cliente atualizado com sucesso!")
+    }
+
+    // Step 2: Create order
     const orderPayload = {
       customer_id: customerId.toString(),
       products: [
@@ -220,22 +247,10 @@ export async function POST(request: NextRequest) {
           price: productPrice,
         },
       ],
-      // Tentar diferentes formatos que a Appmax pode aceitar
-      shipping_address: shippingAddress,
-      delivery_address: shippingAddress,
-      address: shippingAddress,
-      // Também tentar no formato mais direto
-      postcode: body.address.cep.replace(/\D/g, ""),
-      address_street: body.address.street,
-      address_number: body.address.number,
-      address_district: body.address.district,
-      address_city: body.address.city,
-      address_state: body.address.state,
-      address_complement: body.address.complement || "",
     }
 
-    console.log("=== PAYLOAD DO PEDIDO (COM ENDEREÇO) ===")
-    console.log(JSON.stringify(orderPayload, null, 2))
+    console.log("=== STEP 2: CRIANDO PEDIDO NA APPMAX ===")
+    console.log("Order Payload:", JSON.stringify(orderPayload, null, 2))
 
     const orderResponse = await fetch("https://admin.appmax.com.br/api/v3/order", {
       method: "POST",
@@ -247,22 +262,6 @@ export async function POST(request: NextRequest) {
     })
 
     const orderData: AppmaxOrderResponse = await orderResponse.json()
-
-    console.log("=== RESPOSTA CRIAÇÃO PEDIDO (DETALHADA) ===")
-    console.log("Status:", orderResponse.status)
-    console.log("Headers:", Object.fromEntries(orderResponse.headers.entries()))
-    console.log("Order Data COMPLETO:", JSON.stringify(orderData, null, 2))
-
-    // Verificar se a Appmax retornou algum erro relacionado ao endereço
-    if (orderData.errors) {
-      console.log("=== ERROS RETORNADOS PELA APPMAX ===")
-      console.log("Errors:", JSON.stringify(orderData.errors, null, 2))
-    }
-
-    if (orderData.warnings) {
-      console.log("=== WARNINGS RETORNADOS PELA APPMAX ===")
-      console.log("Warnings:", JSON.stringify(orderData.warnings, null, 2))
-    }
 
     console.log("=== RESPOSTA CRIAÇÃO PEDIDO ===")
     console.log("Status:", orderResponse.status)
