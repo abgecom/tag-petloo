@@ -830,7 +830,7 @@ function CheckoutForm() {
         {/* Alert Banner - mesmo durante loading */}
         <div className="bg-red-500 text-white text-center py-2 px-4 text-sm">
           <strong>ATENÇÃO:</strong> O prazo de entrega dos produtos personalizados inclui o tempo de frete + o prazo de
-          produção (2 a 3 semanas).
+          produção (7 dias).
         </div>
 
         <div className="min-h-screen bg-white flex items-center justify-center p-4">
@@ -927,7 +927,7 @@ function CheckoutForm() {
       {/* Alert Banner */}
       <div className="bg-red-500 text-white text-center py-2 px-4 text-sm">
         <strong>ATENÇÃO:</strong> O prazo de entrega dos produtos personalizados inclui o tempo de frete + o prazo de
-        produção (2 a 3 semanas).
+        produção (7 dias).
       </div>
 
       <div className="max-w-7xl mx-auto p-4 lg:p-8">

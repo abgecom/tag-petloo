@@ -460,8 +460,7 @@ export default function ProductOffer() {
                   Como faço para ativar o seguro Petloo?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-700 pb-4">
-                  Ao cadastrar sua Tag no app Petloo, seu pet fica automaticamente protegido com nosso seguro saúde
-                  gratuito.
+                  Ao cadastrar sua Tag no app Petloo, seu pet fica automaticamente protegido com nosso seguro saúde gratuito. O seguro tem uma carência de 30 dias. 
                 </AccordionContent>
               </AccordionItem>
 
