@@ -3,6 +3,8 @@ import type { Metadata } from "next"
 import "./globals.css"
 import Script from "next/script"
 import PageViewTracker from "@/components/PageViewTracker"
+import { Analytics } from "@vercel/analytics/react"
+import { Suspense } from "react"
 
 export const metadata: Metadata = {
   title: "Tag de Rastreamento Petloo - Nunca mais perca seu pet",
@@ -76,9 +78,14 @@ export default function RootLayout({
         </noscript>
 
         {/* Page View Tracker - Tracks all page views automatically */}
-        <PageViewTracker />
+        <Suspense fallback={null}>
+          <PageViewTracker />
+        </Suspense>
 
         {children}
+
+        {/* Vercel Analytics */}
+        <Analytics />
       </body>
     </html>
   )
