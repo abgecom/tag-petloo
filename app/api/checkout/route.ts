@@ -144,7 +144,7 @@ export async function POST(request: NextRequest) {
         customer_state: body.estado,
         order_amount: body.shipping_price / 100, // Converter centavos para reais
         payment_method: "Cartão de Crédito",
-        order_status: "Processando",
+        order_status: "Confirmado", // ✅ ALTERADO DE "Processando" PARA "Confirmado"
         // 🎯 USAR DADOS REAIS DO PRODUTO
         product_type: body.product_type,
         product_color: body.product_color,
@@ -164,7 +164,7 @@ export async function POST(request: NextRequest) {
         console.warn("⚠️ Erro ao salvar na planilha (não crítico):", error)
       })
 
-      console.log("📊 Dados enviados para planilha Google com informações corretas do produto")
+      console.log("📊 Dados enviados para planilha Google com status 'Confirmado' para cartão de crédito")
     } catch (error) {
       console.warn("⚠️ Erro ao preparar dados para planilha:", error)
     }
