@@ -108,20 +108,20 @@ function OrderSummaryContent({
 
     if (isPersonalized) {
       const data = JSON.parse(personalizedData)
-      const basePrice = data.amount / 100 // R$ 39,90
+      const basePrice = data.amount / 100 // R$ 49,90
 
       if (!addressFound) return basePrice
 
       // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
       if (shippingMethod === "express") {
-        return basePrice + 10.52 // R$ 39,90 + R$ 10,52 = R$ 50,42
+        return basePrice + 10.52 // R$ 49,90 + R$ 10,52 = R$ 60,42
       }
-      return basePrice // R$ 39,90 (frete grátis)
+      return basePrice // R$ 49,90 (frete grátis)
     }
 
-    // Lógica para produtos genéricos (NÃO personalizados)
+    // Lógica para produtos genéricos (NÃO personalizados) - APENAS FRETE EXPRESSO
     if (!addressFound) return 0
-    return shippingMethod === "express" ? 29.39 : 18.87
+    return 29.39 // Apenas frete expresso disponível
   }
 
   const shippingCost = getShippingCost()
@@ -139,7 +139,7 @@ function OrderSummaryContent({
       isPersonalized = !!(data.color && data.amount && data.petName)
 
       if (isPersonalized) {
-        productPrice = data.amount / 100 // R$ 39,90
+        productPrice = data.amount / 100 // R$ 49,90
         shippingPrice = shippingMethod === "express" ? 10.52 : 0 // Frete grátis ou R$ 10,52
       }
     } catch (error) {
@@ -148,10 +148,10 @@ function OrderSummaryContent({
     }
   }
 
-  // Para produto genérico: produto grátis, cliente paga apenas o frete
+  // Para produto genérico: produto grátis, cliente paga apenas o frete (APENAS EXPRESSO)
   if (!isPersonalized) {
     productPrice = 0
-    shippingPrice = addressFound ? (shippingMethod === "express" ? 29.39 : 18.87) : 0
+    shippingPrice = addressFound ? 29.39 : 0 // Apenas frete expresso
   }
 
   const subtotal = productPrice + shippingPrice
@@ -263,7 +263,7 @@ function CheckoutForm() {
     state: "",
   })
   const [addressFound, setAddressFound] = useState(false)
-  const [shippingMethod, setShippingMethod] = useState("standard")
+  const [shippingMethod, setShippingMethod] = useState("standard") // Definir frete grátis como padrão para personalizados
   const [cardData, setCardData] = useState({
     number: "",
     name: "",
@@ -327,6 +327,9 @@ function CheckoutForm() {
           petName: petName ? decodeURIComponent(petName) : "", // Adicionar ao estado
         })
 
+        // Manter frete grátis como padrão para produtos personalizados
+        setShippingMethod("standard")
+
         if ("requestIdleCallback" in window) {
           requestIdleCallback(() => {
             sessionStorage.setItem("personalizedProduct", JSON.stringify(productData))
@@ -338,14 +341,16 @@ function CheckoutForm() {
         }
       }
     } else {
-      // Produto genérico
+      // Produto genérico - APENAS FRETE EXPRESSO
       setProductInfo({
         type: "Tag Genérica",
         color: "Não se aplica",
-        amount: 1887, // Valor padrão
-        sku: "TAG-APP-1887",
+        amount: 2939, // Valor do frete expresso
+        sku: "TAG-APP-2939",
         petName: "", // Produto genérico não tem nome do pet
       })
+      // Forçar frete expresso para produtos genéricos
+      setShippingMethod("express")
     }
   }, [])
 
@@ -368,20 +373,20 @@ function CheckoutForm() {
 
     if (isPersonalized) {
       const data = JSON.parse(personalizedData)
-      const basePrice = data.amount / 100 // R$ 39,90
+      const basePrice = data.amount / 100 // R$ 49,90
 
       if (!addressFound) return basePrice
 
       // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
       if (shippingMethod === "express") {
-        return basePrice + 10.52 // R$ 39,90 + R$ 10,52 = R$ 50,42
+        return basePrice + 10.52 // R$ 49,90 + R$ 10,52 = R$ 60,42
       }
-      return basePrice // R$ 39,90 (frete grátis)
+      return basePrice // R$ 49,90 (frete grátis)
     }
 
-    // Lógica para produtos genéricos (NÃO personalizados)
+    // Lógica para produtos genéricos (NÃO personalizados) - APENAS FRETE EXPRESSO
     if (!addressFound) return 0
-    return shippingMethod === "express" ? 29.39 : 18.87
+    return 29.39 // Apenas frete expresso disponível
   }
 
   // Função para salvar cookies para GTM
@@ -412,14 +417,14 @@ function CheckoutForm() {
 
   // Função para disparar eventos de add_payment_info
   const handleAddressFound = () => {
-    const value = 18.87 // Valor real do produto
+    const value = 29.39 // Valor do frete expresso
     const items = [
       {
         item_id: "tag-petloo",
         item_name: "Tag rastreamento Petloo + App",
         category: "Pet Tracking",
         quantity: 1,
-        price: 18.87,
+        price: 29.39,
       },
     ]
 
@@ -561,7 +566,7 @@ function CheckoutForm() {
       console.log("=== DADOS DO CHECKOUT ===")
       console.log("Cliente:", { name, email, phone: phone?.replace(/\D/g, "") })
       console.log("Método de pagamento:", paymentMethod)
-      console.log("Produto: Tag rastreamento Petloo + App - R$ 18,87")
+      console.log("Produto: Tag rastreamento Petloo + App - R$ 29,39")
 
       if (!email || !name || !phone || !cpf || !addressFound || !number) {
         setCheckoutMessage({ type: "error", text: "Por favor, preencha todos os campos obrigatórios." })
@@ -570,9 +575,9 @@ function CheckoutForm() {
 
       const personalizedProductData = sessionStorage.getItem("personalizedProduct")
       let productInfo = {
-        amount: shippingMethod === "express" ? 2939 : 1887,
+        amount: 2939, // Apenas frete expresso
         name: "Tag rastreamento Petloo + App",
-        sku: shippingMethod === "express" ? "TAG-APP-2939" : "TAG-APP-1887",
+        sku: "TAG-APP-2939",
         type: "Tag Genérica",
         color: "Não se aplica",
       }
@@ -580,7 +585,7 @@ function CheckoutForm() {
       if (personalizedProductData) {
         try {
           const data = JSON.parse(personalizedProductData)
-          const baseAmount = data.amount // R$ 39,90 = 3990 centavos
+          const baseAmount = data.amount // R$ 49,90 = 4990 centavos
           const expressShipping = 1052 // R$ 10,52 = 1052 centavos
 
           productInfo = {
@@ -674,7 +679,7 @@ function CheckoutForm() {
           } else {
             // Fallback para o fluxo antigo se necessário
             const orderId = result.order_id
-            const amount = result.amount || 1887
+            const amount = result.amount || 2939 // Default para frete expresso
 
             if (!orderId) {
               throw new Error("ID do pedido não foi retornado pela API")
@@ -786,7 +791,7 @@ function CheckoutForm() {
               orderId: paymentIntent.id,
               customerName: name,
               customerEmail: email,
-              amount: 1887,
+              amount: productInfo.amount, // Usar o valor real da compra em vez de valor fixo
               paymentMethod: "Cartão de Crédito",
             }
 
@@ -1125,7 +1130,7 @@ function CheckoutForm() {
               </div>
             </div>
 
-            {/* Shipping Method */}
+            {/* Shipping Method - APENAS FRETE EXPRESSO PARA PRODUTOS GENÉRICOS */}
             {addressFound && (
               <div className="mb-8">
                 <h2 className="text-lg font-semibold mb-2">Método de envio</h2>
@@ -1218,46 +1223,8 @@ function CheckoutForm() {
                     } else {
                       return (
                         <>
-                          {/* Frete Padrão para produto não personalizado */}
-                          <div
-                            className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                              shippingMethod === "standard"
-                                ? "border-orange-300 bg-orange-50/30"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                            onClick={() => setShippingMethod("standard")}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="radio"
-                                  id="standard"
-                                  name="shipping"
-                                  value="standard"
-                                  checked={shippingMethod === "standard"}
-                                  onChange={(e) => setShippingMethod(e.target.value)}
-                                  className="pointer-events-none"
-                                />
-                                <div>
-                                  <label htmlFor="standard" className="font-medium cursor-pointer">
-                                    Frete Padrão
-                                  </label>
-                                  <p className="text-sm text-gray-600">10 a 12 dias (Entrega)</p>
-                                </div>
-                              </div>
-                              <span className="font-semibold">R$ 18,87</span>
-                            </div>
-                          </div>
-
-                          {/* Frete Expresso para produto não personalizado */}
-                          <div
-                            className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                              shippingMethod === "express"
-                                ? "border-orange-300 bg-orange-50/30"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                            onClick={() => setShippingMethod("express")}
-                          >
+                          {/* APENAS Frete Expresso para produto não personalizado */}
+                          <div className="border-2 rounded-lg p-4 border-orange-300 bg-orange-50/30">
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3">
                                 <input
@@ -1265,12 +1232,12 @@ function CheckoutForm() {
                                   id="express"
                                   name="shipping"
                                   value="express"
-                                  checked={shippingMethod === "express"}
-                                  onChange={(e) => setShippingMethod(e.target.value)}
+                                  checked={true}
+                                  readOnly
                                   className="pointer-events-none"
                                 />
                                 <div>
-                                  <label htmlFor="express" className="font-medium cursor-pointer">
+                                  <label htmlFor="express" className="font-medium">
                                     Frete Expresso
                                   </label>
                                   <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
@@ -1278,6 +1245,14 @@ function CheckoutForm() {
                               </div>
                               <span className="font-semibold">R$ 29,39</span>
                             </div>
+                          </div>
+
+                          {/* Aviso sobre frete único */}
+                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                            <p className="text-blue-800 text-sm">
+                              ℹ️ <strong>Frete único:</strong> Para garantir a entrega rápida e segura da sua tag,
+                              oferecemos apenas o frete expresso.
+                            </p>
                           </div>
                         </>
                       )

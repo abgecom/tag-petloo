@@ -45,7 +45,7 @@ export default function ObrigadoPage() {
       orderId: orderId || undefined,
       customerName: customerName || undefined,
       customerEmail: customerEmail || undefined,
-      amount: amount ? Number(amount) : 1887, // Manter em centavos como padrão
+      amount: amount ? Number(amount) : 4990, // Alterado de 1887 para 4990 (R$ 49,90)
       paymentMethod: paymentMethod || "PIX",
     })
   }, []) // Empty dependency array - run only once on mount
@@ -107,7 +107,7 @@ export default function ObrigadoPage() {
                     <p className="text-sm text-gray-600">Quantidade: 1</p>
                   </div>
                 </div>
-                <span className="font-semibold text-gray-800">{formatCurrency(orderData.amount || 1887)}</span>
+                <span className="font-semibold text-gray-800">{formatCurrency(orderData.amount || 4990)}</span>
               </div>
 
               {/* Divider */}
@@ -144,7 +144,7 @@ export default function ObrigadoPage() {
               <hr className="border-gray-200" />
               <div className="flex justify-between text-lg font-bold">
                 <span className="text-gray-800">Total:</span>
-                <span className="text-green-600">{formatCurrency(orderData.amount || 1887)}</span>
+                <span className="text-green-600">{formatCurrency(orderData.amount || 4990)}</span>
               </div>
             </div>
           </div>

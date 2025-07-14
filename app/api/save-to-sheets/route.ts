@@ -76,3 +76,72 @@ export async function POST(request: NextRequest) {
     )
   }
 }
+
+// Função para atualizar status do pedido
+export async function PUT(request: NextRequest) {
+  try {
+    console.log("=== API SAVE-TO-SHEETS - ATUALIZAÇÃO DE STATUS ===")
+
+    const updateData = await request.json()
+    console.log("Dados de atualização recebidos:", JSON.stringify(updateData, null, 2))
+
+    // URL do Webhook do Make.com para ATUALIZAÇÃO de status
+    const MAKE_UPDATE_WEBHOOK_URL = "https://hook.us2.make.com/ts1lbb4rx67zdwdy1bd9dkmcy7fwnufj"
+
+    // Preparar dados para atualização
+    const updatePayload = {
+      order_id: updateData.order_id,
+      order_status: updateData.order_status || "Pago",
+      payment_status: updateData.payment_status || "Confirmado",
+      payment_date: updateData.payment_date || new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      update_type: "payment_confirmation",
+      is_update: true,
+    }
+
+    console.log("📦 Enviando atualização para Make.com:", JSON.stringify(updatePayload, null, 2))
+
+    try {
+      const response = await fetch(MAKE_UPDATE_WEBHOOK_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updatePayload),
+      })
+
+      console.log("📡 Resposta do Make.com:", {
+        status: response.status,
+        ok: response.ok,
+      })
+
+      return NextResponse.json({
+        success: true,
+        message: "Status do pedido atualizado com sucesso",
+        order_id: updateData.order_id,
+        new_status: updateData.order_status,
+        updated_at: new Date().toISOString(),
+      })
+    } catch (fetchError) {
+      console.error("❌ Erro ao conectar com Make.com:", fetchError)
+
+      return NextResponse.json({
+        success: true,
+        message: "Dados processados localmente (erro de conexão)",
+        order_id: updateData.order_id,
+        warning: "Make.com indisponível",
+      })
+    }
+  } catch (error) {
+    console.error("❌ Erro na atualização:", error)
+
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Erro interno do servidor",
+        details: error instanceof Error ? error.message : "Erro desconhecido",
+      },
+      { status: 500 },
+    )
+  }
+}

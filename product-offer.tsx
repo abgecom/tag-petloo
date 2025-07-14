@@ -39,7 +39,7 @@ export default function ProductOffer() {
       JSON.stringify({
         color,
         priceId,
-        amount: 3990,
+        amount: 4990,
         name: `Tag ${color === "orange" ? "Laranja" : "Roxa"} Personalizada + App`,
         petName: petName, // Adicionar nome do pet
       }),
@@ -50,7 +50,7 @@ export default function ProductOffer() {
       personalized: "true",
       color: color,
       priceId: priceId,
-      amount: "3990",
+      amount: "4990",
       petName: encodeURIComponent(petName), // Adicionar à URL também
     })
 
@@ -460,7 +460,8 @@ export default function ProductOffer() {
                   Como faço para ativar o seguro Petloo?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-700 pb-4">
-                  Ao cadastrar sua Tag no app Petloo, seu pet fica automaticamente protegido com nosso seguro saúde gratuito. O seguro tem uma carência de 30 dias. 
+                  Ao cadastrar sua Tag no app Petloo, seu pet fica automaticamente protegido com nosso seguro saúde
+                  gratuito. O seguro tem uma carência de 30 dias.
                 </AccordionContent>
               </AccordionItem>
 
@@ -625,6 +626,7 @@ export default function ProductOffer() {
           onClose={closePersonalizationPopup}
           onPersonalize={handlePersonalize}
           onSkipPersonalization={handleSkipPersonalization}
+          price="49.90"
         />
 
         <ColorSelectionPopup
