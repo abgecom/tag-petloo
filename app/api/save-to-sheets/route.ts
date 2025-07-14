@@ -20,6 +20,10 @@ interface OrderData {
   product_quantity: number
   product_sku: string
   pet_name: string // Adicionar este campo
+  // 💰 NOVOS CAMPOS DO PIX
+  pix_code?: string // Código PIX copia e cola
+  pix_qr_code?: string // QR Code em base64
+  pix_expiration_date?: string // Data de expiração
 }
 
 export async function POST(request: NextRequest) {
@@ -31,6 +35,14 @@ export async function POST(request: NextRequest) {
 
     console.log("=== ENVIANDO DADOS PARA MAKE.COM ===")
     console.log("Dados:", JSON.stringify(orderData, null, 2))
+
+    // 💰 LOG ESPECÍFICO PARA DADOS PIX
+    if (orderData.pix_code) {
+      console.log("💰 CÓDIGO PIX INCLUÍDO:")
+      console.log("PIX Code:", orderData.pix_code ? "✅ Presente" : "❌ Ausente")
+      console.log("PIX QR Code:", orderData.pix_qr_code ? "✅ Presente" : "❌ Ausente")
+      console.log("PIX Expiration:", orderData.pix_expiration_date || "Não informado")
+    }
 
     // Enviar dados para o Make.com
     const response = await fetch(MAKE_WEBHOOK_URL, {

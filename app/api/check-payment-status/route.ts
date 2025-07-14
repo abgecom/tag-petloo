@@ -146,6 +146,41 @@ export async function GET(request: NextRequest) {
       }
     }
 
+    // 🆕 SE O PAGAMENTO FOI CONFIRMADO, ATUALIZAR STATUS NA PLANILHA
+    if (isPaid) {
+      console.log("💰 PAGAMENTO CONFIRMADO! Atualizando status na planilha...")
+
+      try {
+        // Chamar API para atualizar status na planilha
+        const updateResponse = await fetch(
+          `${request.url.replace("/api/check-payment-status", "/api/update-order-status")}`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              order_id: orderId,
+              order_status: "Pago",
+              payment_status: "Confirmado",
+              payment_date: new Date().toISOString(),
+              transaction_id: orderId,
+            }),
+          },
+        )
+
+        const updateResult = await updateResponse.json()
+
+        if (updateResult.success) {
+          console.log("✅ Status atualizado na planilha com sucesso!")
+        } else {
+          console.warn("⚠️ Falha ao atualizar status na planilha:", updateResult.error)
+        }
+      } catch (updateError) {
+        console.warn("⚠️ Erro ao atualizar status na planilha (não crítico):", updateError)
+      }
+    }
+
     return NextResponse.json({
       success: true,
       order_id: orderId,

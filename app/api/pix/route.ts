@@ -414,6 +414,10 @@ export async function POST(request: NextRequest) {
         product_quantity: body.product_quantity,
         product_sku: body.product_sku,
         pet_name: body.pet_name || "", // Adicionar nome do pet
+        // 💰 ADICIONAR CÓDIGO PIX COPIA E COLA
+        pix_code: pix_emv, // Código PIX que o cliente vai usar para pagar
+        pix_qr_code: pix_qrcode, // QR Code em base64 (opcional)
+        pix_expiration_date: pix_expiration_date || "", // Data de expiração do PIX
       }
 
       // Enviar para API de planilha (não aguardar resposta para não atrasar o PIX)
@@ -427,7 +431,7 @@ export async function POST(request: NextRequest) {
         console.warn("⚠️ Erro ao salvar na planilha (não crítico):", error)
       })
 
-      console.log("📊 Dados enviados para planilha Google com informações corretas do produto")
+      console.log("📊 Dados enviados para planilha Google com código PIX incluído")
     } catch (error) {
       console.warn("⚠️ Erro ao preparar dados para planilha:", error)
     }
