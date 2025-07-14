@@ -303,6 +303,13 @@ function CheckoutForm() {
     const urlParams = new URLSearchParams(window.location.search)
     const isPersonalized = urlParams.get("personalized") === "true"
 
+    console.log("🔍 Verificando parâmetros da URL:", {
+      isPersonalized,
+      color: urlParams.get("color"),
+      amount: urlParams.get("amount"),
+      petName: urlParams.get("petName"),
+    })
+
     if (isPersonalized) {
       const color = urlParams.get("color")
       const priceId = urlParams.get("priceId")
@@ -310,6 +317,8 @@ function CheckoutForm() {
       const petName = urlParams.get("petName") // Obter nome do pet da URL
 
       if (color && priceId && amount) {
+        console.log("✅ Produto personalizado detectado, salvando dados...")
+
         const productData = {
           color,
           priceId,
@@ -341,6 +350,12 @@ function CheckoutForm() {
         }
       }
     } else {
+      // 🚨 PRODUTO GENÉRICO - LIMPAR DADOS ANTIGOS DO SESSIONSTORAGE
+      console.log("🧹 Produto genérico detectado, limpando sessionStorage...")
+
+      // Limpar dados de produto personalizado antigos
+      sessionStorage.removeItem("personalizedProduct")
+
       // Produto genérico - APENAS FRETE EXPRESSO
       setProductInfo({
         type: "Tag Genérica",
@@ -566,39 +581,65 @@ function CheckoutForm() {
       console.log("=== DADOS DO CHECKOUT ===")
       console.log("Cliente:", { name, email, phone: phone?.replace(/\D/g, "") })
       console.log("Método de pagamento:", paymentMethod)
-      console.log("Produto: Tag rastreamento Petloo + App - R$ 29,39")
 
       if (!email || !name || !phone || !cpf || !addressFound || !number) {
         setCheckoutMessage({ type: "error", text: "Por favor, preencha todos os campos obrigatórios." })
         return
       }
 
+      // 🚨 VERIFICAÇÃO CRÍTICA: Usar apenas dados do estado atual, não do sessionStorage
       const personalizedProductData = sessionStorage.getItem("personalizedProduct")
       let productInfo = {
-        amount: 2939, // Apenas frete expresso
+        amount: 2939, // Apenas frete expresso para produto genérico
         name: "Tag rastreamento Petloo + App",
         sku: "TAG-APP-2939",
         type: "Tag Genérica",
         color: "Não se aplica",
+        petName: "",
       }
 
+      // Só usar dados do sessionStorage se realmente for produto personalizado
       if (personalizedProductData) {
         try {
           const data = JSON.parse(personalizedProductData)
-          const baseAmount = data.amount // R$ 49,90 = 4990 centavos
-          const expressShipping = 1052 // R$ 10,52 = 1052 centavos
+          // Verificação rigorosa: só considerar personalizado se tiver TODOS os dados necessários
+          const isReallyPersonalized = !!(data.color && data.amount && data.petName && data.priceId)
 
-          productInfo = {
-            amount: shippingMethod === "express" ? baseAmount + expressShipping : baseAmount,
-            name: data.name,
-            sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
-            type: "Tag Personalizada",
-            color: data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color,
+          console.log("🔍 Verificando produto personalizado:", {
+            hasColor: !!data.color,
+            hasAmount: !!data.amount,
+            hasPetName: !!data.petName,
+            hasPriceId: !!data.priceId,
+            isReallyPersonalized,
+          })
+
+          if (isReallyPersonalized) {
+            const baseAmount = data.amount // R$ 49,90 = 4990 centavos
+            const expressShipping = 1052 // R$ 10,52 = 1052 centavos
+
+            productInfo = {
+              amount: shippingMethod === "express" ? baseAmount + expressShipping : baseAmount,
+              name: data.name,
+              sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
+              type: "Tag Personalizada",
+              color: data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color,
+              petName: data.petName || "",
+            }
+
+            console.log("✅ Produto personalizado confirmado:", productInfo)
+          } else {
+            console.log("⚠️ Dados incompletos no sessionStorage, usando produto genérico")
+            // Limpar sessionStorage com dados incompletos
+            sessionStorage.removeItem("personalizedProduct")
           }
         } catch (error) {
-          console.error("Erro ao parsear produto personalizado:", error)
+          console.error("❌ Erro ao parsear produto personalizado:", error)
+          // Limpar sessionStorage corrompido
+          sessionStorage.removeItem("personalizedProduct")
         }
       }
+
+      console.log("🎯 Produto final para checkout:", productInfo)
 
       if (paymentMethod === "pix") {
         // Processar pagamento PIX
@@ -622,8 +663,7 @@ function CheckoutForm() {
           product_color: productInfo.color,
           product_quantity: quantity,
           product_sku: productInfo.sku,
-          pet_name:
-            productInfo?.petName || (personalizedProductData ? JSON.parse(personalizedProductData).petName : "") || "", // Adicionar nome do pet
+          pet_name: productInfo.petName || "",
         }
 
         console.log("=== DADOS ENVIADOS PARA PIX API ===")
@@ -725,8 +765,7 @@ function CheckoutForm() {
           product_color: productInfo.color,
           product_quantity: quantity,
           product_sku: productInfo.sku,
-          pet_name:
-            productInfo?.petName || (personalizedProductData ? JSON.parse(personalizedProductData).petName : "") || "", // Adicionar nome do pet
+          pet_name: productInfo.petName || "",
         }
 
         console.log("Dados enviados para API:", checkoutData)
