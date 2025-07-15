@@ -64,7 +64,7 @@ export default function PersonalizationPopup({
           {/* Price */}
           <div className="text-center">
             <p className="text-xl font-bold text-black">
-              Tudo isso por apenas <span className="text-green-600">R$ 39,90</span> com frete grátis.
+              Tudo isso por apenas <span className="text-green-600">R$ 49,90</span> com frete grátis.
             </p>
           </div>
 
