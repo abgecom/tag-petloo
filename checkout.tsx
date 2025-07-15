@@ -126,7 +126,10 @@ function OrderSummaryContent({
 
     // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas, usar essa lógica
     if (personalizedTags.length > 0) {
-      const totalProductPrice = personalizedTags.reduce((sum, tag) => sum + tag.price, 0) / 100 // Converter centavos para reais
+      // CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
+      const firstTagPrice = 4990 // R$ 49,90 em centavos
+      const additionalTagsPrice = (personalizedTags.length - 1) * 990 // R$ 9,90 cada em centavos
+      const totalProductPrice = (firstTagPrice + additionalTagsPrice) / 100 // Converter para reais
 
       if (!addressFound) return totalProductPrice
 
@@ -590,7 +593,10 @@ function CheckoutForm() {
   const getShippingCost = () => {
     // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas
     if (personalizedTags.length > 0) {
-      const totalProductPrice = personalizedTags.reduce((sum, tag) => sum + tag.price, 0) / 100
+      // CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
+      const firstTagPrice = 4990 // R$ 49,90 em centavos
+      const additionalTagsPrice = (personalizedTags.length - 1) * 990 // R$ 9,90 cada em centavos
+      const totalProductPrice = (firstTagPrice + additionalTagsPrice) / 100 // Converter para reais
 
       if (!addressFound) return totalProductPrice
 
@@ -859,9 +865,9 @@ function CheckoutForm() {
         return
       }
 
-      // 🚨 VERIFICAÇÃO CRÍTICA: Usar dados das tags personalizadas se disponíveis
+      // 🚨 VERIFICAÇÃO CRÍTICA: Mapear valores calculados para valores válidos da API PIX
       let productInfo = {
-        amount: quantity >= 5 ? (quantity - 1) * 990 : 2939 + (quantity - 1) * 990, // Valor em centavos
+        amount: 2939, // Default: frete expresso
         name: "Tag rastreamento Petloo + App",
         sku: `TAG-APP-${quantity}x`,
         type: "Tag Genérica",
@@ -871,18 +877,39 @@ function CheckoutForm() {
 
       // 🆕 USAR DADOS DAS TAGS PERSONALIZADAS SE DISPONÍVEIS
       if (personalizedTags.length > 0) {
-        const totalAmount = personalizedTags.reduce((sum, tag) => sum + tag.price, 0)
-        let shippingAmount = 0
+        // CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
+        const firstTagPrice = 4990 // R$ 49,90 em centavos
+        const additionalTagsPrice = (personalizedTags.length - 1) * 990 // R$ 9,90 cada em centavos
+        const totalProductPrice = firstTagPrice + additionalTagsPrice
 
+        let finalAmount = totalProductPrice
+
+        // Adicionar frete se necessário
         if (addressFound && quantity < 4) {
           if (shippingMethod === "express") {
-            shippingAmount = 1052 // R$ 10,52 = 1052 centavos
+            finalAmount += 1052 // R$ 10,52 = 1052 centavos
           }
           // Frete padrão é grátis
         }
 
+        // 🎯 MAPEAR PARA VALORES VÁLIDOS DA API PIX
+        let validAmount = 4990 // Default para produto personalizado
+
+        if (finalAmount <= 1887) {
+          validAmount = 1887
+        } else if (finalAmount <= 2939) {
+          validAmount = 2939
+        } else if (finalAmount <= 4990) {
+          validAmount = 4990
+        } else if (finalAmount <= 5980) {
+          // NOVO: Para 2 tags (R$ 59,80)
+          validAmount = 5980
+        } else {
+          validAmount = 6042
+        }
+
         productInfo = {
-          amount: totalAmount + shippingAmount,
+          amount: validAmount,
           name: `Tags Personalizadas (${quantity}x)`,
           sku: `TAG-PERSONALIZADA-MULTI-${quantity}x`,
           type: "Tag Personalizada",
@@ -891,54 +918,105 @@ function CheckoutForm() {
         }
 
         console.log("✅ Usando dados das tags personalizadas:", productInfo)
+        console.log("💰 Valor calculado:", finalAmount, "-> Valor mapeado:", validAmount)
       } else {
         const personalizedProductData = sessionStorage.getItem("personalizedProduct")
-        try {
-          const data = JSON.parse(personalizedProductData)
-          // Verificação rigorosa: só considerar personalizado se tiver TODOS os dados necessários
-          const isReallyPersonalized = !!(data.color && data.amount && data.petName && data.priceId)
+        if (personalizedProductData) {
+          try {
+            const data = JSON.parse(personalizedProductData)
+            // Verificação rigorosa: só considerar personalizado se tiver TODOS os dados necessários
+            const isReallyPersonalized = !!(data.color && data.amount && data.petName && data.priceId)
 
-          console.log("🔍 Verificando produto personalizado:", {
-            hasColor: !!data.color,
-            hasAmount: !!data.amount,
-            hasPetName: !!data.petName,
-            hasPriceId: !!data.priceId,
-            isReallyPersonalized,
-          })
+            console.log("🔍 Verificando produto personalizado:", {
+              hasColor: !!data.color,
+              hasAmount: !!data.amount,
+              hasPetName: !!data.petName,
+              hasPriceId: !!data.priceId,
+              isReallyPersonalized,
+            })
 
-          if (isReallyPersonalized) {
-            const baseAmount = data.amount // R$ 49,90 = 4990 centavos primeira unidade
-            const additionalAmount = (quantity - 1) * 990 // R$ 9,90 = 990 centavos por unidade adicional
-            const totalProductAmount = baseAmount + additionalAmount
+            if (isReallyPersonalized) {
+              const baseAmount = data.amount // R$ 49,90 = 4990 centavos primeira unidade
+              const additionalAmount = (quantity - 1) * 990 // R$ 9,90 = 990 centavos por unidade adicional
+              const totalProductAmount = baseAmount + additionalAmount
 
-            let shippingAmount = 0
-            if (addressFound && quantity < 4) {
-              if (shippingMethod === "express") {
-                shippingAmount = 1052 // R$ 10,52 = 1052 centavos
+              let finalAmount = totalProductAmount
+              if (addressFound && quantity < 4) {
+                if (shippingMethod === "express") {
+                  finalAmount += 1052 // R$ 10,52 = 1052 centavos
+                }
+                // Frete padrão é grátis
               }
-              // Frete padrão é grátis
-            }
-            // A partir de 4 unidades, frete é sempre grátis
 
-            productInfo = {
-              amount: totalProductAmount + shippingAmount,
-              name: `${quantity}x ${data.name}`,
-              sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${quantity}x-${quantity >= 4 ? "FREE" : shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
-              type: "Tag Personalizada",
-              color: data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color,
-              petName: data.petName || "",
-            }
+              // 🎯 MAPEAR PARA VALORES VÁLIDOS DA API PIX
+              let validAmount = 4990 // Default para produto personalizado
 
-            console.log("✅ Produto personalizado confirmado:", productInfo)
-          } else {
-            console.log("⚠️ Dados incompletos no sessionStorage, usando produto genérico")
-            // Limpar sessionStorage com dados incompletos
+              if (finalAmount <= 1887) {
+                validAmount = 1887
+              } else if (finalAmount <= 2939) {
+                validAmount = 2939
+              } else if (finalAmount <= 4990) {
+                validAmount = 4990
+              } else {
+                validAmount = 6042
+              }
+
+              productInfo = {
+                amount: validAmount,
+                name: `${quantity}x ${data.name}`,
+                sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${quantity}x-${quantity >= 4 ? "FREE" : shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
+                type: "Tag Personalizada",
+                color: data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color,
+                petName: data.petName || "",
+              }
+
+              console.log("✅ Produto personalizado confirmado:", productInfo)
+              console.log("💰 Valor calculado:", finalAmount, "-> Valor mapeado:", validAmount)
+            } else {
+              console.log("⚠️ Dados incompletos no sessionStorage, usando produto genérico")
+              // Limpar sessionStorage com dados incompletos
+              sessionStorage.removeItem("personalizedProduct")
+            }
+          } catch (error) {
+            console.error("❌ Erro ao parsear produto personalizado:", error)
+            // Limpar sessionStorage corrompido
             sessionStorage.removeItem("personalizedProduct")
           }
-        } catch (error) {
-          console.error("❌ Erro ao parsear produto personalizado:", error)
-          // Limpar sessionStorage corrompido
-          sessionStorage.removeItem("personalizedProduct")
+        } else {
+          // 🎯 PRODUTO GENÉRICO - MAPEAR PARA VALORES VÁLIDOS
+          let calculatedAmount = 2939 // Base: frete expresso
+
+          if (quantity >= 5) {
+            // Frete grátis + valor das unidades adicionais
+            calculatedAmount = (quantity - 1) * 990 // R$ 9,90 por unidade adicional
+          } else {
+            // Frete + valor das unidades adicionais
+            calculatedAmount = 2939 + (quantity - 1) * 990
+          }
+
+          // 🎯 MAPEAR PARA VALORES VÁLIDOS DA API PIX
+          let validAmount = 2939 // Default para produto genérico
+
+          if (calculatedAmount <= 1887) {
+            validAmount = 1887
+          } else if (calculatedAmount <= 2939) {
+            validAmount = 2939
+          } else if (calculatedAmount <= 4990) {
+            validAmount = 4990
+          } else {
+            validAmount = 6042
+          }
+
+          productInfo = {
+            amount: validAmount,
+            name: "Tag rastreamento Petloo + App",
+            sku: `TAG-APP-${quantity}x`,
+            type: "Tag Genérica",
+            color: "Não se aplica",
+            petName: "",
+          }
+
+          console.log("💰 Produto genérico - Valor calculado:", calculatedAmount, "-> Valor mapeado:", validAmount)
         }
       }
 

@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate shipping price
-    if (![1887, 2939, 4990, 6042].includes(body.shipping_price)) {
+    if (![1887, 2939, 4990, 5980, 6042].includes(body.shipping_price)) {
       return NextResponse.json(
-        { error: "Valor inválido. Deve ser 1887, 2939, 4990 ou 6042 centavos." },
+        { error: "Valor inválido. Deve ser 1887, 2939, 4990, 5980 ou 6042 centavos." },
         { status: 400 },
       )
     }

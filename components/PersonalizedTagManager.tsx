@@ -56,6 +56,7 @@ export default function PersonalizedTagManager({
 
   const handleSave = () => {
     if (selectedColor && petName.trim()) {
+      // CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
       const price = tagIndex === 0 ? 4990 : 990 // Primeira tag R$ 49,90, demais R$ 9,90
 
       onSaveTag({
