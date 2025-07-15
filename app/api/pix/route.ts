@@ -1,6 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
 
-// Define the request body interface
 interface PixRequestBody {
   name: string
   email: string
@@ -15,317 +14,223 @@ interface PixRequestBody {
     city: string
     state: string
   }
-  shipping_price: number // Value in cents: 1887 or 2990
+  shipping_price: number // Valor em centavos
   // 🎯 NOVOS CAMPOS DO PRODUTO
   product_type: string
   product_color: string
   product_quantity: number
   product_sku: string
-  pet_name?: string // Adicionar nome do pet
-}
-
-// Define Appmax Customer Creation Response
-interface AppmaxCustomerResponse {
-  success: boolean
-  data: {
-    id: number
-    firstname: string
-    lastname: string
-    email: string
-  }
-}
-
-// Define Appmax Order Response
-interface AppmaxOrderResponse {
-  success: boolean
-  data: {
-    id: string
-    customer_id: number
-    total: number
-    status: string
-  }
-}
-
-// Define Appmax PIX Payment Response
-interface AppmaxPixResponse {
-  success: boolean
-  data: {
-    pix_qrcode: string
-    pix_emv: string
-    pix_expiration_date: string
-    order_id: string
-  }
+  pet_name?: string
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse request body
     const body: PixRequestBody = await request.json()
 
-    // Validate required fields
-    const requiredFields = ["name", "email", "cpf", "phone", "address", "shipping_price"]
+    console.log("=== DADOS RECEBIDOS NA API PIX ===")
+    console.log("📦 Dados completos:", JSON.stringify(body, null, 2))
 
+    // Validar campos obrigatórios
+    const requiredFields = ["name", "email", "cpf", "phone", "shipping_price"]
     for (const field of requiredFields) {
       if (!body[field]) {
         return NextResponse.json({ error: `Campo obrigatório ausente: ${field}` }, { status: 400 })
       }
     }
 
-    // Validate address fields
-    const requiredAddressFields = ["cep", "street", "number", "district", "city", "state"]
-    for (const field of requiredAddressFields) {
-      if (!body.address[field]) {
-        return NextResponse.json({ error: `Campo de endereço obrigatório ausente: ${field}` }, { status: 400 })
-      }
-    }
+    // 🔧 CORREÇÃO: Expandir lista de valores válidos para incluir todos os cenários possíveis
+    const validAmounts = [
+      1887, // R$ 18,87 - Frete básico
+      2939, // R$ 29,39 - Frete expresso
+      3929, // R$ 39,29 - 2 tags genéricas (29,39 + 9,90)
+      3960, // R$ 39,60 - 5 tags genéricas (4 x 9,90 = frete grátis)
+      4919, // R$ 49,19 - 3 tags genéricas (29,39 + 19,80)
+      4950, // R$ 49,50 - 6 tags genéricas (5 x 9,90 = frete grátis)
+      4990, // R$ 49,90 - 1 tag personalizada
+      5909, // R$ 59,09 - 4 tags genéricas (29,39 + 29,70)
+      5940, // R$ 59,40 - 7 tags genéricas (6 x 9,90 = frete grátis)
+      5980, // R$ 59,80 - 2 tags personalizadas (49,90 + 9,90)
+      6042, // R$ 60,42 - Valor antigo (manter compatibilidade)
+      6930, // R$ 69,30 - 8 tags genéricas (7 x 9,90 = frete grátis)
+      6970, // R$ 69,70 - 3 tags personalizadas (49,90 + 9,90 + 9,90)
+      7920, // R$ 79,20 - 9 tags genéricas (8 x 9,90 = frete grátis)
+      7960, // R$ 79,60 - 4 tags personalizadas (49,90 + 9,90 + 9,90 + 9,90)
+      8910, // R$ 89,10 - 10 tags genéricas (9 x 9,90 = frete grátis)
+      8950, // R$ 89,50 - 5 tags personalizadas
+      9940, // R$ 99,40 - 6 tags personalizadas
+      10930, // R$ 109,30 - 7 tags personalizadas
+      11920, // R$ 119,20 - 8 tags personalizadas
+      12910, // R$ 129,10 - 9 tags personalizadas
+      13900, // R$ 139,00 - 10 tags personalizadas
+      // Adicionar valores com frete expresso (+1052 centavos = +R$ 10,52)
+      6042, // R$ 60,42 - 1 tag + frete expresso (4990 + 1052)
+      7032, // R$ 70,32 - 2 tags + frete expresso (5980 + 1052)
+      8022, // R$ 80,22 - 3 tags + frete expresso (6970 + 1052)
+    ]
 
-    // Validate shipping price
-    if (![1887, 2939, 4990, 5980, 6042].includes(body.shipping_price)) {
+    // Validar valor do PIX
+    if (!validAmounts.includes(body.shipping_price)) {
+      console.error("❌ Valor PIX inválido recebido:", body.shipping_price)
+      console.error("💡 Valores válidos:", validAmounts)
       return NextResponse.json(
-        { error: "Valor inválido. Deve ser 1887, 2939, 4990, 5980 ou 6042 centavos." },
+        {
+          error: `Valor inválido: R$ ${(body.shipping_price / 100).toFixed(2)}. Entre em contato com o suporte.`,
+          received_value: body.shipping_price,
+          valid_values: validAmounts,
+        },
         { status: 400 },
       )
     }
 
-    // Validate email format
+    // Validar formato do email
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(body.email)) {
       return NextResponse.json({ error: "Email inválido" }, { status: 400 })
     }
 
-    // Validate CPF format (basic validation)
-    const cleanCPF = body.cpf.replace(/\D/g, "")
-    if (cleanCPF.length !== 11) {
-      return NextResponse.json({ error: "CPF deve ter 11 dígitos" }, { status: 400 })
+    console.log("💰 Valor PIX:", body.shipping_price, "centavos =", (body.shipping_price / 100).toFixed(2), "reais")
+
+    const accessToken = process.env.APPMAX_ACCESS_TOKEN
+    if (!accessToken) {
+      console.error("❌ APPMAX_ACCESS_TOKEN não configurado")
+      return NextResponse.json({ error: "Configuração de pagamento não encontrada" }, { status: 500 })
     }
 
-    // Validate phone format
-    const cleanPhone = body.phone.replace(/\D/g, "")
-    if (cleanPhone.length !== 11) {
-      return NextResponse.json({ error: "Telefone deve ter 11 dígitos (DDD + número)" }, { status: 400 })
-    }
+    // Dividir nome em primeiro e último nome
+    const nameParts = body.name.trim().split(" ")
+    const firstName = nameParts[0] || ""
+    const lastName = nameParts.slice(1).join(" ") || ""
 
-    // Log detalhado dos dados recebidos
-    console.log("=== DADOS COMPLETOS RECEBIDOS NA API ===")
-    console.log("Nome:", body.name)
-    console.log("Email:", body.email)
-    console.log("CPF:", body.cpf)
-    console.log("Telefone:", body.phone)
-    console.log("Endereço completo:", JSON.stringify(body.address, null, 2))
-    console.log("Valor do frete:", body.shipping_price)
-    console.log("🎯 DADOS DO PRODUTO:")
-    console.log("Tipo:", body.product_type)
-    console.log("Cor:", body.product_color)
-    console.log("Quantidade:", body.product_quantity)
-    console.log("SKU:", body.product_sku)
-    console.log("Nome do Pet:", body.pet_name || "Não informado")
-
-    // Check if Appmax access token is configured
-    const appmaxToken = process.env.APPMAX_ACCESS_TOKEN
-    if (!appmaxToken) {
-      console.error("APPMAX_ACCESS_TOKEN não configurada no ambiente")
-      return NextResponse.json({ error: "Token da Appmax não configurado" }, { status: 500 })
-    }
-
-    console.log("=== INICIANDO FLUXO PIX APPMAX ===")
-    console.log("Token configurado:", appmaxToken ? "✅ Sim" : "❌ Não")
-
-    // 🚨 CORREÇÃO CRÍTICA: Calcular preço unitário correto para Appmax
-    // A Appmax multiplica automaticamente o preço pela quantidade
-    // Então precisamos enviar o preço unitário, não o total
-    const totalPriceInCents = body.shipping_price
-    const unitPriceInReais = totalPriceInCents / 100 / body.product_quantity
-
-    console.log("=== CÁLCULO DE PREÇO CORRIGIDO ===")
-    console.log("Preço total recebido (centavos):", totalPriceInCents)
-    console.log("Quantidade:", body.product_quantity)
-    console.log("Preço unitário calculado (reais):", unitPriceInReais)
-    console.log(
-      "Verificação: ",
-      unitPriceInReais,
-      "x",
-      body.product_quantity,
-      "=",
-      unitPriceInReais * body.product_quantity,
-    )
-
-    // Split name into firstname and lastname
-    const [firstname, ...rest] = body.name.split(" ")
-    const lastname = rest.join(" ") || "-"
-
-    // Step 1: Create customer first
-    const customerPayload = {
-      firstname: firstname,
-      lastname: lastname,
+    // 1. Criar cliente no Appmax
+    console.log("=== CRIANDO CLIENTE NO APPMAX ===")
+    const customerData = {
+      firstname: firstName,
+      lastname: lastName,
       email: body.email,
-      document: cleanCPF,
-      telephone: cleanPhone,
+      document: body.cpf.replace(/\D/g, ""),
+      zipcode: body.address.cep.replace(/\D/g, ""),
+      address: body.address.street,
+      number: body.address.number,
+      neighborhood: body.address.district,
+      city: body.address.city,
+      state: body.address.state,
+      telephone: body.phone.replace(/\D/g, ""),
     }
 
-    console.log("=== STEP 1: CRIANDO CLIENTE NA APPMAX ===")
-    console.log("Customer Payload:", JSON.stringify(customerPayload, null, 2))
+    console.log("📤 Dados do cliente:", JSON.stringify(customerData, null, 2))
 
     const customerResponse = await fetch("https://admin.appmax.com.br/api/v3/customer", {
       method: "POST",
       headers: {
-        "access-token": appmaxToken,
         "Content-Type": "application/json",
+        "access-token": accessToken,
       },
-      body: JSON.stringify(customerPayload),
+      body: JSON.stringify(customerData),
     })
-
-    const customerData: AppmaxCustomerResponse = await customerResponse.json()
-
-    console.log("=== RESPOSTA CRIAÇÃO CLIENTE ===")
-    console.log("Status:", customerResponse.status)
-    console.log("Customer Data:", JSON.stringify(customerData, null, 2))
 
     if (!customerResponse.ok) {
-      console.error("=== ERRO NA CRIAÇÃO DO CLIENTE ===")
-      console.error("Status Code:", customerResponse.status)
-      console.error("Response Body:", customerData)
-
-      return NextResponse.json(
-        {
-          error: "Erro ao criar cliente",
-          details: customerData.message || customerData.errors || "Erro desconhecido da Appmax",
-          status_code: customerResponse.status,
-          appmax_error: customerData,
-        },
-        { status: 500 },
-      )
+      const errorText = await customerResponse.text()
+      console.error("❌ Erro ao criar cliente:", errorText)
+      throw new Error(`Erro ao criar cliente: ${customerResponse.status} - ${errorText}`)
     }
 
-    // Extract customer ID from the correct path
-    const customerId = customerData.data?.id
-    if (!customerId) {
-      console.error("Customer ID não encontrado na resposta:", customerData)
-      return NextResponse.json(
-        {
-          error: "Erro ao obter ID do cliente",
-        },
-        { status: 500 },
-      )
+    const customerResult = await customerResponse.json()
+    console.log("✅ Cliente criado:", JSON.stringify(customerResult, null, 2))
+
+    if (!customerResult.success || !customerResult.data?.id) {
+      throw new Error("Falha ao criar cliente no Appmax")
     }
 
-    console.log("✅ Cliente criado com sucesso! ID:", customerId)
+    const customerId = customerResult.data.id
 
-    // Step 1.5: Update customer with address
-    console.log("=== STEP 1.5: ATUALIZANDO CLIENTE COM ENDEREÇO ===")
+    // 🔧 CORREÇÃO CRÍTICA: Appmax espera preço em REAIS, não centavos
+    const totalAmount = body.shipping_price // Valor total em centavos
+    const quantity = body.product_quantity || 1
 
-    const customerUpdatePayload = {
-      firstname: firstname,
-      lastname: lastname,
-      email: body.email,
-      document: cleanCPF,
-      telephone: cleanPhone,
-      postcode: body.address.cep.replace(/\D/g, ""),
-      address_street: body.address.street,
-      address_street_number: body.address.number,
-      address_street_complement: body.address.complement || "",
-      address_street_district: body.address.district,
-      address_city: body.address.city,
-      address_state: body.address.state,
-    }
+    // 🚨 CORREÇÃO DECIMAL: Converter centavos para reais com 2 casas decimais
+    const totalAmountInReais = totalAmount / 100 // Converter centavos para reais
+    const unitPriceInReais = Number((totalAmountInReais / quantity).toFixed(2)) // Preço unitário em reais
 
-    console.log("Customer Update Payload:", JSON.stringify(customerUpdatePayload, null, 2))
+    console.log("🔧 CORREÇÃO DECIMAL:")
+    console.log("Total em centavos:", totalAmount)
+    console.log("Total em reais:", totalAmountInReais)
+    console.log("Quantidade:", quantity)
+    console.log("Preço unitário em reais:", unitPriceInReais)
 
-    const customerUpdateResponse = await fetch(`https://admin.appmax.com.br/api/v3/customer/${customerId}`, {
-      method: "PUT",
-      headers: {
-        "access-token": appmaxToken,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(customerUpdatePayload),
-    })
-
-    const customerUpdateData = await customerUpdateResponse.json()
-
-    console.log("=== RESPOSTA ATUALIZAÇÃO CLIENTE ===")
-    console.log("Status:", customerUpdateResponse.status)
-    console.log("Customer Update Data:", JSON.stringify(customerUpdateData, null, 2))
-
-    if (!customerUpdateResponse.ok) {
-      console.warn("⚠️ Falha ao atualizar endereço do cliente, mas continuando...")
-      console.warn("Status Code:", customerUpdateResponse.status)
-      console.warn("Response Body:", customerUpdateData)
-    } else {
-      console.log("✅ Endereço do cliente atualizado com sucesso!")
-    }
-
-    // Step 2: Create order
-    const orderPayload = {
-      customer_id: customerId.toString(),
+    // 2. Criar pedido no Appmax
+    console.log("=== CRIANDO PEDIDO NO APPMAX ===")
+    let orderData: any
+    orderData = {
+      customer_id: customerId,
       products: [
         {
-          name: `${body.product_type} - ${body.product_color}`,
-          sku: body.product_sku,
-          qty: body.product_quantity,
-          price: unitPriceInReais, // 🚨 USAR PREÇO UNITÁRIO, NÃO TOTAL
+          name: body.product_type || "Tag rastreamento Petloo + App",
+          sku: body.product_sku || "TAG-APP",
+          qty: quantity,
+          price: unitPriceInReais, // 🔧 USAR PREÇO EM REAIS COM DECIMAIS
         },
       ],
     }
 
-    console.log("=== STEP 2: CRIANDO PEDIDO NA APPMAX ===")
-    console.log("Order Payload:", JSON.stringify(orderPayload, null, 2))
+    console.log("📤 Dados do pedido:", JSON.stringify(orderData, null, 2))
 
     const orderResponse = await fetch("https://admin.appmax.com.br/api/v3/order", {
       method: "POST",
       headers: {
-        "access-token": appmaxToken,
         "Content-Type": "application/json",
+        "access-token": accessToken,
       },
-      body: JSON.stringify(orderPayload),
+      body: JSON.stringify(orderData),
     })
 
-    const orderData: AppmaxOrderResponse = await orderResponse.json()
-
-    console.log("=== RESPOSTA CRIAÇÃO PEDIDO ===")
-    console.log("Status:", orderResponse.status)
-    console.log("Order Data:", JSON.stringify(orderData, null, 2))
-
     if (!orderResponse.ok) {
-      console.error("=== ERRO NA CRIAÇÃO DO PEDIDO ===")
-      console.error("Status Code:", orderResponse.status)
-      console.error("Response Body:", orderData)
+      const errorText = await orderResponse.text()
+      console.error("❌ Erro ao criar pedido:", errorText)
+      throw new Error(`Erro ao criar pedido: ${orderResponse.status} - ${errorText}`)
+    }
 
-      return NextResponse.json(
-        {
-          error: "Erro ao criar pedido",
-          details: orderData.message || orderData.errors || "Erro desconhecido da Appmax",
-          status_code: orderResponse.status,
-          appmax_error: orderData,
-        },
-        { status: 500 },
+    const orderResult = await orderResponse.json()
+    console.log("✅ Pedido criado:", JSON.stringify(orderResult, null, 2))
+
+    if (!orderResult.success || !orderResult.data?.id) {
+      throw new Error("Falha ao criar pedido no Appmax")
+    }
+
+    const orderId = orderResult.data.id
+    const orderTotal = orderResult.data.total
+
+    // 🔧 VERIFICAR SE O TOTAL DO PEDIDO ESTÁ CORRETO
+    // Appmax retorna o total em REAIS, não centavos
+    const orderTotalInCentavos = Math.round(orderTotal * 100) // Converter reais para centavos
+
+    console.log("🔍 VERIFICAÇÃO DO TOTAL:")
+    console.log("Total esperado:", totalAmount, "centavos (R$", (totalAmount / 100).toFixed(2), ")")
+    console.log("Total do pedido Appmax:", orderTotal, "reais (", orderTotalInCentavos, "centavos)")
+    console.log("Diferença:", Math.abs(orderTotalInCentavos - totalAmount), "centavos")
+
+    // Se a diferença for muito grande, cancelar
+    if (Math.abs(orderTotalInCentavos - totalAmount) > 100) {
+      // Tolerância de R$ 1,00
+      console.error("❌ TOTAL DO PEDIDO INCORRETO!")
+      console.error("Esperado:", totalAmount, "centavos")
+      console.error("Recebido:", orderTotalInCentavos, "centavos")
+      throw new Error(
+        `Valor do pedido incorreto. Esperado: R$ ${(totalAmount / 100).toFixed(2)}, Calculado: R$ ${orderTotal.toFixed(2)}`,
       )
     }
 
-    // Extract order ID from response
-    const orderId = orderData.data?.id
-    if (!orderId) {
-      console.error("Order ID não encontrado na resposta:", orderData)
-      return NextResponse.json(
-        {
-          error: "Erro ao obter ID do pedido",
-          details: "ID do pedido não foi retornado pela Appmax",
-        },
-        { status: 500 },
-      )
-    }
-
-    console.log("✅ Pedido criado com sucesso! ID:", orderId)
-
-    // Step 3: Generate PIX payment
-    const pixPayload = {
+    // 3. Gerar pagamento PIX
+    console.log("=== GERANDO PAGAMENTO PIX ===")
+    const pixPaymentData = {
       cart: {
         order_id: orderId,
-        products: [], // Array vazio conforme especificado
+        products: [],
       },
       customer: {
-        firstname: firstname,
-        lastname: lastname,
+        firstname: firstName,
+        lastname: lastName,
         email: body.email,
-        telephone: cleanPhone,
+        telephone: body.phone.replace(/\D/g, ""),
         postcode: body.address.cep.replace(/\D/g, ""),
         address_street: body.address.street,
         address_street_number: body.address.number,
@@ -335,139 +240,124 @@ export async function POST(request: NextRequest) {
       },
       payment: {
         pix: {
-          document_number: cleanCPF,
+          document_number: body.cpf.replace(/\D/g, ""),
         },
       },
     }
 
-    console.log("=== STEP 3: GERANDO PAGAMENTO PIX ===")
-    console.log("PIX Payload:", JSON.stringify(pixPayload, null, 2))
+    console.log("📤 Dados do pagamento PIX:", JSON.stringify(pixPaymentData, null, 2))
 
     const pixResponse = await fetch("https://admin.appmax.com.br/api/v3/payment/pix", {
       method: "POST",
       headers: {
-        "access-token": appmaxToken,
         "Content-Type": "application/json",
+        "access-token": accessToken,
       },
-      body: JSON.stringify(pixPayload),
+      body: JSON.stringify(pixPaymentData),
     })
 
-    const pixData: AppmaxPixResponse = await pixResponse.json()
-
-    console.log("=== RESPOSTA GERAÇÃO PIX ===")
-    console.log("Status:", pixResponse.status)
-    console.log("PIX Data:", JSON.stringify(pixData, null, 2))
-
     if (!pixResponse.ok) {
-      console.error("=== ERRO NA GERAÇÃO DO PIX ===")
-      console.error("Status Code:", pixResponse.status)
-      console.error("Response Body:", pixData)
-
-      return NextResponse.json(
-        {
-          error: "Erro ao gerar pagamento via PIX. Tente novamente.",
-          details: pixData.message || pixData.errors || "Erro desconhecido da Appmax",
-          status_code: pixResponse.status,
-          appmax_error: pixData,
-        },
-        { status: 500 },
-      )
+      const errorText = await pixResponse.text()
+      console.error("❌ Erro ao gerar PIX:", errorText)
+      throw new Error(`Erro ao gerar PIX: ${pixResponse.status} - ${errorText}`)
     }
 
-    // Verificar se os dados PIX foram retornados
-    if (!pixData.success || !pixData.data) {
-      console.error("=== DADOS PIX NÃO RETORNADOS ===")
-      console.error("PIX Response:", pixData)
+    const pixResult = await pixResponse.json()
+    console.log("✅ PIX gerado:", JSON.stringify(pixResult, null, 2))
 
-      return NextResponse.json(
-        {
-          error: "Erro ao gerar pagamento via PIX. Tente novamente.",
-          details: "Dados do PIX não foram retornados pela Appmax",
-        },
-        { status: 500 },
-      )
+    // 🔧 CORREÇÃO: Appmax retorna success como string "ATIVA" em vez de boolean true
+    const isPixSuccess = pixResult.success === "ATIVA" || pixResult.success === true
+    const hasPixData = pixResult.data && (pixResult.data.pix_qrcode || pixResult.data.pix_emv)
+
+    if (!isPixSuccess || !hasPixData) {
+      console.error("❌ Dados PIX inválidos:", {
+        success: pixResult.success,
+        hasData: !!pixResult.data,
+        hasQrCode: !!pixResult.data?.pix_qrcode,
+        hasEmv: !!pixResult.data?.pix_emv,
+      })
+      throw new Error("Falha ao gerar PIX no Appmax - dados incompletos")
     }
 
-    const { pix_qrcode, pix_emv, pix_expiration_date } = pixData.data
+    // Extrair dados PIX da resposta
+    const pixData = pixResult.data
+    const qrCodeBase64 = pixData.pix_qrcode
+    const pixEmv = pixData.pix_emv
+    const expirationDate = pixData.pix_expiration_date
 
-    if (!pix_qrcode || !pix_emv) {
-      console.error("=== DADOS PIX INCOMPLETOS ===")
-      console.error("QR Code:", pix_qrcode ? "✅ Presente" : "❌ Ausente")
-      console.error("EMV:", pix_emv ? "✅ Presente" : "❌ Ausente")
-
-      return NextResponse.json(
-        {
-          error: "Erro ao gerar pagamento via PIX. Tente novamente.",
-          details: "Dados do PIX estão incompletos",
-        },
-        { status: 500 },
-      )
-    }
-
-    console.log("✅ PIX gerado com sucesso!")
-    console.log("QR Code:", pix_qrcode ? "✅ Presente" : "❌ Ausente")
-    console.log("EMV (Copia e Cola):", pix_emv ? "✅ Presente" : "❌ Ausente")
-    console.log("Expiração:", pix_expiration_date || "Não informado")
+    console.log("🎯 Dados PIX extraídos:", {
+      hasQrCode: !!qrCodeBase64,
+      hasEmv: !!pixEmv,
+      expirationDate: expirationDate,
+    })
 
     // Salvar dados na planilha Google via Make.com
     try {
       const orderDataForSheets = {
-        order_id: orderId.toString(),
+        order_id: orderId,
+        customer_id: customerId,
         customer_name: body.name,
         customer_email: body.email,
         customer_phone: body.phone,
-        customer_cpf: cleanCPF,
+        customer_cpf: body.cpf,
         customer_address: `${body.address.street}, ${body.address.number}${body.address.complement ? `, ${body.address.complement}` : ""}, ${body.address.district}`,
         customer_cep: body.address.cep,
         customer_city: body.address.city,
         customer_state: body.address.state,
-        order_amount: totalPriceInCents / 100, // 🚨 USAR VALOR TOTAL CORRETO EM REAIS
+        order_amount: body.shipping_price / 100, // Converter centavos para reais
         payment_method: "PIX",
-        order_status: "Pendente",
+        order_status: "Aguardando Pagamento",
         // 🎯 USAR DADOS REAIS DO PRODUTO
         product_type: body.product_type,
         product_color: body.product_color,
         product_quantity: body.product_quantity,
         product_sku: body.product_sku,
-        pet_name: body.pet_name || "", // Adicionar nome do pet
-        // 💰 ADICIONAR CÓDIGO PIX COPIA E COLA
-        pix_code: pix_emv, // Código PIX que o cliente vai usar para pagar
-        pix_qr_code: pix_qrcode, // QR Code em base64 (opcional)
-        pix_expiration_date: pix_expiration_date || "", // Data de expiração do PIX
+        pet_name: body.pet_name || "",
+        // 💰 DADOS PIX
+        pix_code: pixEmv,
+        pix_qr_code: qrCodeBase64,
+        pix_expiration_date: expirationDate,
       }
 
-      // Enviar para API de planilha (não aguardar resposta para não atrasar o PIX)
-      fetch(`${request.url.replace("/api/pix", "/api/save-to-sheets")}`, {
+      console.log("=== ENVIANDO DADOS PARA MAKE.COM ===")
+      console.log("Dados:", JSON.stringify(orderDataForSheets, null, 2))
+
+      // Enviar para Make.com (não aguardar resposta para não bloquear)
+      fetch("https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(orderDataForSheets),
-      }).catch((error) => {
-        console.warn("⚠️ Erro ao salvar na planilha (não crítico):", error)
       })
-
-      console.log("📊 Dados enviados para planilha Google com código PIX incluído")
+        .then((response) => {
+          console.log("📡 Resposta do Make.com:", response.status)
+          return response.text()
+        })
+        .then((data) => {
+          console.log("✅ Dados enviados para Make.com com sucesso!")
+        })
+        .catch((error) => {
+          console.warn("⚠️ Erro ao enviar para Make.com (não crítico):", error)
+        })
     } catch (error) {
       console.warn("⚠️ Erro ao preparar dados para planilha:", error)
     }
 
-    // Return success response with PIX data
+    // Retornar dados PIX para o frontend
     return NextResponse.json({
       success: true,
       order_id: orderId,
       customer_id: customerId,
-      amount: body.shipping_price, // Valor dinâmico em centavos
-      qrcode: pix_qrcode,
-      copiacola: pix_emv,
-      expiration_date: pix_expiration_date,
-      message: "PIX gerado com sucesso. Redirecionando para pagamento.",
+      amount: body.shipping_price, // Manter o valor original solicitado
+      qrcode: qrCodeBase64,
+      copiacola: pixEmv,
+      expiration_date: expirationDate || new Date(Date.now() + 30 * 60 * 1000).toISOString(),
+      message: "PIX gerado com sucesso",
     })
   } catch (error) {
-    console.error("=== ERRO GERAL NO PROCESSAMENTO PIX ===")
-    console.error("Error:", error)
+    console.error("❌ Erro na API PIX:", error)
 
-    // Handle network or parsing errors
     return NextResponse.json(
       {
         error: "Erro interno do servidor",

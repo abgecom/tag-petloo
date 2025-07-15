@@ -109,6 +109,22 @@ function OrderSummaryContent({
 }) {
   // Calculate shipping cost based on shipping method and quantity
   const getShippingCost = () => {
+    // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas
+    if (personalizedTags.length > 0) {
+      // CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
+      const firstTagPrice = 49.9 // R$ 49,90 em reais
+      const additionalTagsPrice = (personalizedTags.length - 1) * 9.9 // R$ 9,90 cada em reais
+      const totalProductPrice = firstTagPrice + additionalTagsPrice
+
+      if (!addressFound) return totalProductPrice
+
+      // Para produto personalizado: sempre oferecer ambas opções de frete
+      if (shippingMethod === "express") {
+        return totalProductPrice + 10.52
+      }
+      return totalProductPrice // Frete grátis padrão
+    }
+
     // Verificar se é produto personalizado de forma mais rigorosa
     const personalizedData = sessionStorage.getItem("personalizedProduct")
     let isPersonalized = false
@@ -122,22 +138,6 @@ function OrderSummaryContent({
         console.error("Erro ao parsear produto personalizado:", error)
         isPersonalized = false
       }
-    }
-
-    // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas, usar essa lógica
-    if (personalizedTags.length > 0) {
-      // CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
-      const firstTagPrice = 4990 // R$ 49,90 em centavos
-      const additionalTagsPrice = (personalizedTags.length - 1) * 990 // R$ 9,90 cada em centavos
-      const totalProductPrice = (firstTagPrice + additionalTagsPrice) / 100 // Converter para reais
-
-      if (!addressFound) return totalProductPrice
-
-      // Para produto personalizado: sempre oferecer ambas opções de frete
-      if (shippingMethod === "express") {
-        return totalProductPrice + 10.52
-      }
-      return totalProductPrice // Frete grátis padrão
     }
 
     if (isPersonalized) {
@@ -160,16 +160,19 @@ function OrderSummaryContent({
       return totalProductPrice // Frete grátis padrão
     }
 
-    // 🆕 NOVA LÓGICA PARA PRODUTOS GENÉRICOS
+    // 🔧 CORREÇÃO: Lógica para produtos genéricos (NÃO personalizados)
     if (!addressFound) return 0
 
-    // Para produtos genéricos:
-    // - Produto: R$ 0 primeira unidade, R$ 9,90 por unidade adicional
-    // - Frete: R$ 29,39 fixo (não muda com quantidade)
-    const productPrice = (quantity - 1) * 9.9 // Primeira unidade grátis, demais R$ 9,90
-    const shippingPrice = quantity >= 5 ? 0 : 29.39 // Frete grátis a partir de 5 unidades
+    // Para produtos genéricos com 5+ unidades: frete grátis
+    if (quantity >= 5) {
+      // Primeira unidade grátis + unidades adicionais R$ 9,90 cada
+      return (quantity - 1) * 9.9 // Sem frete
+    }
 
-    return productPrice + shippingPrice
+    // Para produtos genéricos com menos de 5 unidades: frete R$ 29,39
+    const baseShipping = 29.39
+    const additionalPrice = (quantity - 1) * 9.9
+    return baseShipping + additionalPrice
   }
 
   const shippingCost = getShippingCost()
@@ -434,6 +437,7 @@ function CheckoutForm() {
   const [personalizedTags, setPersonalizedTags] = useState<PersonalizedTag[]>([])
   const [showTagManager, setShowTagManager] = useState(false)
   const [editingTagIndex, setEditingTagIndex] = useState<number>(-1)
+  const [isCepLoading, setIsCepLoading] = useState(false)
 
   // Initialize loading state
   useEffect(() => {
@@ -589,14 +593,14 @@ function CheckoutForm() {
     setShowTagManager(true)
   }
 
-  // Mover esta função para dentro do CheckoutForm, antes do return
+  // 🔧 FUNÇÃO CORRIGIDA PARA CALCULAR VALOR TOTAL EM REAIS
   const getShippingCost = () => {
     // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas
     if (personalizedTags.length > 0) {
       // CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
-      const firstTagPrice = 4990 // R$ 49,90 em centavos
-      const additionalTagsPrice = (personalizedTags.length - 1) * 990 // R$ 9,90 cada em centavos
-      const totalProductPrice = (firstTagPrice + additionalTagsPrice) / 100 // Converter para reais
+      const firstTagPrice = 49.9 // R$ 49,90 em reais
+      const additionalTagsPrice = (personalizedTags.length - 1) * 9.9 // R$ 9,90 cada em reais
+      const totalProductPrice = firstTagPrice + additionalTagsPrice
 
       if (!addressFound) return totalProductPrice
 
@@ -642,20 +646,19 @@ function CheckoutForm() {
       return totalProductPrice // Frete grátis padrão
     }
 
-    // Lógica para produtos genéricos (NÃO personalizados)
+    // 🔧 CORREÇÃO: Lógica para produtos genéricos (NÃO personalizados)
     if (!addressFound) return 0
 
-    // Para produtos genéricos: R$ 29,39 primeira unidade + R$ 9,90 por adicional
-    const baseShipping = 29.39
-    const additionalPrice = (quantity - 1) * 9.9
-    const totalPrice = baseShipping + additionalPrice
-
-    // Frete grátis a partir de 4 unidades para produtos genéricos também
+    // Para produtos genéricos com 5+ unidades: frete grátis
     if (quantity >= 5) {
-      return quantity * 9.9 // Apenas o valor das unidades adicionais, sem frete
+      // Primeira unidade grátis + unidades adicionais R$ 9,90 cada
+      return (quantity - 1) * 9.9 // Sem frete
     }
 
-    return totalPrice
+    // Para produtos genéricos com menos de 5 unidades: frete R$ 29,39
+    const baseShipping = 29.39
+    const additionalPrice = (quantity - 1) * 9.9
+    return baseShipping + additionalPrice
   }
 
   // Função para salvar cookies para GTM
@@ -865,7 +868,7 @@ function CheckoutForm() {
         return
       }
 
-      // 🚨 VERIFICAÇÃO CRÍTICA: Mapear valores calculados para valores válidos da API PIX
+      // 🔧 CORREÇÃO CRÍTICA: Calcular valor correto em centavos
       let productInfo = {
         amount: 2939, // Default: frete expresso
         name: "Tag rastreamento Petloo + App",
@@ -885,40 +888,25 @@ function CheckoutForm() {
         let finalAmount = totalProductPrice
 
         // Adicionar frete se necessário
-        if (addressFound && quantity < 4) {
+        if (addressFound && personalizedTags.length < 4) {
           if (shippingMethod === "express") {
             finalAmount += 1052 // R$ 10,52 = 1052 centavos
           }
           // Frete padrão é grátis
         }
 
-        // 🎯 MAPEAR PARA VALORES VÁLIDOS DA API PIX
-        let validAmount = 4990 // Default para produto personalizado
-
-        if (finalAmount <= 1887) {
-          validAmount = 1887
-        } else if (finalAmount <= 2939) {
-          validAmount = 2939
-        } else if (finalAmount <= 4990) {
-          validAmount = 4990
-        } else if (finalAmount <= 5980) {
-          // NOVO: Para 2 tags (R$ 59,80)
-          validAmount = 5980
-        } else {
-          validAmount = 6042
-        }
-
+        // 🎯 USAR VALOR CALCULADO DIRETAMENTE (sem mapeamento incorreto)
         productInfo = {
-          amount: validAmount,
-          name: `Tags Personalizadas (${quantity}x)`,
-          sku: `TAG-PERSONALIZADA-MULTI-${quantity}x`,
+          amount: finalAmount, // Usar valor calculado diretamente
+          name: `Tags Personalizadas (${personalizedTags.length}x)`,
+          sku: `TAG-PERSONALIZADA-MULTI-${personalizedTags.length}x`,
           type: "Tag Personalizada",
           color: personalizedTags.map((tag) => tag.color).join(", "),
           petName: personalizedTags.map((tag) => tag.petName).join(", "),
         }
 
         console.log("✅ Usando dados das tags personalizadas:", productInfo)
-        console.log("💰 Valor calculado:", finalAmount, "-> Valor mapeado:", validAmount)
+        console.log("💰 Valor final em centavos:", finalAmount)
       } else {
         const personalizedProductData = sessionStorage.getItem("personalizedProduct")
         if (personalizedProductData) {
@@ -948,21 +936,8 @@ function CheckoutForm() {
                 // Frete padrão é grátis
               }
 
-              // 🎯 MAPEAR PARA VALORES VÁLIDOS DA API PIX
-              let validAmount = 4990 // Default para produto personalizado
-
-              if (finalAmount <= 1887) {
-                validAmount = 1887
-              } else if (finalAmount <= 2939) {
-                validAmount = 2939
-              } else if (finalAmount <= 4990) {
-                validAmount = 4990
-              } else {
-                validAmount = 6042
-              }
-
               productInfo = {
-                amount: validAmount,
+                amount: finalAmount, // Usar valor calculado diretamente
                 name: `${quantity}x ${data.name}`,
                 sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${quantity}x-${quantity >= 4 ? "FREE" : shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
                 type: "Tag Personalizada",
@@ -971,7 +946,7 @@ function CheckoutForm() {
               }
 
               console.log("✅ Produto personalizado confirmado:", productInfo)
-              console.log("💰 Valor calculado:", finalAmount, "-> Valor mapeado:", validAmount)
+              console.log("💰 Valor final em centavos:", finalAmount)
             } else {
               console.log("⚠️ Dados incompletos no sessionStorage, usando produto genérico")
               // Limpar sessionStorage com dados incompletos
@@ -983,7 +958,7 @@ function CheckoutForm() {
             sessionStorage.removeItem("personalizedProduct")
           }
         } else {
-          // 🎯 PRODUTO GENÉRICO - MAPEAR PARA VALORES VÁLIDOS
+          // 🎯 PRODUTO GENÉRICO - CALCULAR VALOR CORRETO
           let calculatedAmount = 2939 // Base: frete expresso
 
           if (quantity >= 5) {
@@ -994,21 +969,8 @@ function CheckoutForm() {
             calculatedAmount = 2939 + (quantity - 1) * 990
           }
 
-          // 🎯 MAPEAR PARA VALORES VÁLIDOS DA API PIX
-          let validAmount = 2939 // Default para produto genérico
-
-          if (calculatedAmount <= 1887) {
-            validAmount = 1887
-          } else if (calculatedAmount <= 2939) {
-            validAmount = 2939
-          } else if (calculatedAmount <= 4990) {
-            validAmount = 4990
-          } else {
-            validAmount = 6042
-          }
-
           productInfo = {
-            amount: validAmount,
+            amount: calculatedAmount, // Usar valor calculado diretamente
             name: "Tag rastreamento Petloo + App",
             sku: `TAG-APP-${quantity}x`,
             type: "Tag Genérica",
@@ -1016,7 +978,7 @@ function CheckoutForm() {
             petName: "",
           }
 
-          console.log("💰 Produto genérico - Valor calculado:", calculatedAmount, "-> Valor mapeado:", validAmount)
+          console.log("💰 Produto genérico - Valor final em centavos:", calculatedAmount)
         }
       }
 
@@ -1144,7 +1106,7 @@ function CheckoutForm() {
           // 🎯 ADICIONAR DADOS DO PRODUTO
           product_type: productInfo.type,
           product_color: productInfo.color,
-          product_quantity: productInfo.quantity,
+          product_quantity: quantity, // CORREÇÃO: usar quantity em vez de productInfo.quantity
           product_sku: productInfo.sku,
           pet_name: productInfo.petName || "",
         }
@@ -1464,32 +1426,63 @@ function CheckoutForm() {
                     <Input
                       id="cep"
                       placeholder="99999-999"
-                      className={`mt-1 ${addressFound ? "border-green-500 bg-green-50" : "bg-blue-50"}`}
+                      className={`mt-1 ${
+                        addressFound
+                          ? "border-green-500 bg-green-50"
+                          : isCepLoading
+                            ? "border-blue-500 bg-blue-50"
+                            : "bg-blue-50"
+                      }`}
                       value={addressData.cep}
                       onChange={(e) => {
                         const formatted = formatCEP(e.target.value)
                         setAddressData((prev) => ({ ...prev, cep: formatted }))
-                        fetchAddressByCEP(formatted).then((address) => {
-                          if (address) {
-                            setAddressData(address)
-                            setAddressFound(true)
-                            // 🎯 DISPARAR EVENTOS QUANDO ENDEREÇO FOR ENCONTRADO
-                            setTimeout(() => {
-                              handleAddressFound()
-                            }, 500) // Pequeno delay para garantir que os campos estejam preenchidos
-                          } else {
-                            setAddressFound(false)
-                          }
-                        })
+
+                        // Se o CEP tem 9 caracteres (formato completo), buscar endereço
+                        if (formatted.length === 9) {
+                          setIsCepLoading(true)
+                          setAddressFound(false)
+
+                          fetchAddressByCEP(formatted)
+                            .then((address) => {
+                              if (address) {
+                                setAddressData(address)
+                                setAddressFound(true)
+                                // 🎯 DISPARAR EVENTOS QUANDO ENDEREÇO FOR ENCONTRADO
+                                setTimeout(() => {
+                                  handleAddressFound()
+                                }, 500) // Pequeno delay para garantir que os campos estejam preenchidos
+                              } else {
+                                setAddressFound(false)
+                              }
+                              setIsCepLoading(false)
+                            })
+                            .catch(() => {
+                              setAddressFound(false)
+                              setIsCepLoading(false)
+                            })
+                        } else {
+                          setAddressFound(false)
+                          setIsCepLoading(false)
+                        }
                       }}
                     />
-                    {addressFound && (
-                      <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                        <span className="text-green-500">✅</span>
-                      </div>
-                    )}
+                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                      {isCepLoading && (
+                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
+                      )}
+                      {addressFound && !isCepLoading && <span className="text-green-500">✅</span>}
+                    </div>
                   </div>
-                  {addressFound && <p className="text-green-600 text-sm mt-1">Endereço encontrado com sucesso</p>}
+                  {isCepLoading && (
+                    <div className="text-blue-600 text-sm mt-1 flex items-center gap-2">
+                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-blue-500 border-t-transparent"></div>
+                      Validando CEP...
+                    </div>
+                  )}
+                  {addressFound && !isCepLoading && (
+                    <p className="text-green-600 text-sm mt-1">Endereço encontrado com sucesso</p>
+                  )}
                 </div>
 
                 {addressFound && (
