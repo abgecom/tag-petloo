@@ -35,8 +35,8 @@ export default function Advertorial() {
 
         {/* Author and Date */}
         <div className="mb-8">
-          <p className="text-gray-800 font-medium text-lg">Por Renan Freitas de Andrade, G7</p>
-          <p className="text-gray-600 text-sm mt-1">30/05/2025 09h17 – Atualizado há duas horas</p>
+          <p className="text-gray-800 font-medium text-lg">Por Renan Freitas de Andrade</p>
+          <p className="text-gray-600 text-sm mt-1">15/07/2025 09h17 – Atualizado há duas horas</p>
         </div>
 
         {/* Main Hero Image */}
