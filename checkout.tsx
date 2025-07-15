@@ -281,6 +281,8 @@ function OrderSummaryContent({
             >
               <Plus className="w-4 h-4" />
             </button>
+            {/* Adicionar mensagem ao lado do botão + */}
+            <span className="text-xs text-gray-500 ml-2">Clique aqui para adicionar mais uma tag</span>
           </div>
           {quantity > 1 && (
             <p className="text-xs text-gray-600 mt-1">
@@ -1064,7 +1066,7 @@ function CheckoutForm() {
           // 🎯 ADICIONAR DADOS DO PRODUTO
           product_type: productInfo.type,
           product_color: productInfo.color,
-          product_quantity: quantity,
+          product_quantity: productInfo.quantity,
           product_sku: productInfo.sku,
           pet_name: productInfo.petName || "",
         }
@@ -1288,6 +1290,13 @@ function CheckoutForm() {
                 <span className="font-medium">Resumo do pedido</span>
                 {isOrderSummaryOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
               </button>
+
+              {/* Mensagem sutil para orientar o usuário */}
+              {!isOrderSummaryOpen && (
+                <p className="text-xs text-gray-500 text-center mt-2 px-2">
+                  💡 Toque no resumo acima para alterar a quantidade ou configurar suas tags
+                </p>
+              )}
 
               {isOrderSummaryOpen && (
                 <div className="mt-4 p-4 bg-white border rounded-lg">
