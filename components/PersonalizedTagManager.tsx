@@ -1,9 +1,10 @@
 "use client"
 
-import type React from "react"
 import { useState, useEffect } from "react"
-import { X } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { X } from "lucide-react"
 
 interface PersonalizedTag {
   id: string
@@ -27,161 +28,128 @@ export default function PersonalizedTagManager({
   existingTag,
   onSaveTag,
 }: PersonalizedTagManagerProps) {
-  const [selectedColor, setSelectedColor] = useState<"orange" | "purple" | null>(existingTag?.color || null)
-  const [petName, setPetName] = useState(() => {
-    // Se existingTag existe, usar o nome dele (editando tag existente)
-    // Se não existe, começar com string vazia (nova tag)
-    return existingTag?.petName || ""
-  })
+  const [selectedColor, setSelectedColor] = useState<"orange" | "purple">("orange")
+  const [petName, setPetName] = useState("")
 
+  // Reset form when opening
   useEffect(() => {
-    if (existingTag) {
-      // Editando tag existente - preencher com dados existentes
-      setSelectedColor(existingTag.color)
-      setPetName(existingTag.petName)
-    } else {
-      // Nova tag - limpar campos
-      setSelectedColor(null)
-      setPetName("")
+    if (isOpen) {
+      if (existingTag) {
+        setSelectedColor(existingTag.color)
+        setPetName(existingTag.petName)
+      } else {
+        setSelectedColor("orange")
+        setPetName("")
+      }
     }
-  }, [existingTag, isOpen])
+  }, [isOpen, existingTag])
+
+  const handleSave = () => {
+    if (!petName.trim()) {
+      alert("Por favor, digite o nome do seu pet")
+      return
+    }
+
+    // 🚨 CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
+    const price = tagIndex === 0 ? 4990 : 990 // Primeira tag 4990 centavos, demais 990 centavos
+
+    const tag: PersonalizedTag = {
+      id: existingTag?.id || `tag-${tagIndex}`,
+      color: selectedColor,
+      petName: petName.trim(),
+      price: price,
+    }
+
+    onSaveTag(tag)
+    onClose()
+  }
 
   if (!isOpen) return null
 
-  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
-      onClose()
-    }
-  }
-
-  const handleSave = () => {
-    if (selectedColor && petName.trim()) {
-      // CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
-      const price = tagIndex === 0 ? 4990 : 990 // Primeira tag R$ 49,90, demais R$ 9,90
-
-      onSaveTag({
-        id: `tag-${tagIndex}`,
-        color: selectedColor,
-        petName: petName.trim(),
-        price: price,
-      })
-      onClose()
-    }
-  }
-
-  const isFirstTag = tagIndex === 0
-  const tagPrice = isFirstTag ? "R$ 49,90" : "R$ 9,90"
-
   return (
-    <div
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-      onClick={handleOverlayClick}
-    >
-      <div className="bg-white rounded-2xl p-6 max-w-md w-full max-h-[90vh] overflow-y-auto relative">
-        {/* Close Button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
-          aria-label="Fechar"
-        >
-          <X className="w-5 h-5 text-gray-600" />
-        </button>
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-lg p-6 max-w-md w-full">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">{existingTag ? "Editar Tag" : `Configurar Tag ${tagIndex + 1}`}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
 
-        {/* Content */}
-        <div className="space-y-6">
-          {/* Title */}
-          <div className="text-center pr-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-black leading-tight">
-              {isFirstTag ? "Configure sua primeira tag" : `Configure a tag ${tagIndex + 1}`}
-            </h2>
-            <p className="text-gray-700 text-base mt-2">
-              {isFirstTag ? `Primeira tag por ${tagPrice}` : `Tag adicional por ${tagPrice}`}
-            </p>
-          </div>
+        <div className="space-y-4">
+          {/* Color Selection */}
+          <div>
+            <Label className="text-sm font-medium mb-3 block">Escolha a cor da tag:</Label>
+            <div className="flex gap-4">
+              <button
+                onClick={() => setSelectedColor("orange")}
+                className={`flex-1 p-4 border-2 rounded-lg transition-colors ${
+                  selectedColor === "orange"
+                    ? "border-orange-500 bg-orange-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-orange-500 rounded-full"></div>
+                  <div className="text-left">
+                    <p className="font-medium">Tag Laranja</p>
+                    <p className="text-sm text-gray-600">Cor vibrante</p>
+                  </div>
+                </div>
+              </button>
 
-          {/* Color Options */}
-          <div className="space-y-4">
-            <h3 className="font-medium text-gray-800">Escolha a cor da tag:</h3>
-
-            {/* Orange Tag */}
-            <div
-              className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                selectedColor === "orange"
-                  ? "border-orange-500 bg-orange-50 shadow-md"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => setSelectedColor("orange")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-4 h-4 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                  {selectedColor === "orange" && <div className="w-2 h-2 rounded-full bg-orange-500" />}
+              <button
+                onClick={() => setSelectedColor("purple")}
+                className={`flex-1 p-4 border-2 rounded-lg transition-colors ${
+                  selectedColor === "purple"
+                    ? "border-purple-500 bg-purple-50"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-purple-500 rounded-full"></div>
+                  <div className="text-left">
+                    <p className="font-medium">Tag Roxa</p>
+                    <p className="text-sm text-gray-600">Cor elegante</p>
+                  </div>
                 </div>
-                <div className="flex-1">
-                  <img
-                    src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_16.png"
-                    alt="Tag laranja personalizada"
-                    className="w-full h-20 object-contain rounded-lg"
-                  />
-                  <p className="text-center mt-2 font-medium text-gray-800">Tag Laranja</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Purple Tag */}
-            <div
-              className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                selectedColor === "purple"
-                  ? "border-purple-500 bg-purple-50 shadow-md"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => setSelectedColor("purple")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-4 h-4 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                  {selectedColor === "purple" && <div className="w-2 h-2 rounded-full bg-purple-500" />}
-                </div>
-                <div className="flex-1">
-                  <img
-                    src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_18.png"
-                    alt="Tag roxa personalizada"
-                    className="w-full h-20 object-contain rounded-lg"
-                  />
-                  <p className="text-center mt-2 font-medium text-gray-800">Tag Roxa</p>
-                </div>
-              </div>
+              </button>
             </div>
           </div>
 
           {/* Pet Name Input */}
-          <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Nome do pet para esta tag</label>
-            <input
-              type="text"
+          <div>
+            <Label htmlFor="petName" className="text-sm font-medium">
+              Nome do seu pet
+            </Label>
+            <Input
+              id="petName"
               value={petName}
               onChange={(e) => setPetName(e.target.value)}
-              placeholder="Digite o nome do pet"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-400 shadow-sm"
+              placeholder="Ex: Rex, Luna, Buddy..."
+              className="mt-1"
               maxLength={20}
             />
-            {petName.length > 15 && (
-              <p className="text-sm text-amber-600">⚠️ Nomes muito longos podem não caber na tag</p>
-            )}
+            <p className="text-xs text-gray-500 mt-1">Máximo 20 caracteres</p>
           </div>
 
-          {/* Save Button */}
-          <Button
-            onClick={handleSave}
-            disabled={!selectedColor || !petName.trim()}
-            className="w-full rounded-xl px-6 py-3 text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ backgroundColor: "#F1542E" }}
-          >
-            {!selectedColor
-              ? "Escolha uma cor"
-              : !petName.trim()
-                ? "Digite o nome do pet"
-                : isFirstTag
-                  ? "Salvar primeira tag"
-                  : `Salvar tag ${tagIndex + 1}`}
+          {/* Price Display */}
+          <div className="bg-gray-50 p-3 rounded-lg">
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Preço desta tag:</span>
+              <span className="font-bold text-lg">{tagIndex === 0 ? "R$ 49,90" : "R$ 9,90"}</span>
+            </div>
+            {tagIndex === 0 && <p className="text-xs text-gray-500 mt-1">Primeira tag - preço completo</p>}
+            {tagIndex > 0 && <p className="text-xs text-gray-500 mt-1">Tag adicional - preço promocional</p>}
+          </div>
+        </div>
+
+        <div className="flex gap-3 mt-6">
+          <Button onClick={onClose} variant="outline" className="flex-1 bg-transparent">
+            Cancelar
+          </Button>
+          <Button onClick={handleSave} className="flex-1 bg-orange-500 hover:bg-orange-600 text-white">
+            {existingTag ? "Salvar Alterações" : "Adicionar Tag"}
           </Button>
         </div>
       </div>

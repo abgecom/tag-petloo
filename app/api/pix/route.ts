@@ -130,8 +130,24 @@ export async function POST(request: NextRequest) {
     console.log("=== INICIANDO FLUXO PIX APPMAX ===")
     console.log("Token configurado:", appmaxToken ? "✅ Sim" : "❌ Não")
 
-    // Convert shipping price from cents to decimal
-    const productPrice = body.shipping_price / 100 // Valor em formato decimal
+    // 🚨 CORREÇÃO CRÍTICA: Calcular preço unitário correto para Appmax
+    // A Appmax multiplica automaticamente o preço pela quantidade
+    // Então precisamos enviar o preço unitário, não o total
+    const totalPriceInCents = body.shipping_price
+    const unitPriceInReais = totalPriceInCents / 100 / body.product_quantity
+
+    console.log("=== CÁLCULO DE PREÇO CORRIGIDO ===")
+    console.log("Preço total recebido (centavos):", totalPriceInCents)
+    console.log("Quantidade:", body.product_quantity)
+    console.log("Preço unitário calculado (reais):", unitPriceInReais)
+    console.log(
+      "Verificação: ",
+      unitPriceInReais,
+      "x",
+      body.product_quantity,
+      "=",
+      unitPriceInReais * body.product_quantity,
+    )
 
     // Split name into firstname and lastname
     const [firstname, ...rest] = body.name.split(" ")
@@ -245,7 +261,7 @@ export async function POST(request: NextRequest) {
           name: `${body.product_type} - ${body.product_color}`,
           sku: body.product_sku,
           qty: body.product_quantity,
-          price: productPrice,
+          price: unitPriceInReais, // 🚨 USAR PREÇO UNITÁRIO, NÃO TOTAL
         },
       ],
     }
@@ -405,7 +421,7 @@ export async function POST(request: NextRequest) {
         customer_cep: body.address.cep,
         customer_city: body.address.city,
         customer_state: body.address.state,
-        order_amount: productPrice,
+        order_amount: totalPriceInCents / 100, // 🚨 USAR VALOR TOTAL CORRETO EM REAIS
         payment_method: "PIX",
         order_status: "Pendente",
         // 🎯 USAR DADOS REAIS DO PRODUTO
