@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, Suspense } from "react"
-import { ChevronUp, ChevronDown, Minus, Plus } from "lucide-react"
+import { ChevronUp, ChevronDown, Minus, Plus, Edit2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation"
 import InitiateCheckoutTracker from "@/components/InitiateCheckoutTracker"
 import AbandonedCartTracker from "@/components/AbandonedCartTracker"
 import LeadCaptureTracker from "@/components/LeadCaptureTracker"
+import PersonalizedTagManager from "@/components/PersonalizedTagManager"
 import { Elements } from "@stripe/react-stripe-js"
 
 // Initialize Stripe with preload
@@ -24,6 +25,14 @@ const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!
 // Preload Stripe immediately
 if (typeof window !== "undefined") {
   stripePromise
+}
+
+// Interface para tags personalizadas
+interface PersonalizedTag {
+  id: string
+  color: "orange" | "purple"
+  petName: string
+  price: number
 }
 
 // Mask functions for credit card fields
@@ -88,7 +97,16 @@ function OrderSummaryContent({
   setQuantity,
   shippingMethod,
   addressFound,
-}: { quantity: number; setQuantity: (q: number) => void; shippingMethod: string; addressFound: boolean }) {
+  personalizedTags,
+  onEditTag,
+}: {
+  quantity: number
+  setQuantity: (q: number) => void
+  shippingMethod: string
+  addressFound: boolean
+  personalizedTags: PersonalizedTag[]
+  onEditTag: (index: number) => void
+}) {
   // Calculate shipping cost based on shipping method and quantity
   const getShippingCost = () => {
     // Verificar se é produto personalizado de forma mais rigorosa
@@ -104,6 +122,19 @@ function OrderSummaryContent({
         console.error("Erro ao parsear produto personalizado:", error)
         isPersonalized = false
       }
+    }
+
+    // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas, usar essa lógica
+    if (personalizedTags.length > 0) {
+      const totalProductPrice = personalizedTags.reduce((sum, tag) => sum + tag.price, 0) / 100 // Converter centavos para reais
+
+      if (!addressFound) return totalProductPrice
+
+      // Para produto personalizado: sempre oferecer ambas opções de frete
+      if (shippingMethod === "express") {
+        return totalProductPrice + 10.52
+      }
+      return totalProductPrice // Frete grátis padrão
     }
 
     if (isPersonalized) {
@@ -133,7 +164,7 @@ function OrderSummaryContent({
     // - Produto: R$ 0 primeira unidade, R$ 9,90 por unidade adicional
     // - Frete: R$ 29,39 fixo (não muda com quantidade)
     const productPrice = (quantity - 1) * 9.9 // Primeira unidade grátis, demais R$ 9,90
-    const shippingPrice = quantity >= 4 ? 0 : 29.39 // Frete grátis a partir de 4 unidades
+    const shippingPrice = quantity >= 5 ? 0 : 29.39 // Frete grátis a partir de 5 unidades
 
     return productPrice + shippingPrice
   }
@@ -146,7 +177,22 @@ function OrderSummaryContent({
   let productPrice = 0
   let shippingPrice = 0
 
-  if (personalizedProductData) {
+  // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas
+  if (personalizedTags.length > 0) {
+    isPersonalized = true
+    productPrice = personalizedTags.reduce((sum, tag) => sum + tag.price, 0) / 100 // Converter centavos para reais
+
+    // Calcular frete separadamente
+    if (addressFound) {
+      if (quantity >= 4) {
+        shippingPrice = 0 // Frete grátis
+      } else if (shippingMethod === "express") {
+        shippingPrice = 10.52
+      } else {
+        shippingPrice = 0 // Frete grátis padrão
+      }
+    }
+  } else if (personalizedProductData) {
     try {
       const data = JSON.parse(personalizedProductData)
       // Verificar se realmente tem os dados de personalização
@@ -181,7 +227,7 @@ function OrderSummaryContent({
       productPrice = (quantity - 1) * 9.9
 
       // Frete: R$ 29,39 fixo, grátis a partir de 4 unidades
-      shippingPrice = quantity >= 4 ? 0 : 29.39
+      shippingPrice = quantity >= 5 ? 0 : 29.39
     }
   }
 
@@ -256,14 +302,46 @@ function OrderSummaryContent({
         </div>
       </div>
 
-      {/* Quantity Discount Notice */}
-      {quantity >= 4 && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-          <p className="text-green-800 text-sm font-medium">
-            🎉 <strong>Frete Grátis!</strong> A partir de 4 unidades, o frete é por nossa conta!
-          </p>
+      {/* 🆕 LISTA DE TAGS PERSONALIZADAS */}
+      {personalizedTags.length > 0 && (
+        <div className="border-t pt-4">
+          <h4 className="font-medium text-gray-800 mb-3">Tags Configuradas:</h4>
+          <div className="space-y-2">
+            {personalizedTags.map((tag, index) => (
+              <div key={tag.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`w-4 h-4 rounded-full ${tag.color === "orange" ? "bg-orange-500" : "bg-purple-500"}`}
+                  ></div>
+                  <div>
+                    <p className="font-medium text-sm">{tag.petName}</p>
+                    <p className="text-xs text-gray-600">Tag {tag.color === "orange" ? "Laranja" : "Roxa"}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium">R$ {(tag.price / 100).toFixed(2).replace(".", ",")}</span>
+                  <button onClick={() => onEditTag(index)} className="p-1 hover:bg-gray-200 rounded" title="Editar tag">
+                    <Edit2 className="w-3 h-3 text-gray-600" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Aviso sobre tags não configuradas */}
+          {personalizedTags.length < quantity && (
+            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800 text-sm">
+                ⚠️ Você tem {quantity - personalizedTags.length} tag{quantity - personalizedTags.length > 1 ? "s" : ""}{" "}
+                não configurada{quantity - personalizedTags.length > 1 ? "s" : ""}. Configure todas as tags antes de
+                finalizar a compra.
+              </p>
+            </div>
+          )}
         </div>
       )}
+
+      {/* Quantity Discount Notice */}
 
       {/* Coupon */}
       <div className="border-t pt-4">
@@ -347,6 +425,11 @@ function CheckoutForm() {
     petName?: string
   } | null>(null)
 
+  // 🆕 NOVOS ESTADOS PARA TAGS PERSONALIZADAS
+  const [personalizedTags, setPersonalizedTags] = useState<PersonalizedTag[]>([])
+  const [showTagManager, setShowTagManager] = useState(false)
+  const [editingTagIndex, setEditingTagIndex] = useState<number>(-1)
+
   // Initialize loading state
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -393,6 +476,17 @@ function CheckoutForm() {
           petName: petName ? decodeURIComponent(petName) : "", // Adicionar ao estado
         })
 
+        // 🆕 CRIAR PRIMEIRA TAG PERSONALIZADA AUTOMATICAMENTE
+        if (petName) {
+          const firstTag: PersonalizedTag = {
+            id: "tag-0",
+            color: color as "orange" | "purple",
+            petName: decodeURIComponent(petName),
+            price: 4990, // R$ 49,90 em centavos
+          }
+          setPersonalizedTags([firstTag])
+        }
+
         // Manter frete grátis como padrão para produtos personalizados
         setShippingMethod("standard")
 
@@ -412,6 +506,7 @@ function CheckoutForm() {
 
       // Limpar dados de produto personalizado antigos
       sessionStorage.removeItem("personalizedProduct")
+      setPersonalizedTags([]) // Limpar tags personalizadas
 
       // Produto genérico - APENAS FRETE EXPRESSO
       setProductInfo({
@@ -426,8 +521,84 @@ function CheckoutForm() {
     }
   }, [])
 
+  // 🆕 FUNÇÃO PERSONALIZADA PARA ALTERAR QUANTIDADE
+  const handleQuantityChange = (newQuantity: number) => {
+    const personalizedData = sessionStorage.getItem("personalizedProduct")
+    let isPersonalized = false
+
+    if (personalizedData) {
+      try {
+        const data = JSON.parse(personalizedData)
+        isPersonalized = !!(data.color && data.amount && data.petName)
+      } catch (error) {
+        console.error("Erro ao parsear produto personalizado:", error)
+        isPersonalized = false
+      }
+    }
+
+    // 🆕 TAMBÉM CONSIDERAR PERSONALIZADO SE TEMOS TAGS CONFIGURADAS
+    if (personalizedTags.length > 0) {
+      isPersonalized = true
+    }
+
+    // Se diminuiu a quantidade, remover tags extras
+    if (newQuantity < personalizedTags.length) {
+      setPersonalizedTags((prev) => prev.slice(0, newQuantity))
+      setQuantity(newQuantity)
+    }
+    // Se aumentou a quantidade E é produto personalizado, abrir popup para nova tag
+    else if (newQuantity > quantity && isPersonalized && newQuantity > personalizedTags.length) {
+      // NÃO alterar a quantidade ainda - só alterar após salvar a tag
+      setEditingTagIndex(personalizedTags.length) // Índice da nova tag
+      setShowTagManager(true)
+    }
+    // Para produtos genéricos ou quando não precisa de popup
+    else {
+      setQuantity(newQuantity)
+    }
+  }
+
+  // 🆕 FUNÇÃO PARA SALVAR TAG PERSONALIZADA
+  const handleSaveTag = (tag: PersonalizedTag) => {
+    setPersonalizedTags((prev) => {
+      const newTags = [...prev]
+      const existingIndex = newTags.findIndex((t) => t.id === tag.id)
+
+      if (existingIndex >= 0) {
+        newTags[existingIndex] = tag
+      } else {
+        newTags.push(tag)
+        // Se é uma nova tag, atualizar a quantidade
+        setQuantity(newTags.length)
+      }
+
+      return newTags
+    })
+    setShowTagManager(false)
+    setEditingTagIndex(-1)
+  }
+
+  // 🆕 FUNÇÃO PARA EDITAR TAG
+  const handleEditTag = (index: number) => {
+    setEditingTagIndex(index)
+    setShowTagManager(true)
+  }
+
   // Mover esta função para dentro do CheckoutForm, antes do return
   const getShippingCost = () => {
+    // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas
+    if (personalizedTags.length > 0) {
+      const totalProductPrice = personalizedTags.reduce((sum, tag) => sum + tag.price, 0) / 100
+
+      if (!addressFound) return totalProductPrice
+
+      // Para produto personalizado: sempre oferecer ambas opções de frete
+      if (shippingMethod === "express") {
+        return totalProductPrice + 10.52
+      }
+      return totalProductPrice // Frete grátis padrão
+    }
+
     // Verificar se é produto personalizado de forma mais rigorosa
     const personalizedData = sessionStorage.getItem("personalizedProduct")
     let isPersonalized = false
@@ -472,7 +643,7 @@ function CheckoutForm() {
     const totalPrice = baseShipping + additionalPrice
 
     // Frete grátis a partir de 4 unidades para produtos genéricos também
-    if (quantity >= 4) {
+    if (quantity >= 5) {
       return quantity * 9.9 // Apenas o valor das unidades adicionais, sem frete
     }
 
@@ -642,6 +813,29 @@ function CheckoutForm() {
       return
     }
 
+    // 🆕 VALIDAÇÃO PARA PRODUTOS PERSONALIZADOS
+    const personalizedData = sessionStorage.getItem("personalizedProduct")
+    let isPersonalized = false
+
+    if (personalizedData) {
+      try {
+        const data = JSON.parse(personalizedData)
+        isPersonalized = !!(data.color && data.amount && data.petName)
+      } catch (error) {
+        console.error("Erro ao parsear produto personalizado:", error)
+        isPersonalized = false
+      }
+    }
+
+    // Se é produto personalizado, verificar se todas as tags estão configuradas
+    if (isPersonalized && personalizedTags.length < quantity) {
+      setCheckoutMessage({
+        type: "error",
+        text: `Configure todas as ${quantity} tags antes de finalizar a compra. ${quantity - personalizedTags.length} tag${quantity - personalizedTags.length > 1 ? "s" : ""} ainda não configurada${quantity - personalizedTags.length > 1 ? "s" : ""}.`,
+      })
+      return
+    }
+
     setIsProcessing(true)
     setCheckoutMessage(null)
 
@@ -656,16 +850,16 @@ function CheckoutForm() {
       console.log("=== DADOS DO CHECKOUT ===")
       console.log("Cliente:", { name, email, phone: phone?.replace(/\D/g, "") })
       console.log("Método de pagamento:", paymentMethod)
+      console.log("Tags personalizadas:", personalizedTags)
 
       if (!email || !name || !phone || !cpf || !addressFound || !number) {
         setCheckoutMessage({ type: "error", text: "Por favor, preencha todos os campos obrigatórios." })
         return
       }
 
-      // 🚨 VERIFICAÇÃO CRÍTICA: Usar apenas dados do estado atual, não do sessionStorage
-      const personalizedProductData = sessionStorage.getItem("personalizedProduct")
+      // 🚨 VERIFICAÇÃO CRÍTICA: Usar dados das tags personalizadas se disponíveis
       let productInfo = {
-        amount: quantity >= 4 ? (quantity - 1) * 990 : 2939 + (quantity - 1) * 990, // Valor em centavos
+        amount: quantity >= 5 ? (quantity - 1) * 990 : 2939 + (quantity - 1) * 990, // Valor em centavos
         name: "Tag rastreamento Petloo + App",
         sku: `TAG-APP-${quantity}x`,
         type: "Tag Genérica",
@@ -673,8 +867,30 @@ function CheckoutForm() {
         petName: "",
       }
 
-      // Só usar dados do sessionStorage se realmente for produto personalizado
-      if (personalizedProductData) {
+      // 🆕 USAR DADOS DAS TAGS PERSONALIZADAS SE DISPONÍVEIS
+      if (personalizedTags.length > 0) {
+        const totalAmount = personalizedTags.reduce((sum, tag) => sum + tag.price, 0)
+        let shippingAmount = 0
+
+        if (addressFound && quantity < 4) {
+          if (shippingMethod === "express") {
+            shippingAmount = 1052 // R$ 10,52 = 1052 centavos
+          }
+          // Frete padrão é grátis
+        }
+
+        productInfo = {
+          amount: totalAmount + shippingAmount,
+          name: `Tags Personalizadas (${quantity}x)`,
+          sku: `TAG-PERSONALIZADA-MULTI-${quantity}x`,
+          type: "Tag Personalizada",
+          color: personalizedTags.map((tag) => tag.color).join(", "),
+          petName: personalizedTags.map((tag) => tag.petName).join(", "),
+        }
+
+        console.log("✅ Usando dados das tags personalizadas:", productInfo)
+      } else {
+        const personalizedProductData = sessionStorage.getItem("personalizedProduct")
         try {
           const data = JSON.parse(personalizedProductData)
           // Verificação rigorosa: só considerar personalizado se tiver TODOS os dados necessários
@@ -1077,9 +1293,11 @@ function CheckoutForm() {
                 <div className="mt-4 p-4 bg-white border rounded-lg">
                   <OrderSummaryContent
                     quantity={quantity}
-                    setQuantity={setQuantity}
+                    setQuantity={handleQuantityChange}
                     shippingMethod={shippingMethod}
                     addressFound={addressFound}
+                    personalizedTags={personalizedTags}
+                    onEditTag={handleEditTag}
                   />
                 </div>
               )}
@@ -1259,160 +1477,173 @@ function CheckoutForm() {
               <div className="mb-8">
                 <h2 className="text-lg font-semibold mb-2">Método de envio</h2>
 
-                {/* Aviso sobre frete grátis */}
-                {quantity >= 4 && (
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                    <p className="text-green-800 font-medium">
-                      🎉 <strong>Parabéns!</strong> Com {quantity} unidades, seu frete é <strong>GRÁTIS</strong>!
-                    </p>
-                  </div>
-                )}
+                {(() => {
+                  const personalizedData = sessionStorage.getItem("personalizedProduct")
+                  let isPersonalized = false
 
-                <div className="space-y-3">
-                  {(() => {
-                    const personalizedData = sessionStorage.getItem("personalizedProduct")
-                    let isPersonalized = false
-
-                    if (personalizedData) {
-                      try {
-                        const data = JSON.parse(personalizedData)
-                        // Verificar se realmente tem os dados de personalização
-                        isPersonalized = !!(data.color && data.amount && data.petName)
-                      } catch (error) {
-                        console.error("Erro ao parsear produto personalizado:", error)
-                        isPersonalized = false
-                      }
+                  if (personalizedData) {
+                    try {
+                      const data = JSON.parse(personalizedData)
+                      // Verificar se realmente tem os dados de personalização
+                      isPersonalized = !!(data.color && data.amount && data.petName)
+                    } catch (error) {
+                      console.error("Erro ao parsear produto personalizado:", error)
+                      isPersonalized = false
                     }
+                  }
 
-                    if (isPersonalized) {
-                      return (
-                        <>
-                          {/* Frete Grátis para produto personalizado */}
-                          <div
-                            className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                              shippingMethod === "standard"
-                                ? "border-green-300 bg-green-50/30"
-                                : "border-gray-200 hover:border-gray-300"
-                            } ${quantity >= 4 ? "opacity-100" : ""}`}
-                            onClick={() => setShippingMethod("standard")}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="radio"
-                                  id="standard"
-                                  name="shipping"
-                                  value="standard"
-                                  checked={shippingMethod === "standard"}
-                                  onChange={(e) => setShippingMethod(e.target.value)}
-                                  className="pointer-events-none"
-                                />
-                                <div>
-                                  <label htmlFor="standard" className="font-medium cursor-pointer">
-                                    Frete Grátis
-                                  </label>
-                                  <p className="text-sm text-gray-600">
-                                    15 a 20 dias (Produção) + 4 a 12 dias (Entrega)
-                                  </p>
-                                </div>
+                  // 🆕 TAMBÉM CONSIDERAR PERSONALIZADO SE TEMOS TAGS CONFIGURADAS
+                  if (personalizedTags.length > 0) {
+                    isPersonalized = true
+                  }
+
+                  // 🆕 MENSAGEM ESPECÍFICA PARA PRODUTOS GENÉRICOS
+                  if (!isPersonalized && quantity < 5) {
+                    return (
+                      <>
+                        {/* Aviso sobre frete grátis para produtos genéricos */}
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                          <p className="text-blue-800 text-sm">
+                            💡 <strong>Dica:</strong> Pedidos com 5 tags ou mais ganham <strong>frete grátis</strong>!
+                            Você está a {5 - quantity} tag{5 - quantity > 1 ? "s" : ""} de conseguir o frete grátis.
+                          </p>
+                        </div>
+
+                        {/* Para produto genérico com frete fixo */}
+                        <div className="border-2 rounded-lg p-4 border-orange-300 bg-orange-50/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="radio"
+                                id="express"
+                                name="shipping"
+                                value="express"
+                                checked={true}
+                                readOnly
+                                className="pointer-events-none"
+                              />
+                              <div>
+                                <label htmlFor="express" className="font-medium">
+                                  Frete Expresso
+                                </label>
+                                <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
+                                <p className="text-xs text-gray-500">Valor fixo independente da quantidade</p>
                               </div>
-                              <span className="font-semibold text-green-600">Grátis</span>
                             </div>
+                            <span className="font-semibold">R$ 29,39</span>
                           </div>
+                        </div>
+                      </>
+                    )
+                  }
 
-                          {/* Frete Expresso para produto personalizado - desabilitado se >= 4 unidades */}
-                          {quantity < 4 && (
-                            <div
-                              className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                                shippingMethod === "express"
-                                  ? "border-orange-300 bg-orange-50/30"
-                                  : "border-gray-200 hover:border-gray-300"
-                              }`}
-                              onClick={() => setShippingMethod("express")}
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <input
-                                    type="radio"
-                                    id="express"
-                                    name="shipping"
-                                    value="express"
-                                    checked={shippingMethod === "express"}
-                                    onChange={(e) => setShippingMethod(e.target.value)}
-                                    className="pointer-events-none"
-                                  />
-                                  <div>
-                                    <label htmlFor="express" className="font-medium cursor-pointer">
-                                      Frete Expresso
-                                    </label>
-                                    <p className="text-sm text-gray-600">
-                                      15 a 20 dias (Produção) + 1 a 3 dias (Entrega)
-                                    </p>
-                                  </div>
-                                </div>
-                                <span className="font-semibold">R$ 10,52</span>
+                  // Aviso sobre frete grátis quando já tem 4+ unidades (genérico)
+                  if (!isPersonalized && quantity >= 5) {
+                    return (
+                      <>
+                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                          <p className="text-green-800 font-medium">
+                            🎉 <strong>Parabéns!</strong> Com {quantity} unidades, seu frete é <strong>GRÁTIS</strong>!
+                          </p>
+                        </div>
+
+                        <div className="border-2 rounded-lg p-4 border-green-300 bg-green-50/30">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="radio"
+                                id="free-shipping"
+                                name="shipping"
+                                value="free"
+                                checked={true}
+                                readOnly
+                                className="pointer-events-none"
+                              />
+                              <div>
+                                <label htmlFor="free-shipping" className="font-medium">
+                                  Frete Grátis
+                                </label>
+                                <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
                               </div>
                             </div>
-                          )}
-                        </>
-                      )
-                    } else {
-                      return (
-                        <>
-                          {/* Para produto genérico com frete fixo */}
-                          {quantity >= 4 ? (
-                            <div className="border-2 rounded-lg p-4 border-green-300 bg-green-50/30">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <input
-                                    type="radio"
-                                    id="free-shipping"
-                                    name="shipping"
-                                    value="free"
-                                    checked={true}
-                                    readOnly
-                                    className="pointer-events-none"
-                                  />
-                                  <div>
-                                    <label htmlFor="free-shipping" className="font-medium">
-                                      Frete Grátis
-                                    </label>
-                                    <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
-                                  </div>
-                                </div>
-                                <span className="font-semibold text-green-600">Grátis</span>
+                            <span className="font-semibold text-green-600">Grátis</span>
+                          </div>
+                        </div>
+                      </>
+                    )
+                  }
+
+                  // Para produtos personalizados (mantém a lógica existente)
+                  if (isPersonalized) {
+                    return (
+                      <>
+                        {/* Frete Grátis para produto personalizado */}
+                        <div
+                          className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                            shippingMethod === "standard"
+                              ? "border-green-300 bg-green-50/30"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                          onClick={() => setShippingMethod("standard")}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="radio"
+                                id="standard"
+                                name="shipping"
+                                value="standard"
+                                checked={shippingMethod === "standard"}
+                                onChange={(e) => setShippingMethod(e.target.value)}
+                                className="pointer-events-none"
+                              />
+                              <div>
+                                <label htmlFor="standard" className="font-medium cursor-pointer">
+                                  Frete Grátis
+                                </label>
+                                <p className="text-sm text-gray-600">15 a 20 dias (Produção) + 4 a 12 dias (Entrega)</p>
                               </div>
                             </div>
-                          ) : (
-                            <div className="border-2 rounded-lg p-4 border-orange-300 bg-orange-50/30">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <input
-                                    type="radio"
-                                    id="express"
-                                    name="shipping"
-                                    value="express"
-                                    checked={true}
-                                    readOnly
-                                    className="pointer-events-none"
-                                  />
-                                  <div>
-                                    <label htmlFor="express" className="font-medium">
-                                      Frete Expresso
-                                    </label>
-                                    <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
-                                    <p className="text-xs text-gray-500">Valor fixo independente da quantidade</p>
-                                  </div>
-                                </div>
-                                <span className="font-semibold">R$ 29,39</span>
+                            <span className="font-semibold text-green-600">Grátis</span>
+                          </div>
+                        </div>
+
+                        {/* Frete Expresso para produto personalizado - sempre disponível */}
+                        <div
+                          className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                            shippingMethod === "express"
+                              ? "border-orange-300 bg-orange-50/30"
+                              : "border-gray-200 hover:border-gray-300"
+                          }`}
+                          onClick={() => setShippingMethod("express")}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <input
+                                type="radio"
+                                id="express"
+                                name="shipping"
+                                value="express"
+                                checked={shippingMethod === "express"}
+                                onChange={(e) => setShippingMethod(e.target.value)}
+                                className="pointer-events-none"
+                              />
+                              <div>
+                                <label htmlFor="express" className="font-medium cursor-pointer">
+                                  Frete Expresso
+                                </label>
+                                <p className="text-sm text-gray-600">15 a 20 dias (Produção) + 1 a 3 dias (Entrega)</p>
                               </div>
                             </div>
-                          )}
-                        </>
-                      )
-                    }
-                  })()}
-                </div>
+                            <span className="font-semibold">R$ 10,52</span>
+                          </div>
+                        </div>
+                      </>
+                    )
+                  }
+
+                  return null
+                })()}
               </div>
             )}
 
@@ -1586,13 +1817,32 @@ function CheckoutForm() {
             <div className="bg-white p-6 rounded-lg border sticky top-8">
               <OrderSummaryContent
                 quantity={quantity}
-                setQuantity={setQuantity}
+                setQuantity={handleQuantityChange}
                 shippingMethod={shippingMethod}
                 addressFound={addressFound}
+                personalizedTags={personalizedTags}
+                onEditTag={handleEditTag}
               />
             </div>
           </div>
         </div>
+
+        {/* 🆕 POPUP PARA CONFIGURAR TAGS PERSONALIZADAS */}
+        <PersonalizedTagManager
+          isOpen={showTagManager}
+          onClose={() => {
+            setShowTagManager(false)
+            setEditingTagIndex(-1)
+          }}
+          tagIndex={editingTagIndex}
+          existingTag={
+            editingTagIndex >= 0 && editingTagIndex < personalizedTags.length
+              ? personalizedTags[editingTagIndex]
+              : undefined
+          }
+          onSaveTag={handleSaveTag}
+        />
+
         {/* PIX Payment Interface */}
         {showPixPayment && pixPaymentData && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
