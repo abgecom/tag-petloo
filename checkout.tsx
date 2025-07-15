@@ -31,7 +31,7 @@ const formatCardNumber = (value: string) => {
   const cleaned = value.replace(/\D/g, "")
   const match = cleaned.match(/(\d{0,4})(\d{0,4})(\d{0,4})(\d{0,4})/)
   if (match) {
-    return [match[1], match[2], match[3], match[4]].filter(Boolean).join(" ")
+    return [match[1], match[2], [match[3], match[4]].filter(Boolean).join(" ")]
   }
   return cleaned
 }
@@ -89,7 +89,7 @@ function OrderSummaryContent({
   shippingMethod,
   addressFound,
 }: { quantity: number; setQuantity: (q: number) => void; shippingMethod: string; addressFound: boolean }) {
-  // Calculate shipping cost based on shipping method
+  // Calculate shipping cost based on shipping method and quantity
   const getShippingCost = () => {
     // Verificar se é produto personalizado de forma mais rigorosa
     const personalizedData = sessionStorage.getItem("personalizedProduct")
@@ -108,20 +108,34 @@ function OrderSummaryContent({
 
     if (isPersonalized) {
       const data = JSON.parse(personalizedData)
-      const basePrice = data.amount / 100 // R$ 49,90
+      const basePrice = data.amount / 100 // R$ 49,90 primeira unidade
+      const additionalPrice = (quantity - 1) * 9.9 // R$ 9,90 por unidade adicional
+      const totalProductPrice = basePrice + additionalPrice
 
-      if (!addressFound) return basePrice
+      if (!addressFound) return totalProductPrice
 
-      // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
-      if (shippingMethod === "express") {
-        return basePrice + 10.52 // R$ 49,90 + R$ 10,52 = R$ 60,42
+      // Para produto personalizado: frete grátis a partir de 4 unidades
+      if (quantity >= 4) {
+        return totalProductPrice // Frete grátis
       }
-      return basePrice // R$ 49,90 (frete grátis)
+
+      // Menos de 4 unidades: frete grátis padrão, frete expresso R$ 10,52
+      if (shippingMethod === "express") {
+        return totalProductPrice + 10.52
+      }
+      return totalProductPrice // Frete grátis padrão
     }
 
-    // Lógica para produtos genéricos (NÃO personalizados) - APENAS FRETE EXPRESSO
+    // 🆕 NOVA LÓGICA PARA PRODUTOS GENÉRICOS
     if (!addressFound) return 0
-    return 29.39 // Apenas frete expresso disponível
+
+    // Para produtos genéricos:
+    // - Produto: R$ 0 primeira unidade, R$ 9,90 por unidade adicional
+    // - Frete: R$ 29,39 fixo (não muda com quantidade)
+    const productPrice = (quantity - 1) * 9.9 // Primeira unidade grátis, demais R$ 9,90
+    const shippingPrice = quantity >= 4 ? 0 : 29.39 // Frete grátis a partir de 4 unidades
+
+    return productPrice + shippingPrice
   }
 
   const shippingCost = getShippingCost()
@@ -139,8 +153,20 @@ function OrderSummaryContent({
       isPersonalized = !!(data.color && data.amount && data.petName)
 
       if (isPersonalized) {
-        productPrice = data.amount / 100 // R$ 49,90
-        shippingPrice = shippingMethod === "express" ? 10.52 : 0 // Frete grátis ou R$ 10,52
+        const basePrice = data.amount / 100 // R$ 49,90 primeira unidade
+        const additionalPrice = (quantity - 1) * 9.9 // R$ 9,90 por unidade adicional
+        productPrice = basePrice + additionalPrice
+
+        // Calcular frete separadamente
+        if (addressFound) {
+          if (quantity >= 4) {
+            shippingPrice = 0 // Frete grátis
+          } else if (shippingMethod === "express") {
+            shippingPrice = 10.52
+          } else {
+            shippingPrice = 0 // Frete grátis padrão
+          }
+        }
       }
     } catch (error) {
       console.error("Erro ao parsear produto personalizado:", error)
@@ -148,10 +174,15 @@ function OrderSummaryContent({
     }
   }
 
-  // Para produto genérico: produto grátis, cliente paga apenas o frete (APENAS EXPRESSO)
+  // 🆕 NOVA LÓGICA PARA PRODUTO GENÉRICO
   if (!isPersonalized) {
-    productPrice = 0
-    shippingPrice = addressFound ? 29.39 : 0 // Apenas frete expresso
+    if (addressFound) {
+      // Produto: primeira unidade grátis, demais R$ 9,90
+      productPrice = (quantity - 1) * 9.9
+
+      // Frete: R$ 29,39 fixo, grátis a partir de 4 unidades
+      shippingPrice = quantity >= 4 ? 0 : 29.39
+    }
   }
 
   const subtotal = productPrice + shippingPrice
@@ -193,25 +224,46 @@ function OrderSummaryContent({
           <div className="flex items-center gap-2 mt-2">
             <button
               onClick={() => setQuantity(Math.max(1, quantity - 1))}
-              className="w-8 h-8 rounded-full border flex items-center justify-center"
+              className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100"
             >
               <Minus className="w-4 h-4" />
             </button>
-            <span className="w-8 text-center">{quantity}</span>
+            <span className="w-8 text-center font-medium">{quantity}</span>
             <button
               onClick={() => setQuantity(quantity + 1)}
-              className="w-8 h-8 rounded-full border flex items-center justify-center"
+              className="w-8 h-8 rounded-full border flex items-center justify-center hover:bg-gray-100"
             >
               <Plus className="w-4 h-4" />
             </button>
           </div>
+          {quantity > 1 && (
+            <p className="text-xs text-gray-600 mt-1">
+              {isPersonalized
+                ? `1ª unidade + ${quantity - 1} adicional${quantity > 2 ? "is" : ""} (R$ 9,90 cada)`
+                : `1ª unidade grátis + ${quantity - 1} adicional${quantity > 2 ? "is" : ""} (R$ 9,90 cada)`}
+            </p>
+          )}
         </div>
         <div className="text-right">
           <p className="font-semibold">
-            {isPersonalized ? `R$ ${productPrice.toFixed(2).replace(".", ",")}` : "Grátis"}
+            {isPersonalized
+              ? `R$ ${productPrice.toFixed(2).replace(".", ",")}`
+              : productPrice === 0
+                ? "Grátis"
+                : `R$ ${productPrice.toFixed(2).replace(".", ",")}`}
           </p>
+          {quantity === 1 && !isPersonalized && <p className="text-xs text-gray-500">1ª grátis</p>}
         </div>
       </div>
+
+      {/* Quantity Discount Notice */}
+      {quantity >= 4 && (
+        <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+          <p className="text-green-800 text-sm font-medium">
+            🎉 <strong>Frete Grátis!</strong> A partir de 4 unidades, o frete é por nossa conta!
+          </p>
+        </div>
+      )}
 
       {/* Coupon */}
       <div className="border-t pt-4">
@@ -224,10 +276,15 @@ function OrderSummaryContent({
 
       {/* Totals */}
       <div className="border-t pt-4 space-y-2">
-        {isPersonalized && (
+        {/* Mostrar linha do produto apenas se tiver valor ou for personalizado */}
+        {(isPersonalized || productPrice > 0) && (
           <div className="flex justify-between">
-            <span>Produto</span>
-            <span className="font-semibold">R$ {productPrice.toFixed(2).replace(".", ",")}</span>
+            <span>
+              Produto{quantity > 1 ? "s" : ""} ({quantity}x)
+            </span>
+            <span className="font-semibold">
+              {productPrice === 0 ? "Grátis" : `R$ ${productPrice.toFixed(2).replace(".", ",")}`}
+            </span>
           </div>
         )}
         <div className="flex justify-between">
@@ -388,20 +445,38 @@ function CheckoutForm() {
 
     if (isPersonalized) {
       const data = JSON.parse(personalizedData)
-      const basePrice = data.amount / 100 // R$ 49,90
+      const basePrice = data.amount / 100 // R$ 49,90 primeira unidade
+      const additionalPrice = (quantity - 1) * 9.9 // R$ 9,90 por unidade adicional
+      const totalProductPrice = basePrice + additionalPrice
 
-      if (!addressFound) return basePrice
+      if (!addressFound) return totalProductPrice
 
-      // Para produto personalizado: frete grátis padrão, frete expresso R$ 10,52
-      if (shippingMethod === "express") {
-        return basePrice + 10.52 // R$ 49,90 + R$ 10,52 = R$ 60,42
+      // Para produto personalizado: frete grátis a partir de 4 unidades
+      if (quantity >= 4) {
+        return totalProductPrice // Frete grátis
       }
-      return basePrice // R$ 49,90 (frete grátis)
+
+      // Menos de 4 unidades: frete grátis padrão, frete expresso R$ 10,52
+      if (shippingMethod === "express") {
+        return totalProductPrice + 10.52
+      }
+      return totalProductPrice // Frete grátis padrão
     }
 
-    // Lógica para produtos genéricos (NÃO personalizados) - APENAS FRETE EXPRESSO
+    // Lógica para produtos genéricos (NÃO personalizados)
     if (!addressFound) return 0
-    return 29.39 // Apenas frete expresso disponível
+
+    // Para produtos genéricos: R$ 29,39 primeira unidade + R$ 9,90 por adicional
+    const baseShipping = 29.39
+    const additionalPrice = (quantity - 1) * 9.9
+    const totalPrice = baseShipping + additionalPrice
+
+    // Frete grátis a partir de 4 unidades para produtos genéricos também
+    if (quantity >= 4) {
+      return quantity * 9.9 // Apenas o valor das unidades adicionais, sem frete
+    }
+
+    return totalPrice
   }
 
   // Função para salvar cookies para GTM
@@ -590,9 +665,9 @@ function CheckoutForm() {
       // 🚨 VERIFICAÇÃO CRÍTICA: Usar apenas dados do estado atual, não do sessionStorage
       const personalizedProductData = sessionStorage.getItem("personalizedProduct")
       let productInfo = {
-        amount: 2939, // Apenas frete expresso para produto genérico
+        amount: quantity >= 4 ? (quantity - 1) * 990 : 2939 + (quantity - 1) * 990, // Valor em centavos
         name: "Tag rastreamento Petloo + App",
-        sku: "TAG-APP-2939",
+        sku: `TAG-APP-${quantity}x`,
         type: "Tag Genérica",
         color: "Não se aplica",
         petName: "",
@@ -614,13 +689,23 @@ function CheckoutForm() {
           })
 
           if (isReallyPersonalized) {
-            const baseAmount = data.amount // R$ 49,90 = 4990 centavos
-            const expressShipping = 1052 // R$ 10,52 = 1052 centavos
+            const baseAmount = data.amount // R$ 49,90 = 4990 centavos primeira unidade
+            const additionalAmount = (quantity - 1) * 990 // R$ 9,90 = 990 centavos por unidade adicional
+            const totalProductAmount = baseAmount + additionalAmount
+
+            let shippingAmount = 0
+            if (addressFound && quantity < 4) {
+              if (shippingMethod === "express") {
+                shippingAmount = 1052 // R$ 10,52 = 1052 centavos
+              }
+              // Frete padrão é grátis
+            }
+            // A partir de 4 unidades, frete é sempre grátis
 
             productInfo = {
-              amount: shippingMethod === "express" ? baseAmount + expressShipping : baseAmount,
-              name: data.name,
-              sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
+              amount: totalProductAmount + shippingAmount,
+              name: `${quantity}x ${data.name}`,
+              sku: `TAG-PERSONALIZADA-${data.color.toUpperCase()}-${quantity}x-${quantity >= 4 ? "FREE" : shippingMethod === "express" ? "EXPRESS" : "FREE"}`,
               type: "Tag Personalizada",
               color: data.color === "orange" ? "Laranja" : data.color === "purple" ? "Roxa" : data.color,
               petName: data.petName || "",
@@ -1169,10 +1254,20 @@ function CheckoutForm() {
               </div>
             </div>
 
-            {/* Shipping Method - APENAS FRETE EXPRESSO PARA PRODUTOS GENÉRICOS */}
+            {/* Shipping Method - Atualizar para mostrar frete grátis a partir de 4 unidades */}
             {addressFound && (
               <div className="mb-8">
                 <h2 className="text-lg font-semibold mb-2">Método de envio</h2>
+
+                {/* Aviso sobre frete grátis */}
+                {quantity >= 4 && (
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <p className="text-green-800 font-medium">
+                      🎉 <strong>Parabéns!</strong> Com {quantity} unidades, seu frete é <strong>GRÁTIS</strong>!
+                    </p>
+                  </div>
+                )}
+
                 <div className="space-y-3">
                   {(() => {
                     const personalizedData = sessionStorage.getItem("personalizedProduct")
@@ -1198,7 +1293,7 @@ function CheckoutForm() {
                               shippingMethod === "standard"
                                 ? "border-green-300 bg-green-50/30"
                                 : "border-gray-200 hover:border-gray-300"
-                            }`}
+                            } ${quantity >= 4 ? "opacity-100" : ""}`}
                             onClick={() => setShippingMethod("standard")}
                           >
                             <div className="flex items-center justify-between">
@@ -1225,74 +1320,94 @@ function CheckoutForm() {
                             </div>
                           </div>
 
-                          {/* Frete Expresso para produto personalizado */}
-                          <div
-                            className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                              shippingMethod === "express"
-                                ? "border-orange-300 bg-orange-50/30"
-                                : "border-gray-200 hover:border-gray-300"
-                            }`}
-                            onClick={() => setShippingMethod("express")}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="radio"
-                                  id="express"
-                                  name="shipping"
-                                  value="express"
-                                  checked={shippingMethod === "express"}
-                                  onChange={(e) => setShippingMethod(e.target.value)}
-                                  className="pointer-events-none"
-                                />
-                                <div>
-                                  <label htmlFor="express" className="font-medium cursor-pointer">
-                                    Frete Expresso
-                                  </label>
-                                  <p className="text-sm text-gray-600">
-                                    15 a 20 dias (Produção) + 1 a 3 dias (Entrega)
-                                  </p>
+                          {/* Frete Expresso para produto personalizado - desabilitado se >= 4 unidades */}
+                          {quantity < 4 && (
+                            <div
+                              className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
+                                shippingMethod === "express"
+                                  ? "border-orange-300 bg-orange-50/30"
+                                  : "border-gray-200 hover:border-gray-300"
+                              }`}
+                              onClick={() => setShippingMethod("express")}
+                            >
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="radio"
+                                    id="express"
+                                    name="shipping"
+                                    value="express"
+                                    checked={shippingMethod === "express"}
+                                    onChange={(e) => setShippingMethod(e.target.value)}
+                                    className="pointer-events-none"
+                                  />
+                                  <div>
+                                    <label htmlFor="express" className="font-medium cursor-pointer">
+                                      Frete Expresso
+                                    </label>
+                                    <p className="text-sm text-gray-600">
+                                      15 a 20 dias (Produção) + 1 a 3 dias (Entrega)
+                                    </p>
+                                  </div>
                                 </div>
+                                <span className="font-semibold">R$ 10,52</span>
                               </div>
-                              <span className="font-semibold">R$ 10,52</span>
                             </div>
-                          </div>
+                          )}
                         </>
                       )
                     } else {
                       return (
                         <>
-                          {/* APENAS Frete Expresso para produto não personalizado */}
-                          <div className="border-2 rounded-lg p-4 border-orange-300 bg-orange-50/30">
-                            <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-3">
-                                <input
-                                  type="radio"
-                                  id="express"
-                                  name="shipping"
-                                  value="express"
-                                  checked={true}
-                                  readOnly
-                                  className="pointer-events-none"
-                                />
-                                <div>
-                                  <label htmlFor="express" className="font-medium">
-                                    Frete Expresso
-                                  </label>
-                                  <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
+                          {/* Para produto genérico com frete fixo */}
+                          {quantity >= 4 ? (
+                            <div className="border-2 rounded-lg p-4 border-green-300 bg-green-50/30">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="radio"
+                                    id="free-shipping"
+                                    name="shipping"
+                                    value="free"
+                                    checked={true}
+                                    readOnly
+                                    className="pointer-events-none"
+                                  />
+                                  <div>
+                                    <label htmlFor="free-shipping" className="font-medium">
+                                      Frete Grátis
+                                    </label>
+                                    <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
+                                  </div>
                                 </div>
+                                <span className="font-semibold text-green-600">Grátis</span>
                               </div>
-                              <span className="font-semibold">R$ 29,39</span>
                             </div>
-                          </div>
-
-                          {/* Aviso sobre frete único */}
-                          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                            <p className="text-blue-800 text-sm">
-                              ℹ️ <strong>Frete único:</strong> Para garantir a entrega rápida e segura da sua tag,
-                              oferecemos apenas o frete expresso.
-                            </p>
-                          </div>
+                          ) : (
+                            <div className="border-2 rounded-lg p-4 border-orange-300 bg-orange-50/30">
+                              <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-3">
+                                  <input
+                                    type="radio"
+                                    id="express"
+                                    name="shipping"
+                                    value="express"
+                                    checked={true}
+                                    readOnly
+                                    className="pointer-events-none"
+                                  />
+                                  <div>
+                                    <label htmlFor="express" className="font-medium">
+                                      Frete Expresso
+                                    </label>
+                                    <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
+                                    <p className="text-xs text-gray-500">Valor fixo independente da quantidade</p>
+                                  </div>
+                                </div>
+                                <span className="font-semibold">R$ 29,39</span>
+                              </div>
+                            </div>
+                          )}
                         </>
                       )
                     }
