@@ -358,8 +358,8 @@ function CheckoutForm() {
 
       // Produto genérico - APENAS FRETE EXPRESSO
       setProductInfo({
-        type: "Tag Genérica",
-        color: "Não se aplica",
+        type: "Tag Rastreamento Petloo",
+        color: "Padrão",
         amount: 2939, // Valor do frete expresso
         sku: "TAG-APP-2939",
         petName: "", // Produto genérico não tem nome do pet
