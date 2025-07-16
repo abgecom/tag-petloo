@@ -163,13 +163,13 @@ function OrderSummaryContent({
     // 🔧 CORREÇÃO: Lógica para produtos genéricos (NÃO personalizados)
     if (!addressFound) return 0
 
-    // Para produtos genéricos com 5+ unidades: frete grátis
-    if (quantity >= 5) {
+    // Para produtos genéricos com 6+ unidades: frete grátis
+    if (quantity >= 6) {
       // Primeira unidade grátis + unidades adicionais R$ 9,90 cada
       return (quantity - 1) * 9.9 // Sem frete
     }
 
-    // Para produtos genéricos com menos de 5 unidades: frete R$ 29,39
+    // Para produtos genéricos com menos de 6 unidades: frete R$ 29,39
     const baseShipping = 29.39
     const additionalPrice = (quantity - 1) * 9.9
     return baseShipping + additionalPrice
@@ -232,8 +232,8 @@ function OrderSummaryContent({
       // Produto: primeira unidade grátis, demais R$ 9,90
       productPrice = (quantity - 1) * 9.9
 
-      // Frete: R$ 29,39 fixo, grátis a partir de 4 unidades
-      shippingPrice = quantity >= 5 ? 0 : 29.39
+      // Frete: R$ 29,39 fixo, grátis a partir de 6 unidades
+      shippingPrice = quantity >= 6 ? 0 : 29.39
     }
   }
 
@@ -649,13 +649,13 @@ function CheckoutForm() {
     // 🔧 CORREÇÃO: Lógica para produtos genéricos (NÃO personalizados)
     if (!addressFound) return 0
 
-    // Para produtos genéricos com 5+ unidades: frete grátis
-    if (quantity >= 5) {
+    // Para produtos genéricos com 6+ unidades: frete grátis
+    if (quantity >= 6) {
       // Primeira unidade grátis + unidades adicionais R$ 9,90 cada
       return (quantity - 1) * 9.9 // Sem frete
     }
 
-    // Para produtos genéricos com menos de 5 unidades: frete R$ 29,39
+    // Para produtos genéricos com menos de 6 unidades: frete R$ 29,39
     const baseShipping = 29.39
     const additionalPrice = (quantity - 1) * 9.9
     return baseShipping + additionalPrice
@@ -1584,14 +1584,14 @@ function CheckoutForm() {
                   }
 
                   // 🆕 MENSAGEM ESPECÍFICA PARA PRODUTOS GENÉRICOS
-                  if (!isPersonalized && quantity < 5) {
+                  if (!isPersonalized && quantity < 6) {
                     return (
                       <>
                         {/* Aviso sobre frete grátis para produtos genéricos */}
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
                           <p className="text-blue-800 text-sm">
-                            💡 <strong>Dica:</strong> Pedidos com 5 tags ou mais ganham <strong>frete grátis</strong>!
-                            Você está a {5 - quantity} tag{5 - quantity > 1 ? "s" : ""} de conseguir o frete grátis.
+                            💡 <strong>Dica:</strong> Pedidos com 6 tags ou mais ganham <strong>frete grátis</strong>!
+                            Você está a {6 - quantity} tag{6 - quantity > 1 ? "s" : ""} de conseguir o frete grátis.
                           </p>
                         </div>
 
@@ -1623,8 +1623,8 @@ function CheckoutForm() {
                     )
                   }
 
-                  // Aviso sobre frete grátis quando já tem 4+ unidades (genérico)
-                  if (!isPersonalized && quantity >= 5) {
+                  // Aviso sobre frete grátis quando já tem 6+ unidades (genérico)
+                  if (!isPersonalized && quantity >= 6) {
                     return (
                       <>
                         <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">

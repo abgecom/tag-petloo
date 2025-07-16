@@ -50,19 +50,19 @@ export async function POST(request: NextRequest) {
       1887, // R$ 18,87 - Frete básico
       2939, // R$ 29,39 - Frete expresso
       3929, // R$ 39,29 - 2 tags genéricas (29,39 + 9,90)
-      3960, // R$ 39,60 - 5 tags genéricas (4 x 9,90 = frete grátis)
+      3960, // R$ 39,60 - 6 tags genéricas (5 x 9,90 = frete grátis)
       4919, // R$ 49,19 - 3 tags genéricas (29,39 + 19,80)
-      4950, // R$ 49,50 - 6 tags genéricas (5 x 9,90 = frete grátis)
+      4950, // R$ 49,50 - 7 tags genéricas (6 x 9,90 = frete grátis)
       4990, // R$ 49,90 - 1 tag personalizada
       5909, // R$ 59,09 - 4 tags genéricas (29,39 + 29,70)
-      5940, // R$ 59,40 - 7 tags genéricas (6 x 9,90 = frete grátis)
+      5940, // R$ 59,40 - 8 tags genéricas (7 x 9,90 = frete grátis)
       5980, // R$ 59,80 - 2 tags personalizadas (49,90 + 9,90)
       6042, // R$ 60,42 - Valor antigo (manter compatibilidade)
-      6930, // R$ 69,30 - 8 tags genéricas (7 x 9,90 = frete grátis)
+      6930, // R$ 69,30 - 9 tags genéricas (8 x 9,90 = frete grátis)
       6970, // R$ 69,70 - 3 tags personalizadas (49,90 + 9,90 + 9,90)
-      7920, // R$ 79,20 - 9 tags genéricas (8 x 9,90 = frete grátis)
+      7920, // R$ 79,20 - 10 tags genéricas (9 x 9,90 = frete grátis)
       7960, // R$ 79,60 - 4 tags personalizadas (49,90 + 9,90 + 9,90 + 9,90)
-      8910, // R$ 89,10 - 10 tags genéricas (9 x 9,90 = frete grátis)
+      8910, // R$ 89,10 - 11 tags genéricas (10 x 9,90 = frete grátis)
       8950, // R$ 89,50 - 5 tags personalizadas
       9940, // R$ 99,40 - 6 tags personalizadas
       10930, // R$ 109,30 - 7 tags personalizadas
