@@ -53,7 +53,30 @@ interface CEPProvider {
 }
 
 const CEP_PROVIDERS: CEPProvider[] = [
-  // 1. CEP Aberto (API gratuita, bem confiável)
+  // 1. BrasilAPI (API governamental gratuita) - MOVIDA PARA PRIMEIRA POSIÇÃO
+  {
+    name: "BrasilAPI",
+    url: (cep: string) => `https://brasilapi.com.br/api/cep/v1/${cep}`,
+    headers: {
+      Accept: "application/json",
+      "User-Agent": "Petloo-Checkout/1.0",
+    },
+    parseResponse: (data: any) => {
+      if (data && data.city && !data.error) {
+        return {
+          cep: data.cep || "",
+          logradouro: data.street || "",
+          bairro: data.neighborhood || "",
+          localidade: data.city || "",
+          uf: data.state || "",
+        }
+      }
+      return null
+    },
+    timeout: 5000,
+  },
+
+  // 2. CEP Aberto (API gratuita, bem confiável)
   {
     name: "CEP Aberto",
     url: (cep: string) => `https://www.cepaberto.com/api/v3/cep?cep=${cep}`,
@@ -77,7 +100,7 @@ const CEP_PROVIDERS: CEPProvider[] = [
     timeout: 5000,
   },
 
-  // 2. PostMon (API gratuita, sem necessidade de token)
+  // 3. PostMon (API gratuita, sem necessidade de token)
   {
     name: "PostMon",
     url: (cep: string) => `https://api.postmon.com.br/v1/cep/${cep}`,
@@ -100,7 +123,7 @@ const CEP_PROVIDERS: CEPProvider[] = [
     timeout: 5000,
   },
 
-  // 3. ViaCEP (mantido como fallback)
+  // 4. ViaCEP (mantido como fallback)
   {
     name: "ViaCEP",
     url: (cep: string) => `https://viacep.com.br/ws/${cep}/json/`,
@@ -123,7 +146,7 @@ const CEP_PROVIDERS: CEPProvider[] = [
     timeout: 6000,
   },
 
-  // 4. CEP.la (API gratuita)
+  // 5. CEP.la (API gratuita)
   {
     name: "CEP.la",
     url: (cep: string) => `https://cep.la/${cep}`,
@@ -137,29 +160,6 @@ const CEP_PROVIDERS: CEPProvider[] = [
           cep: data.cep || "",
           logradouro: data.address || "",
           bairro: data.district || "",
-          localidade: data.city || "",
-          uf: data.state || "",
-        }
-      }
-      return null
-    },
-    timeout: 5000,
-  },
-
-  // 5. BrasilAPI (API governamental gratuita)
-  {
-    name: "BrasilAPI",
-    url: (cep: string) => `https://brasilapi.com.br/api/cep/v1/${cep}`,
-    headers: {
-      Accept: "application/json",
-      "User-Agent": "Petloo-Checkout/1.0",
-    },
-    parseResponse: (data: any) => {
-      if (data && data.city && !data.error) {
-        return {
-          cep: data.cep || "",
-          logradouro: data.street || "",
-          bairro: data.neighborhood || "",
           localidade: data.city || "",
           uf: data.state || "",
         }

@@ -433,7 +433,7 @@ function CheckoutForm() {
     petName?: string
   } | null>(null)
 
-  // 🆕 NOVOS ESTADOS PARA TAGS PERSONALIZADAS
+  // 🆕 NOVOS ESTADOS PARA TAGS PERSONALIZADAS\
   const [personalizedTags, setPersonalizedTags] = useState<PersonalizedTag[]>([])
   const [showTagManager, setShowTagManager] = useState(false)
   const [editingTagIndex, setEditingTagIndex] = useState<number>(-1)
@@ -798,12 +798,18 @@ function CheckoutForm() {
   }
 
   const formatCEP = (value: string) => {
+    // Remove all non-digits
     const cleaned = value.replace(/\D/g, "")
-    const match = cleaned.match(/^(\d{5})(\d{3})$/)
-    if (match) {
-      return `${match[1]}-${match[2]}`
+
+    // Limit to 8 digits maximum
+    const limited = cleaned.substring(0, 8)
+
+    // Apply mask progressively
+    if (limited.length <= 5) {
+      return limited
+    } else {
+      return `${limited.substring(0, 5)}-${limited.substring(5)}`
     }
-    return value
   }
 
   const copyToClipboard = async (text: string) => {
