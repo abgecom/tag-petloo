@@ -228,7 +228,7 @@ export async function POST(request: NextRequest) {
         customer_state: body.estado,
         order_amount: body.shipping_price / 100, // Converter centavos para reais
         payment_method: "Cartão de Crédito",
-        order_status: "Aguardando Pagamento",
+        order_status: "Confirmado", // 🎯 ALTERADO: Sempre "Confirmado" para cartão de crédito
         // 🎯 USAR DADOS REAIS DO PRODUTO
         product_type: body.product_type,
         product_color: body.product_color,
