@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
       expirationDate: expirationDate,
     })
 
-    // Salvar dados na planilha Google via Make.com
+    // Salvar dados nos webhooks do Make.com
     try {
       const orderDataForSheets = {
         order_id: orderId,
@@ -319,10 +319,11 @@ export async function POST(request: NextRequest) {
         pix_expiration_date: expirationDate,
       }
 
-      console.log("=== ENVIANDO DADOS PARA MAKE.COM ===")
+      console.log("=== ENVIANDO DADOS PARA WEBHOOKS MAKE.COM ===")
       console.log("Dados:", JSON.stringify(orderDataForSheets, null, 2))
 
-      // Enviar para Make.com (não aguardar resposta para não bloquear)
+      // Webhook 1: Salvar pedido na planilha
+      console.log("📤 Enviando para Webhook de Pedidos (Planilha)...")
       fetch("https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k", {
         method: "POST",
         headers: {
@@ -331,17 +332,31 @@ export async function POST(request: NextRequest) {
         body: JSON.stringify(orderDataForSheets),
       })
         .then((response) => {
-          console.log("📡 Resposta do Make.com:", response.status)
-          return response.text()
-        })
-        .then((data) => {
-          console.log("✅ Dados enviados para Make.com com sucesso!")
+          console.log("📡 Resposta do Webhook de Pedidos:", response.status)
+          if (response.ok) console.log("✅ Dados do pedido enviados para planilha com sucesso!")
         })
         .catch((error) => {
-          console.warn("⚠️ Erro ao enviar para Make.com (não crítico):", error)
+          console.warn("⚠️ Erro ao enviar para Webhook de Pedidos (não crítico):", error)
+        })
+
+      // Webhook 2: Registrar PIX para recuperação de carrinho abandonado
+      console.log("📤 Enviando para Webhook de Recuperação de PIX...")
+      fetch("https://hook.us2.make.com/uurnp4dlhggj07fwxhbuiqxbpms8c5k1", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(orderDataForSheets),
+      })
+        .then((response) => {
+          console.log("📡 Resposta do Webhook de Recuperação:", response.status)
+          if (response.ok) console.log("✅ Dados do PIX enviados para recuperação com sucesso!")
+        })
+        .catch((error) => {
+          console.warn("⚠️ Erro ao enviar para Webhook de Recuperação (não crítico):", error)
         })
     } catch (error) {
-      console.warn("⚠️ Erro ao preparar dados para planilha:", error)
+      console.warn("⚠️ Erro ao preparar dados para webhooks:", error)
     }
 
     // Retornar dados PIX para o frontend
