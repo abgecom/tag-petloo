@@ -11,13 +11,13 @@ import ColorSelectionPopup from "@/components/ColorSelectionPopup"
 const testimonials = [
   {
     initial: "F",
-    name: "Fernanda Almeida",
+    name: "Fernanda Bisoli",
     text: "Minha gatinha sumiu perto do sítio e estava presa na mata. A tag foi essencial! Achei a Luna rapidinho. Recomendo muito!",
     gradient: "from-purple-400 to-pink-400",
   },
   {
     initial: "A",
-    name: "Ana Clara Mendes",
+    name: "Ana Clara Uchoa",
     text: "O rastreamento é excelente, localizei o Juca em menos de 5 minutos. Segurança total pro meu coração e pro meu peludinho!",
     gradient: "from-blue-400 to-cyan-400",
   },
@@ -29,7 +29,7 @@ const testimonials = [
   },
   {
     initial: "L",
-    name: "Letícia Barbosa",
+    name: "Letícia Caliari",
     text: "O seguro dentro do app e já estou utilizando. Vale muito a pena, principalmente pra quem se preocupa com gastos inesperados.",
     gradient: "from-orange-400 to-red-400",
   },
@@ -41,13 +41,13 @@ const testimonials = [
   },
   {
     initial: "J",
-    name: "João Vítor Andrade",
+    name: "João Vítor Yatsu",
     text: "Meu dog tinha fugido do parquinho por causa de um rojão que estouraram e assustou ele, saiu correndo e não consegui pegar. Achei ele numa rua distante aqui do bairro, tudo graças ao rastreamento da tag da Petloo. Não vivo mais sem!",
     gradient: "from-indigo-400 to-purple-400",
   },
   {
     initial: "C",
-    name: "Camila Freitas",
+    name: "Camila Abdalla",
     text: "Minha gatinha adora fugir pra explorar, mas agora fico tranquila com a tag. Achei ela em menos de 10 minutos perto de casa.",
     gradient: "from-teal-400 to-blue-400",
   },
