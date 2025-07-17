@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Menu, X, Search, ShoppingCart, Instagram } from "lucide-react"
+import { Menu, X, Instagram } from "lucide-react"
 import Link from "next/link"
 
 export default function Header() {
@@ -76,16 +76,6 @@ export default function Header() {
                 </a>
               ))}
             </nav>
-
-            {/* Right side icons */}
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md">
-                <Search className="h-5 w-5" />
-              </button>
-              <button className="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md">
-                <ShoppingCart className="h-5 w-5" />
-              </button>
-            </div>
           </div>
         </div>
 
