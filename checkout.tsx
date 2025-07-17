@@ -395,7 +395,7 @@ function CheckoutForm() {
   const router = useRouter()
 
   // All hooks must be called before any conditional returns
-  const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(false)
+  const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(true)
   const [quantity, setQuantity] = useState(1)
   const [paymentMethod, setPaymentMethod] = useState("credit")
   const [addressData, setAddressData] = useState({

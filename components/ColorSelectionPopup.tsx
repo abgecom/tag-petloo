@@ -51,6 +51,13 @@ export default function ColorSelectionPopup({ isOpen, onClose, onFinalizePurchas
             <h2 className="text-2xl md:text-3xl font-bold text-black leading-tight">Escolha a cor da sua tag</h2>
           </div>
 
+          {/* Observation Text */}
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+            <p className="text-blue-800 text-sm text-center">
+              💡 Caso queira adicionar mais tags ao seu pedido será possível no próximo passo da compra
+            </p>
+          </div>
+
           {/* Color Options */}
           <div className="space-y-4">
             {/* Orange Tag */}
