@@ -87,25 +87,34 @@ export function usePaymentStatusChecker({
             onPaymentConfirmed(data)
           }
 
+          // Tentar obter dados do pedido salvos no checkout
+          let personalizedTags = []
+          let quantity = 1
+          let customerName = ""
+          let customerEmail = ""
+          try {
+            const savedOrderData = sessionStorage.getItem("orderDataForObrigado")
+            if (savedOrderData) {
+              const parsedData = JSON.parse(savedOrderData)
+              personalizedTags = parsedData.personalizedTags || []
+              quantity = parsedData.quantity || 1
+              customerName = parsedData.customerName || ""
+              customerEmail = parsedData.customerEmail || ""
+              sessionStorage.removeItem("orderDataForObrigado") // Limpar após o uso
+            }
+          } catch (storageError) {
+            console.warn("⚠️ Erro ao ler dados salvos para a página de obrigado:", storageError)
+          }
+
           // Salvar dados do pedido para página de obrigado
           const orderSummary = {
             orderId: data.order_id,
-            customerName: "", // Será preenchido se disponível
-            customerEmail: "", // Será preenchido se disponível
-            amount: data.amount, // Manter o valor original da API (já em centavos)
+            customerName: customerName,
+            customerEmail: customerEmail,
+            amount: data.amount,
             paymentMethod: "PIX",
-          }
-
-          // Tentar obter dados do sessionStorage se disponíveis
-          try {
-            const savedOrderData = sessionStorage.getItem("orderSummary")
-            if (savedOrderData) {
-              const existingData = JSON.parse(savedOrderData)
-              orderSummary.customerName = existingData.customerName || ""
-              orderSummary.customerEmail = existingData.customerEmail || ""
-            }
-          } catch (storageError) {
-            console.warn("⚠️ Erro ao ler dados salvos:", storageError)
+            personalizedTags: personalizedTags,
+            quantity: quantity,
           }
 
           sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))

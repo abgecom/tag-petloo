@@ -15,6 +15,20 @@ const PixPurchaseTracker = dynamic(() => import("@/components/PixPurchaseTracker
   ssr: false,
 })
 
+// Interfaces para os dados do pedido
+interface PersonalizedTag {
+  id: string
+  color: "orange" | "purple"
+  petName: string
+  price: number
+}
+
+interface OrderData {
+  personalizedTags: PersonalizedTag[]
+  quantity: number
+  isPersonalized: boolean
+}
+
 export default function PixPaymentPageClient() {
   const searchParams = useSearchParams()
   const router = useRouter()
@@ -26,6 +40,7 @@ export default function PixPaymentPageClient() {
     amount: number
     pix_payment_link?: string
   } | null>(null)
+  const [orderData, setOrderData] = useState<OrderData | null>(null) // Estado para os dados do pedido
 
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -53,6 +68,18 @@ export default function PixPaymentPageClient() {
 
     // Primeiro, verificar se temos dados no sessionStorage
     if (typeof window !== "undefined") {
+      // Buscar dados do pedido para exibição
+      const savedOrderData = sessionStorage.getItem("orderDataForPixPage")
+      if (savedOrderData) {
+        try {
+          const parsedData = JSON.parse(savedOrderData)
+          console.log("✅ DADOS DO PEDIDO ENCONTRADOS NO SESSION STORAGE (PIX)!")
+          setOrderData(parsedData)
+        } catch (error) {
+          console.error("Erro ao parsear dados do pedido do sessionStorage:", error)
+        }
+      }
+
       const savedPixData = sessionStorage.getItem("pixPaymentData")
       if (savedPixData) {
         try {
@@ -323,17 +350,50 @@ export default function PixPaymentPageClient() {
 
           {/* Payment Info */}
           <div className="bg-gray-50 p-4 rounded-lg mb-6">
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-medium text-gray-700">Produto:</span>
-              <span className="text-sm text-gray-600">Tag rastreamento Petloo + App</span>
+            {/* Itens do Pedido */}
+            <div className="mb-4">
+              <span className="font-medium text-gray-700 block mb-2">Itens do pedido:</span>
+              <div className="space-y-2">
+                {orderData?.isPersonalized && orderData.personalizedTags.length > 0 ? (
+                  orderData.personalizedTags.map((tag, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border"
+                    >
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-3 h-3 rounded-full ${
+                            tag.color === "orange" ? "bg-orange-500" : "bg-purple-500"
+                          }`}
+                        ></div>
+                        <span>
+                          Tag {tag.color === "orange" ? "Laranja" : "Roxa"} - "{tag.petName}"
+                        </span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
+                    <span>Tag rastreamento Petloo + App</span>
+                    <span>{orderData?.quantity || 1}x</span>
+                  </div>
+                )}
+              </div>
             </div>
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-medium text-gray-700">Valor:</span>
-              <span className="font-bold text-green-600 text-lg">{totalDisplay}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="font-medium text-gray-700">ID do pedido:</span>
-              <span className="text-sm text-gray-600 font-mono">{pixData.orderId}</span>
+
+            {/* Divisor */}
+            <div className="border-t my-4"></div>
+
+            {/* Resumo Financeiro */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-700">Valor total:</span>
+                <span className="font-bold text-green-600 text-lg">{totalDisplay}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="font-medium text-gray-700">ID do pedido:</span>
+                <span className="text-sm text-gray-600 font-mono">{pixData.orderId}</span>
+              </div>
             </div>
           </div>
 

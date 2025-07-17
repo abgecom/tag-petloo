@@ -991,6 +991,23 @@ function CheckoutForm() {
       console.log("🎯 Produto final para checkout:", productInfo)
 
       if (paymentMethod === "pix") {
+        // Salvar dados do pedido para a página PIX
+        const orderDataForPix = {
+          personalizedTags: personalizedTags,
+          quantity: quantity,
+          isPersonalized: personalizedTags.length > 0 || !!sessionStorage.getItem("personalizedProduct"),
+        }
+        sessionStorage.setItem("orderDataForPixPage", JSON.stringify(orderDataForPix))
+
+        // Salvar dados para a página de Obrigado
+        const orderDataForObrigado = {
+          personalizedTags: personalizedTags,
+          quantity: quantity,
+          customerName: name,
+          customerEmail: email,
+        }
+        sessionStorage.setItem("orderDataForObrigado", JSON.stringify(orderDataForObrigado))
+
         // Processar pagamento PIX
         const pixData = {
           name,
@@ -1181,6 +1198,8 @@ function CheckoutForm() {
               customerEmail: email,
               amount: productInfo.amount, // Usar o valor real da compra em vez de valor fixo
               paymentMethod: "Cartão de Crédito",
+              personalizedTags: personalizedTags,
+              quantity: quantity,
             }
 
             sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))
