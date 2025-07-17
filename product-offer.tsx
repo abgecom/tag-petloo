@@ -1,15 +1,85 @@
 "use client"
 
-import { Check, ShoppingCart, Shield, Truck, RotateCcw, Award, FileText } from "lucide-react"
+import { Check, ShoppingCart, Shield, Truck, RotateCcw, Award, FileText, ChevronLeft, ChevronRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { useState } from "react"
+import { useState, useRef } from "react"
 import PersonalizationPopup from "@/components/PersonalizationPopup"
 import ColorSelectionPopup from "@/components/ColorSelectionPopup"
+
+// Testimonial data
+const testimonials = [
+  {
+    initial: "F",
+    name: "Fernanda Almeida",
+    text: "Minha gatinha sumiu perto do sítio e estava presa na mata. A tag foi essencial! Achei a Luna rapidinho. Recomendo muito!",
+    gradient: "from-purple-400 to-pink-400",
+  },
+  {
+    initial: "A",
+    name: "Ana Clara Mendes",
+    text: "O rastreamento é excelente, localizei o Juca em menos de 5 minutos. Segurança total pro meu coração e pro meu peludinho!",
+    gradient: "from-blue-400 to-cyan-400",
+  },
+  {
+    initial: "M",
+    name: "Mariana Diniz",
+    text: "Tenho 5 cães e sempre esquecia as datas das vacinas e vermífugos. Agora recebo as notificações pelo app e nunca mais atrasei. Simplesmente perfeito!",
+    gradient: "from-green-400 to-emerald-400",
+  },
+  {
+    initial: "L",
+    name: "Letícia Barbosa",
+    text: "O seguro dentro do app e já estou utilizando. Vale muito a pena, principalmente pra quem se preocupa com gastos inesperados.",
+    gradient: "from-orange-400 to-red-400",
+  },
+  {
+    initial: "P",
+    name: "Paula Castro",
+    text: "Muito prático! As notificações do cartão de vacinas me ajudam demais, principalmente pra mim que tenho vários gatos.",
+    gradient: "from-pink-400 to-rose-400",
+  },
+  {
+    initial: "J",
+    name: "João Vítor Andrade",
+    text: "Meu dog tinha fugido do parquinho por causa de um rojão que estouraram e assustou ele, saiu correndo e não consegui pegar. Achei ele numa rua distante aqui do bairro, tudo graças ao rastreamento da tag da Petloo. Não vivo mais sem!",
+    gradient: "from-indigo-400 to-purple-400",
+  },
+  {
+    initial: "C",
+    name: "Camila Freitas",
+    text: "Minha gatinha adora fugir pra explorar, mas agora fico tranquila com a tag. Achei ela em menos de 10 minutos perto de casa.",
+    gradient: "from-teal-400 to-blue-400",
+  },
+]
+
+// TestimonialCard component
+const TestimonialCard = ({
+  initial,
+  name,
+  text,
+  gradient,
+}: { initial: string; name: string; text: string; gradient: string }) => (
+  <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+    <div className="flex items-center mb-4">
+      <div
+        className={`w-12 h-12 bg-gradient-to-r ${gradient} rounded-full flex items-center justify-center text-white font-bold text-lg`}
+      >
+        {initial}
+      </div>
+      <div className="ml-3">
+        <h4 className="font-semibold text-gray-800 text-sm">{name}</h4>
+        <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+      </div>
+    </div>
+    <p className="text-gray-700 text-sm leading-relaxed">{text}</p>
+  </div>
+)
 
 export default function ProductOffer() {
   const [isPersonalizationPopupOpen, setIsPersonalizationPopupOpen] = useState(false)
   const [isColorSelectionPopupOpen, setIsColorSelectionPopupOpen] = useState(false)
+  const scrollContainerRef = useRef<HTMLDivElement>(null)
 
   const openPersonalizationPopup = () => setIsPersonalizationPopupOpen(true)
   const closePersonalizationPopup = () => setIsPersonalizationPopupOpen(false)
@@ -23,17 +93,12 @@ export default function ProductOffer() {
 
   const handleSkipPersonalization = () => {
     closePersonalizationPopup()
-    // Use replace instead of href for faster navigation
     window.location.replace("/checkout")
   }
 
   const handleFinalizePurchase = (color: "orange" | "purple", petName: string) => {
     closeColorSelectionPopup()
-
-    // Definir o price_id baseado na cor escolhida
     const priceId = color === "orange" ? "price_1RjRxWRtGASrDbfeP7jp0wb0" : "price_1RjRyURtGASrDbfeuppcCqtm"
-
-    // Pre-save data to sessionStorage before navigation for faster loading
     sessionStorage.setItem(
       "personalizedProduct",
       JSON.stringify({
@@ -41,20 +106,36 @@ export default function ProductOffer() {
         priceId,
         amount: 4990,
         name: `Tag ${color === "orange" ? "Laranja" : "Roxa"} Personalizada + App`,
-        petName: petName, // Adicionar nome do pet
+        petName: petName,
       }),
     )
-
-    // Use replace for faster navigation
     const params = new URLSearchParams({
       personalized: "true",
       color: color,
       priceId: priceId,
       amount: "4990",
-      petName: encodeURIComponent(petName), // Adicionar à URL também
+      petName: encodeURIComponent(petName),
     })
-
     window.location.replace(`/checkout?${params.toString()}`)
+  }
+
+  // Scroll functions for testimonials carousel
+  const scrollLeft = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: -320, // Width of one card (w-80 = 320px)
+        behavior: "smooth",
+      })
+    }
+  }
+
+  const scrollRight = () => {
+    if (scrollContainerRef.current) {
+      scrollContainerRef.current.scrollBy({
+        left: 320, // Width of one card (w-80 = 320px)
+        behavior: "smooth",
+      })
+    }
   }
 
   return (
@@ -80,8 +161,6 @@ export default function ProductOffer() {
               <span className="text-gray-700 font-semibold ml-1">4,8/5</span>
             </div>
           </div>
-
-          {/* Social Proof Image */}
           <div className="max-w-2xl mx-auto">
             <img
               src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/20250710_1202_Tinoco%20e%20Tecnologia_simple_compose_01jztdnj16eeprx5w1snhshss3.png"
@@ -94,14 +173,10 @@ export default function ProductOffer() {
         {/* Benefits Section */}
         <div className="py-16 px-4 md:px-12 -mx-4" style={{ backgroundColor: "#F1E9DB" }}>
           <div className="max-w-6xl mx-auto">
-            {/* Headline */}
             <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 animate-fade-in-up text-black">
               Benefícios de ser time Petloo
             </h2>
-
-            {/* Mobile Layout */}
             <div className="lg:hidden space-y-8">
-              {/* First 3 benefits - Above image on mobile */}
               <div className="space-y-6">
                 <div className="flex items-center justify-center gap-3 benefit-item animate-slide-in-left">
                   <span className="text-2xl">🛰️</span>
@@ -128,8 +203,6 @@ export default function ProductOffer() {
                   </span>
                 </div>
               </div>
-
-              {/* Center Image */}
               <div>
                 <img
                   src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/20250710_1226_Cachorro%20no%20Parque_simple_compose_01jztezxy5e1199htb50hwqc18.png"
@@ -137,8 +210,6 @@ export default function ProductOffer() {
                   className="w-full h-auto rounded-2xl shadow-lg"
                 />
               </div>
-
-              {/* Last 3 benefits - Below image on mobile */}
               <div className="space-y-6">
                 <div
                   className="flex items-center justify-center gap-3 benefit-item animate-slide-in-right"
@@ -169,10 +240,7 @@ export default function ProductOffer() {
                 </div>
               </div>
             </div>
-
-            {/* Desktop Layout */}
             <div className="hidden lg:grid lg:grid-cols-3 gap-12 items-center">
-              {/* Left Side - Benefits */}
               <div className="space-y-6">
                 <div className="flex items-center gap-3 benefit-item animate-slide-in-left">
                   <span className="text-2xl">🛰️</span>
@@ -199,8 +267,6 @@ export default function ProductOffer() {
                   </span>
                 </div>
               </div>
-
-              {/* Center - Image */}
               <div>
                 <img
                   src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/20250710_1226_Cachorro%20no%20Parque_simple_compose_01jztezxy5e1199htb50hwqc18.png"
@@ -208,8 +274,6 @@ export default function ProductOffer() {
                   className="w-full h-auto rounded-2xl shadow-lg"
                 />
               </div>
-
-              {/* Right Side - Benefits */}
               <div className="space-y-6">
                 <div
                   className="flex items-center gap-3 benefit-item animate-slide-in-right"
@@ -247,7 +311,6 @@ export default function ProductOffer() {
         <div className="py-20 px-6 md:px-12 -mx-4" style={{ backgroundColor: "#F1E9DB" }}>
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col md:flex-row items-center justify-between gap-10">
-              {/* Lado Esquerdo - Texto */}
               <div className="flex-1 text-center md:text-left">
                 <h2 className="text-3xl md:text-5xl font-bold text-black mb-4 font-sans">
                   Como funciona a tag Petloo?{" "}
@@ -255,10 +318,8 @@ export default function ProductOffer() {
                 <p className="text-lg md:text-xl text-black mb-6">
                   {
                     "Você recebe em sua casa a tag rastreadora e se cadastra no app Petloo. Dentro do app você conecta a sua tag única com os dados do seu Pet e a partir dai, você já consegue localiza-lo. "
-                  }{" "}
+                  }
                 </p>
-
-                {/* Lista de etapas (opcional) */}
                 <div className="space-y-4">
                   <div className="flex items-start gap-3">
                     <span className="flex-shrink-0 w-6 h-6 bg-green-500 text-white rounded-full flex items-center justify-center text-sm font-bold">
@@ -280,8 +341,6 @@ export default function ProductOffer() {
                   </div>
                 </div>
               </div>
-
-              {/* Lado Direito - Imagem */}
               <div className="flex-1">
                 <div className="w-full h-[400px] md:h-[500px] bg-gray-200 rounded-2xl flex items-center justify-center">
                   <img
@@ -303,177 +362,39 @@ export default function ProductOffer() {
             </h2>
           </div>
 
-          {/* Testimonials Carousel */}
-          <div className="relative overflow-hidden">
-            <div className="flex animate-fast-marquee space-x-6">
-              {/* Testimonial 1 */}
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    F
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Fernanda Almeida</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "Minha gatinha sumiu perto do sítio e estava presa na mata. A tag foi essencial! Achei a Luna
-                  rapidinho. Recomendo muito!"
-                </p>
-              </div>
+          {/* Carousel with Navigation Arrows */}
+          <div className="relative max-w-7xl mx-auto">
+            {/* Left Arrow */}
+            <button
+              onClick={scrollLeft}
+              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-200 hover:scale-110"
+              aria-label="Depoimento anterior"
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-700" />
+            </button>
 
-              {/* Testimonial 2 */}
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    A
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Ana Clara Mendes</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "O rastreamento é excelente, localizei o Juca em menos de 5 minutos. Segurança total pro meu coração e
-                  pro meu peludinho!"
-                </p>
-              </div>
+            {/* Right Arrow */}
+            <button
+              onClick={scrollRight}
+              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-200 hover:scale-110"
+              aria-label="Próximo depoimento"
+            >
+              <ChevronRight className="w-6 h-6 text-gray-700" />
+            </button>
 
-              {/* Testimonial 3 */}
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    M
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Mariana Diniz</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
+            {/* Scrollable Container */}
+            <div
+              ref={scrollContainerRef}
+              className="flex overflow-x-auto gap-6 pb-4 scrollbar-hide pl-6 md:pl-12 pr-6 md:pr-12"
+              style={{ scrollSnapType: "x mandatory" }}
+            >
+              {testimonials.map((testimonial, index) => (
+                <div key={index} style={{ scrollSnapAlign: "start" }}>
+                  <TestimonialCard {...testimonial} />
                 </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "Tenho 5 cães e sempre esquecia as datas das vacinas e vermífugos. Agora recebo as notificações pelo
-                  app e nunca mais atrasei. Simplesmente perfeito!"
-                </p>
-              </div>
-
-              {/* Testimonial 4 */}
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    L
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Letícia Barbosa</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "O seguro dentro do app e já estou utilizando. Vale muito a pena, principalmente pra quem se preocupa
-                  com gastos inesperados."
-                </p>
-              </div>
-
-              {/* Testimonial 5 */}
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    P
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Paula Castro</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "Muito prático! As notificações do cartão de vacinas me ajudam demais, principalmente pra mim que
-                  tenho vários gatos."
-                </p>
-              </div>
-
-              {/* Testimonial 6 */}
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    J
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">João Vítor Andrade</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "Meu dog tinha fugido do parquinho por causa de um rojão que estouraram e assustou ele, saiu correndo
-                  e não consegui pegar. Achei ele numa rua distante aqui do bairro, tudo graças ao rastreamento da tag
-                  da Petloo. Não vivo mais sem!"
-                </p>
-              </div>
-
-              {/* Testimonial 7 */}
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-teal-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    C
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Camila Freitas</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "Minha gatinha adora fugir pra explorar, mas agora fico tranquila com a tag. Achei ela em menos de 10
-                  minutos perto de casa."
-                </p>
-              </div>
-
-              {/* Duplicate testimonials for seamless loop */}
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    F
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Fernanda Almeida</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "Minha gatinha sumiu perto do sítio e estava presa na mata. A tag foi essencial! Achei a Luna
-                  rapidinho. Recomendo muito!"
-                </p>
-              </div>
-
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    A
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Ana Clara Mendes</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "O rastreamento é excelente, localizei o Juca em menos de 5 minutos. Segurança total pro meu coração e
-                  pro meu peludinho!"
-                </p>
-              </div>
-
-              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
-                <div className="flex items-center mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                    M
-                  </div>
-                  <div className="ml-3">
-                    <h4 className="font-semibold text-gray-800 text-sm">Mariana Diniz</h4>
-                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
-                  </div>
-                </div>
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  "Tenho 5 cães e sempre esquecia as datas das vacinas e vermífugos. Agora recebo as notificações pelo
-                  app e nunca mais atrasei. Simplesmente perfeito!"
-                </p>
-              </div>
+              ))}
+              {/* Spacer at the end for padding */}
+              <div className="flex-shrink-0 w-1"></div>
             </div>
           </div>
         </div>
@@ -541,7 +462,6 @@ export default function ProductOffer() {
             </div>
           </div>
 
-          {/* Guarantees - Horizontal Layout */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
             <div className="flex items-center gap-2 text-sm">
               <Award className="w-5 h-5" style={{ color: "#24B14C" }} />
@@ -565,9 +485,7 @@ export default function ProductOffer() {
         {/* Free Gifts Section */}
         <div className="space-y-6">
           <h2 className="text-2xl font-bold text-gray-800 text-center">Você também vai ganhar um presente </h2>
-
           <div className="space-y-4 max-w-2xl mx-auto">
-            {/* Gift 1 */}
             <div className="bg-green-50 border-2 border-green-200 rounded-lg p-4">
               <div className="flex items-center gap-4">
                 <img
@@ -603,7 +521,6 @@ export default function ProductOffer() {
         {/* FAQ Section */}
         <div className="space-y-8">
           <h2 className="text-3xl font-bold text-black text-center">Perguntas Frequentes</h2>
-
           <div className="max-w-3xl mx-auto">
             <Accordion type="single" collapsible className="space-y-4">
               <AccordionItem value="item-1" className="bg-white rounded-lg border border-gray-200 px-6">
@@ -615,7 +532,6 @@ export default function ProductOffer() {
                   através do app Petloo em tempo real.
                 </AccordionContent>
               </AccordionItem>
-
               <AccordionItem value="item-2" className="bg-white rounded-lg border border-gray-200 px-6">
                 <AccordionTrigger className="text-left font-semibold text-black hover:no-underline">
                   Como funciona o acesso ás funcionalidadees do app Petloo?
@@ -627,7 +543,6 @@ export default function ProductOffer() {
                   manter todos os serviços funcionando.
                 </AccordionContent>
               </AccordionItem>
-
               <AccordionItem value="item-3" className="bg-white rounded-lg border border-gray-200 px-6">
                 <AccordionTrigger className="text-left font-semibold text-black hover:no-underline">
                   Quanto tempo demora para receber minha Tag de rastreamento?
@@ -637,7 +552,6 @@ export default function ProductOffer() {
                   dentro do prazo do frete escolhido no checkout.
                 </AccordionContent>
               </AccordionItem>
-
               <AccordionItem value="item-4" className="bg-white rounded-lg border border-gray-200 px-6">
                 <AccordionTrigger className="text-left font-semibold text-black hover:no-underline">
                   Como faço para ativar o seguro Petloo?
@@ -647,7 +561,6 @@ export default function ProductOffer() {
                   gratuito. O seguro tem uma carência de 30 dias.
                 </AccordionContent>
               </AccordionItem>
-
               <AccordionItem value="item-5" className="bg-white rounded-lg border border-gray-200 px-6">
                 <AccordionTrigger className="text-left font-semibold text-black hover:no-underline">
                   Posso cancelar meu acesso ao aplicativo quando quiser?
@@ -663,7 +576,6 @@ export default function ProductOffer() {
         {/* Footer */}
         <footer className="border-t border-gray-300 pt-8 mt-12">
           <div className="text-center space-y-6">
-            {/* Logo */}
             <div>
               <img
                 src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Petloosemfundo%202-wiHpYOGK6l8BekDtGwMXaJxrq0maQN.png"
@@ -671,8 +583,6 @@ export default function ProductOffer() {
                 className="h-16 mx-auto"
               />
             </div>
-
-            {/* Links */}
             <div className="flex justify-center gap-8 text-sm">
               <a href="#" className="text-black hover:underline">
                 Termos de Uso
@@ -681,147 +591,119 @@ export default function ProductOffer() {
                 Política de Privacidade
               </a>
             </div>
-
-            {/* Copyright */}
             <div className="text-sm text-black">© 2025 Petloo – Todos os direitos reservados</div>
           </div>
         </footer>
 
         {/* Custom Styles */}
         <style jsx>{`
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+          .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+          }
+          .scrollbar-hide {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+          }
 
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
+          @keyframes slideInLeft {
+            from {
+              opacity: 0;
+              transform: translateX(-30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+          @keyframes slideInRight {
+            from {
+              opacity: 0;
+              transform: translateX(30px);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
 
-@keyframes float {
-  0%, 100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-3px);
-  }
-}
+          @keyframes fadeInUp {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
 
-.animate-slide-in-left {
-  animation: slideInLeft 0.5s ease-out forwards;
-}
+          @keyframes float {
+            0%,
+            100% {
+              transform: translateY(0px);
+            }
+            50% {
+              transform: translateY(-3px);
+            }
+          }
 
-.animate-slide-in-right {
-  animation: slideInRight 0.5s ease-out forwards;
-}
+          .animate-slide-in-left {
+            animation: slideInLeft 0.5s ease-out forwards;
+          }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s ease-out forwards;
-}
+          .animate-slide-in-right {
+            animation: slideInRight 0.5s ease-out forwards;
+          }
 
-@keyframes marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+          .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+          }
 
-.animate-marquee {
-  white-space: nowrap;
-  overflow: hidden;
-  animation: marquee 30s linear infinite;
-}
+          .benefit-item {
+            animation-fill-mode: both;
+            transition: transform 0.2s ease;
+            position: relative;
+            will-change: transform;
+          }
 
-@keyframes fast-marquee {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
+          .benefit-item:hover {
+            transform: translateY(-3px);
+          }
 
-.animate-fast-marquee {
-  display: flex;
-  animation: fast-marquee 20s linear infinite;
-}
+          .benefit-item::after {
+            content: "";
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.25);
+            border-radius: 50%;
+            filter: blur(6px);
+            opacity: 0.8;
+          }
 
-.benefit-item {
-  animation-fill-mode: both;
-  transition: transform 0.2s ease;
-  position: relative;
-  will-change: transform;
-}
+          .benefit-item {
+            animation: slideInLeft 0.5s ease-out forwards, float 2s ease-in-out infinite 0.8s;
+          }
 
-.benefit-item:hover {
-  transform: translateY(-3px);
-}
+          .animate-slide-in-right .benefit-item {
+            animation: slideInRight 0.5s ease-out forwards, float 2s ease-in-out infinite 0.8s;
+          }
 
-.benefit-item::after {
-  content: '';
-  position: absolute;
-  bottom: -12px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 70%;
-  height: 12px;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: 50%;
-  filter: blur(6px);
-  opacity: 0.8;
-}
-
-.benefit-item {
-  animation: slideInLeft 0.5s ease-out forwards, float 2s ease-in-out infinite 0.8s;
-}
-
-.animate-slide-in-right .benefit-item {
-  animation: slideInRight 0.5s ease-out forwards, float 2s ease-in-out infinite 0.8s;
-}
-
-/* Performance optimizations */
-@media (prefers-reduced-motion: no-preference) {
-  .benefit-item {
-    opacity: 0;
-    transform: translateX(-30px);
-  }
-  
-  .benefit-item.animate-slide-in-right {
-    transform: translateX(30px);
-  }
-}
-
-/* Reduce motion for accessibility */
-@media (prefers-reduced-motion: reduce) {
-  .benefit-item,
-  .animate-slide-in-left,
-  .animate-slide-in-right,
-  .animate-fade-in-up,
-  .animate-fast-marquee {
-    animation: none !important;
-    opacity: 1 !important;
-    transform: none !important;
-  }
-}
-`}</style>
+          @media (prefers-reduced-motion: reduce) {
+            .benefit-item,
+            .animate-slide-in-left,
+            .animate-slide-in-right,
+            .animate-fade-in-up {
+              animation: none !important;
+              opacity: 1 !important;
+              transform: none !important;
+            }
+          }
+        `}</style>
 
         {/* Pop-ups */}
         <PersonalizationPopup
