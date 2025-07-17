@@ -907,7 +907,7 @@ function CheckoutForm() {
           name: `Tags Personalizadas (${personalizedTags.length}x)`,
           sku: `TAG-PERSONALIZADA-MULTI-${personalizedTags.length}x`,
           type: "Tag Personalizada",
-          color: personalizedTags.map((tag) => tag.color).join(", "),
+          color: personalizedTags.map((tag) => (tag.color === "orange" ? "Laranja" : "Roxa")).join(", "),
           petName: personalizedTags.map((tag) => tag.petName).join(", "),
         }
 
