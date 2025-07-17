@@ -295,6 +295,189 @@ export default function ProductOffer() {
           </div>
         </div>
 
+        {/* Testimonials Section */}
+        <div className="py-20" style={{ backgroundColor: "#F1E9DB" }}>
+          <div className="max-w-6xl mx-auto px-6 md:px-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-black">
+              Veja o que estão dizendo sobre a tag + app Petloo
+            </h2>
+          </div>
+
+          {/* Testimonials Carousel */}
+          <div className="relative overflow-hidden">
+            <div className="flex animate-fast-marquee space-x-6">
+              {/* Testimonial 1 */}
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    F
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Fernanda Almeida</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "Minha gatinha sumiu perto do sítio e estava presa na mata. A tag foi essencial! Achei a Luna
+                  rapidinho. Recomendo muito!"
+                </p>
+              </div>
+
+              {/* Testimonial 2 */}
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    A
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Ana Clara Mendes</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "O rastreamento é excelente, localizei o Juca em menos de 5 minutos. Segurança total pro meu coração e
+                  pro meu peludinho!"
+                </p>
+              </div>
+
+              {/* Testimonial 3 */}
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    M
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Mariana Diniz</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "Tenho 5 cães e sempre esquecia as datas das vacinas e vermífugos. Agora recebo as notificações pelo
+                  app e nunca mais atrasei. Simplesmente perfeito!"
+                </p>
+              </div>
+
+              {/* Testimonial 4 */}
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-orange-400 to-red-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    L
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Letícia Barbosa</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "O seguro dentro do app e já estou utilizando. Vale muito a pena, principalmente pra quem se preocupa
+                  com gastos inesperados."
+                </p>
+              </div>
+
+              {/* Testimonial 5 */}
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-pink-400 to-rose-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    P
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Paula Castro</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "Muito prático! As notificações do cartão de vacinas me ajudam demais, principalmente pra mim que
+                  tenho vários gatos."
+                </p>
+              </div>
+
+              {/* Testimonial 6 */}
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    J
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">João Vítor Andrade</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "Meu dog tinha fugido do parquinho por causa de um rojão que estouraram e assustou ele, saiu correndo
+                  e não consegui pegar. Achei ele numa rua distante aqui do bairro, tudo graças ao rastreamento da tag
+                  da Petloo. Não vivo mais sem!"
+                </p>
+              </div>
+
+              {/* Testimonial 7 */}
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-teal-400 to-blue-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    C
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Camila Freitas</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "Minha gatinha adora fugir pra explorar, mas agora fico tranquila com a tag. Achei ela em menos de 10
+                  minutos perto de casa."
+                </p>
+              </div>
+
+              {/* Duplicate testimonials for seamless loop */}
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    F
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Fernanda Almeida</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "Minha gatinha sumiu perto do sítio e estava presa na mata. A tag foi essencial! Achei a Luna
+                  rapidinho. Recomendo muito!"
+                </p>
+              </div>
+
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-blue-400 to-cyan-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    A
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Ana Clara Mendes</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "O rastreamento é excelente, localizei o Juca em menos de 5 minutos. Segurança total pro meu coração e
+                  pro meu peludinho!"
+                </p>
+              </div>
+
+              <div className="flex-shrink-0 w-80 bg-white rounded-2xl p-6 shadow-lg whitespace-normal">
+                <div className="flex items-center mb-4">
+                  <div className="w-12 h-12 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                    M
+                  </div>
+                  <div className="ml-3">
+                    <h4 className="font-semibold text-gray-800 text-sm">Mariana Diniz</h4>
+                    <div className="flex text-yellow-400 text-sm">⭐⭐⭐⭐⭐</div>
+                  </div>
+                </div>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  "Tenho 5 cães e sempre esquecia as datas das vacinas e vermífugos. Agora recebo as notificações pelo
+                  app e nunca mais atrasei. Simplesmente perfeito!"
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* Resgate Section Title */}
         <div className="text-center py-8">
           <h2 className="text-3xl md:text-4xl font-bold text-black">Resgate agora a sua Tag</h2>
@@ -393,7 +576,7 @@ export default function ProductOffer() {
                   className="w-16 h-20 rounded"
                 />
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-2">
+                  <div className="flex items-center gap-4 mb-2">
                     <span className="text-gray-600 line-through">R$79.90</span>
                     <span
                       className="px-2 py-1 rounded text-white text-sm font-bold"
@@ -506,118 +689,138 @@ export default function ProductOffer() {
 
         {/* Custom Styles */}
         <style jsx>{`
-  @keyframes slideInLeft {
-    from {
-      opacity: 0;
-      transform: translateX(-30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(30px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-
-  @keyframes float {
-    0%, 100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-3px);
-    }
-  }
-
-  .animate-slide-in-left {
-    animation: slideInLeft 0.5s ease-out forwards;
+@keyframes slideInLeft {
+  from {
     opacity: 0;
+    transform: translateX(-30px);
   }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 
-  .animate-slide-in-right {
-    animation: slideInRight 0.5s ease-out forwards;
+@keyframes slideInRight {
+  from {
     opacity: 0;
+    transform: translateX(30px);
   }
-
-  .animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out forwards;
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
+}
 
-  .benefit-item {
-    animation-fill-mode: both;
-    transition: transform 0.2s ease;
-    position: relative;
-    will-change: transform;
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
 
-  .benefit-item:hover {
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
     transform: translateY(-3px);
   }
+}
 
-  .benefit-item::after {
-    content: '';
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70%;
-    height: 12px;
-    background: rgba(0, 0, 0, 0.25);
-    border-radius: 50%;
-    filter: blur(6px);
-    opacity: 0.8;
-  }
+.animate-slide-in-left {
+  animation: slideInLeft 0.5s ease-out forwards;
+}
 
+.animate-slide-in-right {
+  animation: slideInRight 0.5s ease-out forwards;
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+@keyframes marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  white-space: nowrap;
+  overflow: hidden;
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes fast-marquee {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.animate-fast-marquee {
+  display: flex;
+  animation: fast-marquee 20s linear infinite;
+}
+
+.benefit-item {
+  animation-fill-mode: both;
+  transition: transform 0.2s ease;
+  position: relative;
+  will-change: transform;
+}
+
+.benefit-item:hover {
+  transform: translateY(-3px);
+}
+
+.benefit-item::after {
+  content: '';
+  position: absolute;
+  bottom: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 50%;
+  filter: blur(6px);
+  opacity: 0.8;
+}
+
+.benefit-item {
+  animation: slideInLeft 0.5s ease-out forwards, float 2s ease-in-out infinite 0.8s;
+}
+
+.animate-slide-in-right .benefit-item {
+  animation: slideInRight 0.5s ease-out forwards, float 2s ease-in-out infinite 0.8s;
+}
+
+/* Performance optimizations */
+@media (prefers-reduced-motion: no-preference) {
   .benefit-item {
-    animation: slideInLeft 0.5s ease-out forwards, float 2s ease-in-out infinite 0.8s;
+    opacity: 0;
+    transform: translateX(-30px);
   }
+  
+  .benefit-item.animate-slide-in-right {
+    transform: translateX(30px);
+  }
+}
 
-  .animate-slide-in-right .benefit-item {
-    animation: slideInRight 0.5s ease-out forwards, float 2s ease-in-out infinite 0.8s;
+/* Reduce motion for accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .benefit-item,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-fade-in-up,
+  .animate-fast-marquee {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
-
-  /* Performance optimizations */
-  @media (prefers-reduced-motion: no-preference) {
-    .benefit-item {
-      opacity: 0;
-      transform: translateX(-30px);
-    }
-    
-    .benefit-item.animate-slide-in-right {
-      transform: translateX(30px);
-    }
-  }
-
-  /* Reduce motion for accessibility */
-  @media (prefers-reduced-motion: reduce) {
-    .benefit-item,
-    .animate-slide-in-left,
-    .animate-slide-in-right,
-    .animate-fade-in-up {
-      animation: none !important;
-      opacity: 1 !important;
-      transform: none !important;
-    }
-  }
+}
 `}</style>
 
         {/* Pop-ups */}
