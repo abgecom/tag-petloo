@@ -5,7 +5,6 @@ import Script from "next/script"
 import PageViewTracker from "@/components/PageViewTracker"
 import { Analytics } from "@vercel/analytics/react"
 import { Suspense } from "react"
-import Header from "@/components/Header"
 
 export const metadata: Metadata = {
   title: "Tag de Rastreamento Petloo - Nunca mais perca seu pet",
@@ -77,9 +76,6 @@ export default function RootLayout({
             src="https://www.facebook.com/tr?id=1123810912142165&ev=PageView&noscript=1"
           />
         </noscript>
-
-        {/* Header Component */}
-        <Header />
 
         {/* Page View Tracker - Tracks all page views automatically */}
         <Suspense fallback={null}>
