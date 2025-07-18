@@ -146,7 +146,7 @@ export default function PurchaseTracker() {
             ln: lastName,
             ph: phone,
             // Card specific data
-            payment_method: "card",
+            payment_method: "credit_card",
           })
 
           console.log("📱 Meta Pixel Card Purchase Event:", {
