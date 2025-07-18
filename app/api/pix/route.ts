@@ -322,21 +322,6 @@ export async function POST(request: NextRequest) {
       console.log("=== ENVIANDO DADOS PARA WEBHOOKS MAKE.COM ===")
       console.log("Dados:", JSON.stringify(orderDataForSheets, null, 2))
 
-      // 🆕 SALVAR NO DASHBOARD LOCAL PRIMEIRO
-      try {
-        console.log("💾 Salvando pedido no dashboard local...")
-        await fetch(`${process.env.NEXT_PUBLIC_VERCEL_URL || "http://localhost:3000"}/api/save-order`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(orderDataForSheets),
-        })
-        console.log("✅ Pedido salvo no dashboard local!")
-      } catch (dashboardError) {
-        console.warn("⚠️ Erro ao salvar no dashboard local (não crítico):", dashboardError)
-      }
-
       // Webhook 1: Salvar pedido na planilha
       console.log("📤 Enviando para Webhook de Pedidos (Planilha)...")
       fetch("https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k", {
