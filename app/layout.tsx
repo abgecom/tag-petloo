@@ -65,16 +65,17 @@ export default function RootLayout({
             width="0"
             style={{ display: "none", visibility: "hidden" }}
           />
+        </noscript>
+
+        {/* Meta Pixel (noscript) */}
         <noscript>
           <img
             height="1"
             width="1"
             style={{ display: "none" }}
-            src="https://www.facebook.com/tr?id=1123810912142165&ev=PageView&noscript=1"
+            src="https://www.facebook.com/tr?id=11238109121421&ev=PageView&noscript=1"
           />
         </noscript>
-
-     
 
         {/* Page View Tracker - Tracks all page views automatically */}
         <Suspense fallback={null}>
