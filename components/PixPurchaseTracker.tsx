@@ -68,27 +68,30 @@ export default function PixPurchaseTracker() {
 
         // 📊 GA4 via GTM - Purchase Event (PIX)
         window.dataLayer = window.dataLayer || []
-        window.dataLayer.push({
-          event: "purchase",
-          ecommerce: {
-            transaction_id: transactionId,
-            value: value,
-            currency: "BRL",
-            items: items,
-          },
-          // Dados adicionais
-          customer_data: {
-            email: userEmail,
-            first_name: firstName,
-            last_name: lastName,
-            phone: phone,
-          },
-          payment_method: "PIX",
-          payment_status: "pending", // PIX está pendente até confirmação
-          page_location: window.location.href,
-          page_title: document.title,
-          timestamp: new Date().toISOString(),
-        })
+      const eventId = `purchase-${transactionId}`
+
+window.dataLayer.push({
+  event: "purchase",
+  event_id: eventId, // ✅ adicionado para deduplicação
+  ecommerce: {
+    transaction_id: transactionId,
+    value: value,
+    currency: "BRL",
+    items: items,
+  },
+  customer_data: {
+    email: userEmail,
+    first_name: firstName,
+    last_name: lastName,
+    phone: phone,
+  },
+  payment_method: "PIX",
+  payment_status: "pending",
+  page_location: window.location.href,
+  page_title: document.title,
+  timestamp: new Date().toISOString(),
+})
+
 
         console.log("📊 GTM PIX Purchase Event:", {
           event: "purchase",
@@ -99,25 +102,8 @@ export default function PixPurchaseTracker() {
           items: items,
         })
 
-        // 📱 Meta Pixel - Purchase Event (PIX)
-        if (typeof window.fbq !== "undefined") {
-          window.fbq("track", "Purchase", {
-            value: value,
-            currency: "BRL",
-            transaction_id: transactionId,
-            content_type: "product",
-            content_ids: ["tag-petloo"],
-            content_name: "Tag rastreamento Petloo + App",
-            content_category: "Pet Tracking",
-            num_items: 1,
-            // Advanced Matching
-            em: userEmail,
-            fn: firstName,
-            ln: lastName,
-            ph: phone,
-            // PIX specific data
-            payment_method: "pix",
-          })
+        // 📱 Meta Pixel - Purchase Event (PIX) (removido)
+       
 
           console.log("📱 Meta Pixel PIX Purchase Event:", {
             value: value,
