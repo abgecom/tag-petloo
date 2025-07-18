@@ -68,7 +68,7 @@ export default function PixPurchaseTracker() {
 
         // 📊 GA4 via GTM - Purchase Event (PIX)
         window.dataLayer = window.dataLayer || []
-      window.dataLayer.push({
+        window.dataLayer.push({
           event: "purchase",
           ecommerce: {
             transaction_id: transactionId,
@@ -90,7 +90,6 @@ export default function PixPurchaseTracker() {
           timestamp: new Date().toISOString(),
         })
 
-
         console.log("📊 GTM PIX Purchase Event:", {
           event: "purchase",
           transaction_id: transactionId,
@@ -100,8 +99,25 @@ export default function PixPurchaseTracker() {
           items: items,
         })
 
-        // 📱 Meta Pixel - Purchase Event (PIX) (removido)
-       
+        // 📱 Meta Pixel - Purchase Event (PIX)
+        if (typeof window.fbq !== "undefined") {
+          window.fbq("track", "Purchase", {
+            value: value,
+            currency: "BRL",
+            transaction_id: transactionId,
+            content_type: "product",
+            content_ids: ["tag-petloo"],
+            content_name: "Tag rastreamento Petloo + App",
+            content_category: "Pet Tracking",
+            num_items: 1,
+            // Advanced Matching
+            em: userEmail,
+            fn: firstName,
+            ln: lastName,
+            ph: phone,
+            // PIX specific data
+            payment_method: "pix",
+          })
 
           console.log("📱 Meta Pixel PIX Purchase Event:", {
             value: value,

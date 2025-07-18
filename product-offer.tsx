@@ -1,23 +1,25 @@
 "use client"
 
-import { Check, ShoppingCart, Shield, Truck, RotateCcw, Award, FileText, ChevronLeft, ChevronRight } from "lucide-react"
+import { Check, ShoppingCart, Shield, Truck, RotateCcw, Award, FileText } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { useState, useRef } from "react"
+import { useState } from "react"
 import PersonalizationPopup from "@/components/PersonalizationPopup"
 import ColorSelectionPopup from "@/components/ColorSelectionPopup"
+import { ChevronLeft, ChevronRight } from "lucide-react"
+import { useRef } from "react"
 
 // Testimonial data
 const testimonials = [
   {
     initial: "F",
-    name: "Fernanda Bisoli",
+    name: "Fernanda Almeida",
     text: "Minha gatinha sumiu perto do sítio e estava presa na mata. A tag foi essencial! Achei a Luna rapidinho. Recomendo muito!",
     gradient: "from-purple-400 to-pink-400",
   },
   {
     initial: "A",
-    name: "Ana Clara Uchoa",
+    name: "Ana Clara Mendes",
     text: "O rastreamento é excelente, localizei o Juca em menos de 5 minutos. Segurança total pro meu coração e pro meu peludinho!",
     gradient: "from-blue-400 to-cyan-400",
   },
@@ -29,7 +31,7 @@ const testimonials = [
   },
   {
     initial: "L",
-    name: "Letícia Caliari",
+    name: "Letícia Barbosa",
     text: "O seguro dentro do app e já estou utilizando. Vale muito a pena, principalmente pra quem se preocupa com gastos inesperados.",
     gradient: "from-orange-400 to-red-400",
   },
@@ -41,13 +43,13 @@ const testimonials = [
   },
   {
     initial: "J",
-    name: "João Vítor Yatsu",
+    name: "João Vítor Andrade",
     text: "Meu dog tinha fugido do parquinho por causa de um rojão que estouraram e assustou ele, saiu correndo e não consegui pegar. Achei ele numa rua distante aqui do bairro, tudo graças ao rastreamento da tag da Petloo. Não vivo mais sem!",
     gradient: "from-indigo-400 to-purple-400",
   },
   {
     initial: "C",
-    name: "Camila Abdalla",
+    name: "Camila Freitas",
     text: "Minha gatinha adora fugir pra explorar, mas agora fico tranquila com a tag. Achei ela em menos de 10 minutos perto de casa.",
     gradient: "from-teal-400 to-blue-400",
   },
@@ -79,7 +81,7 @@ const TestimonialCard = ({
 export default function ProductOffer() {
   const [isPersonalizationPopupOpen, setIsPersonalizationPopupOpen] = useState(false)
   const [isColorSelectionPopupOpen, setIsColorSelectionPopupOpen] = useState(false)
-  const scrollContainerRef = useRef<HTMLDivElement>(null)
+  const testimonialsRef = useRef<HTMLDivElement>(null)
 
   const openPersonalizationPopup = () => setIsPersonalizationPopupOpen(true)
   const closePersonalizationPopup = () => setIsPersonalizationPopupOpen(false)
@@ -119,20 +121,14 @@ export default function ProductOffer() {
     window.location.replace(`/checkout?${params.toString()}`)
   }
 
-  // Scroll functions for testimonials carousel
-  const scrollLeft = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: -320, // Width of one card (w-80 = 320px)
-        behavior: "smooth",
-      })
-    }
-  }
+  const scrollTestimonials = (direction: "left" | "right") => {
+    if (testimonialsRef.current) {
+      const scrollAmount = 320 // Width of testimonial card + gap
+      const currentScroll = testimonialsRef.current.scrollLeft
+      const targetScroll = direction === "left" ? currentScroll - scrollAmount : currentScroll + scrollAmount
 
-  const scrollRight = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollBy({
-        left: 320, // Width of one card (w-80 = 320px)
+      testimonialsRef.current.scrollTo({
+        left: targetScroll,
         behavior: "smooth",
       })
     }
@@ -362,12 +358,12 @@ export default function ProductOffer() {
             </h2>
           </div>
 
-          {/* Carousel with Navigation Arrows */}
-          <div className="relative max-w-7xl mx-auto">
+          {/* Manual Scroll Container */}
+          <div className="relative">
             {/* Left Arrow */}
             <button
-              onClick={scrollLeft}
-              className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-200 hover:scale-110"
+              onClick={() => scrollTestimonials("left")}
+              className="absolute left-2 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-200 hover:scale-110"
               aria-label="Depoimento anterior"
             >
               <ChevronLeft className="w-6 h-6 text-gray-700" />
@@ -375,26 +371,19 @@ export default function ProductOffer() {
 
             {/* Right Arrow */}
             <button
-              onClick={scrollRight}
-              className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-200 hover:scale-110"
+              onClick={() => scrollTestimonials("right")}
+              className="absolute right-2 top-1/2 transform -translate-y-1/2 z-10 bg-white/90 hover:bg-white shadow-lg rounded-full p-3 transition-all duration-200 hover:scale-110"
               aria-label="Próximo depoimento"
             >
               <ChevronRight className="w-6 h-6 text-gray-700" />
             </button>
 
-            {/* Scrollable Container */}
-            <div
-              ref={scrollContainerRef}
-              className="flex overflow-x-auto gap-6 pb-4 scrollbar-hide pl-6 md:pl-12 pr-6 md:pr-12"
-              style={{ scrollSnapType: "x mandatory" }}
-            >
+            <div ref={testimonialsRef} className="flex overflow-x-auto gap-6 pb-4 scrollbar-hide pl-6 md:pl-12">
               {testimonials.map((testimonial, index) => (
-                <div key={index} style={{ scrollSnapAlign: "start" }}>
-                  <TestimonialCard {...testimonial} />
-                </div>
+                <TestimonialCard key={index} {...testimonial} />
               ))}
               {/* Spacer at the end for padding */}
-              <div className="flex-shrink-0 w-1"></div>
+              <div className="flex-shrink-0 w-1 md:w-6"></div>
             </div>
           </div>
         </div>
