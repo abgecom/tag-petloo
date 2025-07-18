@@ -68,29 +68,27 @@ export default function PixPurchaseTracker() {
 
         // 📊 GA4 via GTM - Purchase Event (PIX)
         window.dataLayer = window.dataLayer || []
-      const eventId = `purchase-${transactionId}`
-
-window.dataLayer.push({
-  event: "purchase",
-  event_id: eventId, // ✅ adicionado para deduplicação
-  ecommerce: {
-    transaction_id: transactionId,
-    value: value,
-    currency: "BRL",
-    items: items,
-  },
-  customer_data: {
-    email: userEmail,
-    first_name: firstName,
-    last_name: lastName,
-    phone: phone,
-  },
-  payment_method: "PIX",
-  payment_status: "pending",
-  page_location: window.location.href,
-  page_title: document.title,
-  timestamp: new Date().toISOString(),
-})
+      window.dataLayer.push({
+          event: "purchase",
+          ecommerce: {
+            transaction_id: transactionId,
+            value: value,
+            currency: "BRL",
+            items: items,
+          },
+          // Dados adicionais
+          customer_data: {
+            email: userEmail,
+            first_name: firstName,
+            last_name: lastName,
+            phone: phone,
+          },
+          payment_method: "PIX",
+          payment_status: "pending", // PIX está pendente até confirmação
+          page_location: window.location.href,
+          page_title: document.title,
+          timestamp: new Date().toISOString(),
+        })
 
 
         console.log("📊 GTM PIX Purchase Event:", {
