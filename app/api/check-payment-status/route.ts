@@ -1,19 +1,19 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { confirmPaymentAndUpdateStatus } from "@/lib/order-actions"
+import { supabase } from "@/lib/supabase"
 
-// Interface para resposta da Appmax
-interface AppmaxPaymentStatusResponse {
+interface AppmaxOrderData {
+  id: string
+  status: string
+  payment_status: string
+  payment_date: string
+  transaction_id: string
+  total: string
+}
+
+interface AppmaxResponse {
   success: boolean
-  data: {
-    id: string
-    status: string
-    payment_status?: string
-    total: number
-    customer_id: number
-    transaction_status?: string
-    order_status?: string
-    payment_method_status?: string
-  }
-  message?: string
+  data: AppmaxOrderData
 }
 
 export async function GET(request: NextRequest) {
@@ -22,196 +22,88 @@ export async function GET(request: NextRequest) {
     const orderId = searchParams.get("orderId")
 
     if (!orderId) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Order ID é obrigatório",
-        },
-        { status: 400 },
-      )
+      return NextResponse.json({ success: false, error: "Order ID é obrigatório" }, { status: 400 })
     }
 
-    // Check if Appmax access token is configured
+    // Otimização: verifica se o pedido já está pago no nosso DB
+    const { data: existingOrder } = await supabase
+      .from("orders")
+      .select("order_status")
+      .eq("order_id", orderId)
+      .single()
+
+    if (existingOrder?.order_status === "paid") {
+      console.log(`[Check Status] Otimização: Pedido ${orderId} já está 'pago' no DB.`)
+      return NextResponse.json({ success: true, order_id: orderId, is_paid: true, status: "paid" })
+    }
+
     const appmaxToken = process.env.APPMAX_ACCESS_TOKEN
     if (!appmaxToken) {
-      console.error("APPMAX_ACCESS_TOKEN não configurada no ambiente")
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Token da Appmax não configurado",
-        },
-        { status: 500 },
-      )
+      console.error("[Check Status] Erro Crítico: APPMAX_ACCESS_TOKEN não configurada.")
+      return NextResponse.json({ success: false, error: "Token da Appmax não configurado" }, { status: 500 })
     }
 
-    console.log(`=== VERIFICANDO STATUS DO PAGAMENTO - ORDER ID: ${orderId} ===`)
+    console.log(`[Check Status] Verificando Appmax para o pedido: ${orderId}`)
 
-    // Fazer requisição para Appmax API
+    // Corrigindo a URL e o método de autenticação da Appmax
     const appmaxResponse = await fetch(`https://admin.appmax.com.br/api/v3/order/${orderId}`, {
       method: "GET",
       headers: {
         "access-token": appmaxToken,
+        "Content-Type": "application/json",
       },
+      cache: "no-store",
     })
 
     if (!appmaxResponse.ok) {
-      console.error("=== ERRO NA CONSULTA DO PEDIDO ===")
-      console.error("Status Code:", appmaxResponse.status)
-
+      const errorText = await appmaxResponse.text()
+      console.error(`[Check Status] Erro na API Appmax: ${appmaxResponse.status}`, errorText)
       return NextResponse.json(
-        {
-          success: false,
-          error: "Erro ao consultar status do pedido",
-          status_code: appmaxResponse.status,
-        },
-        { status: 500 },
+        { success: false, error: "Erro ao consultar pedido na Appmax" },
+        { status: appmaxResponse.status },
       )
     }
 
-    const appmaxData: AppmaxPaymentStatusResponse = await appmaxResponse.json()
-
-    console.log("=== RESPOSTA STATUS PAGAMENTO ===")
-    console.log("Status:", appmaxResponse.status)
-    console.log("Data:", JSON.stringify(appmaxData, null, 2))
+    const appmaxData: AppmaxResponse = await appmaxResponse.json()
+    console.log(`[Check Status] Resposta da Appmax para ${orderId}:`, JSON.stringify(appmaxData, null, 2))
 
     if (!appmaxData.success || !appmaxData.data) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: "Dados do pedido não encontrados",
-        },
-        { status: 404 },
-      )
+      return NextResponse.json({ success: false, error: "Dados do pedido não encontrados na Appmax" }, { status: 404 })
     }
 
-    const { status, payment_status, total } = appmaxData.data
+    const { status, payment_date, transaction_id, total } = appmaxData.data
 
-    // Determinar se o pagamento foi aprovado - VERSÃO CORRIGIDA COM PORTUGUÊS
-    const orderStatus = status?.toLowerCase() || ""
-    const paymentStatus = payment_status?.toLowerCase() || ""
+    // Verificação de status mais robusta
+    const normalizedStatus = status ? status.trim().toLowerCase() : ""
+    const isPaid = normalizedStatus === "aprovado" || normalizedStatus === "pago"
 
-    // Lista de status que indicam pagamento aprovado/confirmado (PORTUGUÊS + INGLÊS)
-    const approvedStatuses = [
-      // Status em inglês
-      "paid",
-      "processing",
-      "approved",
-      "complete",
-      "completed",
-      "success",
-      "successful",
-      "confirmed",
-      "active",
-      // Status em português (ADICIONADO!)
-      "aprovado",
-      "pago",
-      "confirmado",
-      "ativo",
-      "processando",
-      "sucesso",
-      "completo",
-      "finalizado",
-    ]
+    console.log(
+      `[Check Status] Análise do status para ${orderId}: Status Original: "${status}", Normalizado: "${normalizedStatus}", Considerado Pago: ${isPaid}`,
+    )
 
-    let isPaid = approvedStatuses.includes(orderStatus) || approvedStatuses.includes(paymentStatus)
+    const amountInCents = total ? Math.round(Number.parseFloat(total) * 100) : 0
 
-    console.log("=== ANÁLISE DETALHADA DO STATUS (CORRIGIDA) ===")
-    console.log("Order Status (original):", status)
-    console.log("Order Status (lowercase):", orderStatus)
-    console.log("Payment Status (original):", payment_status)
-    console.log("Payment Status (lowercase):", paymentStatus)
-    console.log("Status aprovados aceitos:", approvedStatuses)
-    console.log("Order Status é aprovado:", approvedStatuses.includes(orderStatus))
-    console.log("Payment Status é aprovado:", approvedStatuses.includes(paymentStatus))
-    console.log("Is Paid (FINAL):", isPaid)
-
-    // Se ainda não foi detectado como pago, vamos verificar campos adicionais
-    if (!isPaid && appmaxData.data) {
-      const additionalFields = {
-        transaction_status: appmaxData.data.transaction_status,
-        order_status: appmaxData.data.order_status,
-        payment_method_status: appmaxData.data.payment_method_status,
-      }
-
-      console.log("🔍 Verificando campos adicionais:", additionalFields)
-
-      // Verificar se algum campo adicional indica aprovação
-      const additionalApproved = Object.values(additionalFields).some(
-        (value) => value && approvedStatuses.includes(value.toString().toLowerCase()),
-      )
-
-      if (additionalApproved) {
-        console.log("✅ Pagamento aprovado detectado em campos adicionais!")
-        isPaid = true
-      }
-    }
-
-    // 🆕 SE O PAGAMENTO FOI CONFIRMADO, ATUALIZAR STATUS NA PLANILHA
+    // Se o pagamento foi confirmado, atualizar o Supabase
     if (isPaid) {
-      console.log("💰 PAGAMENTO CONFIRMADO! Atualizando status na planilha...")
-
-      try {
-        // Chamar API para atualizar status na planilha
-        const updateResponse = await fetch(
-          `${request.url.replace("/api/check-payment-status", "/api/update-order-status")}`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              order_id: orderId,
-              order_status: "Pago",
-              payment_status: "Confirmado",
-              payment_date: new Date().toISOString(),
-              transaction_id: orderId,
-            }),
-          },
-        )
-
-        const updateResult = await updateResponse.json()
-
-        if (updateResult.success) {
-          console.log("✅ Status atualizado na planilha com sucesso!")
-        } else {
-          console.warn("⚠️ Falha ao atualizar status na planilha:", updateResult.error)
-        }
-      } catch (updateError) {
-        console.warn("⚠️ Erro ao atualizar status na planilha (não crítico):", updateError)
-      }
+      console.log(`[Check Status] ✅ PAGAMENTO CONFIRMADO NA APPMAX PARA ${orderId}! Disparando atualização...`)
+      await confirmPaymentAndUpdateStatus({
+        order_id: orderId,
+        payment_status: status,
+        payment_date: payment_date,
+        transaction_id: transaction_id,
+      })
     }
 
     return NextResponse.json({
       success: true,
       order_id: orderId,
-      status: status,
-      payment_status: payment_status || "pending",
       is_paid: isPaid,
-      amount: total,
-      message: isPaid ? "Pagamento confirmado!" : "Pagamento pendente",
+      status: status,
+      payment_status: appmaxData.data.payment_status,
+      amount: amountInCents,
     })
   } catch (error) {
-    console.error("=== ERRO GERAL NO CHECK-PAYMENT-STATUS ===")
-    console.error("Error:", error)
-
-    return NextResponse.json(
-      {
-        success: false,
-        error: "Erro interno do servidor",
-        details: error instanceof Error ? error.message : "Erro desconhecido",
-      },
-      { status: 500 },
-    )
+    console.error("[Check Status] Erro fatal na rota:", error)
+    return NextResponse.json({ success: false, error: "Erro interno do servidor" }, { status: 500 })
   }
-}
-
-// Handle unsupported methods
-export async function POST() {
-  return NextResponse.json(
-    {
-      success: false,
-      error: "Método não permitido. Use GET.",
-    },
-    { status: 405 },
-  )
 }

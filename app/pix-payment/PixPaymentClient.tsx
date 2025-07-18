@@ -3,12 +3,10 @@
 import { useState, useEffect } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
-import { Copy, ArrowLeft, RotateCcw, CheckCircle } from "lucide-react"
+import { Copy, ArrowLeft, RotateCcw, CheckCircle, AlertCircle } from "lucide-react"
 import Link from "next/link"
 import dynamic from "next/dynamic"
-
-// Adicionar import no topo do arquivo
-import PaymentStatusChecker from "@/components/PaymentStatusChecker"
+import { usePaymentStatusChecker } from "@/hooks/use-payment-status-checker"
 
 // Importar o tracker dinamicamente
 const PixPurchaseTracker = dynamic(() => import("@/components/PixPurchaseTracker"), {
@@ -29,7 +27,7 @@ interface OrderData {
   isPersonalized: boolean
 }
 
-export default function PixPaymentPageClient() {
+export default function PixPaymentClient({ orderId, amount }: { orderId: string; amount: number }) {
   const searchParams = useSearchParams()
   const router = useRouter()
 
@@ -49,6 +47,12 @@ export default function PixPaymentPageClient() {
   const [fetchAttempted, setFetchAttempted] = useState(false)
   const [mounted, setMounted] = useState(false)
 
+  // Hook para verificação automática do status do pagamento
+  const { isChecking, paymentStatus, attempts, maxAttempts, progress } = usePaymentStatusChecker({
+    orderId: orderId,
+    enabled: !!orderId && !!pixData, // Só ativar quando tiver orderId e pixData
+  })
+
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -58,9 +62,6 @@ export default function PixPaymentPageClient() {
       return
     }
     setFetchAttempted(true)
-
-    const orderId = searchParams.get("orderId")
-    const amount = searchParams.get("amount")
 
     console.log("=== PIX PAYMENT PAGE INICIADA ===")
     console.log("Order ID:", orderId)
@@ -90,7 +91,7 @@ export default function PixPaymentPageClient() {
             orderId: parsedData.orderId,
             qrcode: parsedData.qrcode,
             copiacola: parsedData.copiacola,
-            amount: parsedData.amount,
+            amount: parsedData.amount || amount,
             pix_payment_link: null,
           })
           setIsLoading(false)
@@ -111,7 +112,7 @@ export default function PixPaymentPageClient() {
       setError("Dados do pedido não encontrados. Tente fazer um novo pedido.")
       setIsLoading(false)
     }
-  }, [mounted, fetchAttempted, searchParams])
+  }, [mounted, fetchAttempted, orderId, amount])
 
   const fetchPixData = async (orderId: string, amount: number) => {
     try {
@@ -199,8 +200,6 @@ export default function PixPaymentPageClient() {
       fetchPixData(pixData.orderId, pixData.amount)
     } else {
       // Se não temos orderId, tentar pegar dos parâmetros novamente
-      const orderId = searchParams.get("orderId")
-      const amount = searchParams.get("amount")
       if (orderId && amount) {
         setRetryCount(0)
         fetchPixData(orderId, Number(amount))
@@ -210,6 +209,50 @@ export default function PixPaymentPageClient() {
 
   const handleBackToCheckout = () => {
     router.push("/checkout")
+  }
+
+  // Função para renderizar o status do pagamento
+  const renderPaymentStatus = () => {
+    if (paymentStatus?.is_paid) {
+      return (
+        <div className="bg-green-50 border border-green-200 p-3 rounded-lg mb-6">
+          <div className="flex items-center justify-center gap-2 text-green-600 font-semibold">
+            <CheckCircle className="w-5 h-5" />
+            Pagamento confirmado! Redirecionando...
+          </div>
+        </div>
+      )
+    }
+
+    if (attempts >= maxAttempts) {
+      return (
+        <div className="bg-red-50 border border-red-200 p-3 rounded-lg mb-6">
+          <div className="flex items-center justify-center gap-2 text-red-600 font-semibold">
+            <AlertCircle className="w-5 h-5" />
+            Tempo para pagamento expirado.
+          </div>
+        </div>
+      )
+    }
+
+    if (isChecking) {
+      return (
+        <div className="bg-blue-50 border border-blue-200 p-3 rounded-lg mb-6">
+          <div className="flex items-center justify-center gap-2 text-blue-600">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            Aguardando confirmação do pagamento...
+          </div>
+          <div className="w-full bg-blue-200 rounded-full h-2 mt-2">
+            <div
+              className="bg-blue-600 h-2 rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            ></div>
+          </div>
+        </div>
+      )
+    }
+
+    return null
   }
 
   // Não renderizar até estar montado
@@ -278,17 +321,6 @@ export default function PixPaymentPageClient() {
       {/* PIX Purchase Tracker - Dispara evento de compra quando PIX é exibido */}
       <PixPurchaseTracker />
 
-      {/* Payment Status Checker - Verifica automaticamente o status do pagamento */}
-      {pixData && (
-        <PaymentStatusChecker
-          orderId={pixData.orderId}
-          amount={pixData.amount}
-          onPaymentConfirmed={() => {
-            console.log("🎉 Pagamento confirmado via verificação automática!")
-          }}
-        />
-      )}
-
       <div className="max-w-md mx-auto">
         {/* Header */}
         <div className="text-center mb-8">
@@ -300,6 +332,9 @@ export default function PixPaymentPageClient() {
           <h1 className="text-2xl font-bold text-gray-800">Pagamento via PIX</h1>
           <p className="text-gray-600">Escaneie o QR Code ou copie o código abaixo</p>
         </div>
+
+        {/* Status do Pagamento */}
+        {renderPaymentStatus()}
 
         {/* PIX Payment Card */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-6">

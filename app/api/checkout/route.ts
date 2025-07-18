@@ -1,12 +1,11 @@
 import { type NextRequest, NextResponse } from "next/server"
 import Stripe from "stripe"
+import { supabase } from "@/lib/supabase"
 
-// Initialize Stripe with secret key
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: "2024-12-18.acacia",
 })
 
-// Define the request body interface
 interface CheckoutRequestBody {
   name: string
   email: string
@@ -19,8 +18,7 @@ interface CheckoutRequestBody {
   cidade: string
   estado: string
   complemento?: string
-  shipping_price: number // Value in cents
-  // 🎯 NOVOS CAMPOS DO PRODUTO
+  shipping_price: number
   product_type: string
   product_color: string
   product_quantity: number
@@ -28,54 +26,23 @@ interface CheckoutRequestBody {
   pet_name?: string
 }
 
-// Define Price IDs based on shipping cost
 const PRICE_IDS = {
-  SHIPPING_1887: "price_1Rj0n7RtGASrDbfe40z60yvg", // R$ 18,87
-  SHIPPING_2939: "price_1Rj0p5RtGASrDbfe9s1cHmhC", // R$ 29,39
-  PERSONALIZED_ORANGE: "price_1RjRxWRtGASrDbfeP7jp0wb0", // Tag Laranja R$ 49,90
-  PERSONALIZED_PURPLE: "price_1RjRyURtGASrDbfeuppcCqtm", // Tag Roxa R$ 49,90
-  SUBSCRIPTION: "price_1RjOGMRtGASrDbfemNmh2FzT", // Monthly subscription
+  SHIPPING_1887: "price_1Rj0n7RtGASrDbfe40z60yvg",
+  SHIPPING_2939: "price_1Rj0p5RtGASrDbfe9s1cHmhC",
+  PERSONALIZED_ORANGE: "price_1RjRxWRtGASrDbfeP7jp0wb0",
+  PERSONALIZED_PURPLE: "price_1RjRyURtGASrDbfeuppcCqtm",
+  SUBSCRIPTION: "price_1RjOGMRtGASrDbfemNmh2FzT",
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Parse request body
     const body: CheckoutRequestBody = await request.json()
 
-    console.log("=== DADOS RECEBIDOS NA API CHECKOUT ===")
-    console.log("📦 Dados completos:", JSON.stringify(body, null, 2))
-
-    // 🔧 CORREÇÃO: Expandir lista de valores válidos para incluir todos os cenários possíveis
     const validAmounts = [
-      1887, // R$ 18,87 - Frete básico
-      2939, // R$ 29,39 - Frete expresso
-      3929, // R$ 39,29 - 2 tags genéricas (29,39 + 9,90)
-      3960, // R$ 39,60 - 6 tags genéricas (5 x 9,90 = frete grátis)
-      4919, // R$ 49,19 - 3 tags genéricas (29,39 + 19,80)
-      4950, // R$ 49,50 - 7 tags genéricas (6 x 9,90 = frete grátis)
-      4990, // R$ 49,90 - 1 tag personalizada
-      5909, // R$ 59,09 - 4 tags genéricas (29,39 + 29,70)
-      5940, // R$ 59,40 - 8 tags genéricas (7 x 9,90 = frete grátis)
-      5980, // R$ 59,80 - 2 tags personalizadas (49,90 + 9,90)
-      6042, // R$ 60,42 - Valor antigo (manter compatibilidade)
-      6930, // R$ 69,30 - 9 tags genéricas (8 x 9,90 = frete grátis)
-      6970, // R$ 69,70 - 3 tags personalizadas (49,90 + 9,90 + 9,90)
-      7920, // R$ 79,20 - 10 tags genéricas (9 x 9,90 = frete grátis)
-      7960, // R$ 79,60 - 4 tags personalizadas (49,90 + 9,90 + 9,90 + 9,90)
-      8910, // R$ 89,10 - 11 tags genéricas (10 x 9,90 = frete grátis)
-      8950, // R$ 89,50 - 5 tags personalizadas
-      9940, // R$ 99,40 - 6 tags personalizadas
-      10930, // R$ 109,30 - 7 tags personalizadas
-      11920, // R$ 119,20 - 8 tags personalizadas
-      12910, // R$ 129,10 - 9 tags personalizadas
-      13900, // R$ 139,00 - 10 tags personalizadas
-      // Adicionar valores com frete expresso (+1052 centavos = +R$ 10,52)
-      6042, // R$ 60,42 - 1 tag + frete expresso (4990 + 1052)
-      7032, // R$ 70,32 - 2 tags + frete expresso (5980 + 1052)
-      8022, // R$ 80,22 - 3 tags + frete expresso (6970 + 1052)
+      1887, 2939, 3929, 3960, 4919, 4950, 4990, 5909, 5940, 5980, 6042, 6930, 6970, 7920, 7960, 8910, 8950, 9940, 10930,
+      11920, 12910, 13900, 6042, 7032, 8022,
     ]
 
-    // Validate required fields
     const requiredFields = [
       "name",
       "email",
@@ -96,10 +63,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Validate shipping price
     if (!validAmounts.includes(body.shipping_price)) {
-      console.error("❌ Valor inválido recebido:", body.shipping_price)
-      console.error("💡 Valores válidos:", validAmounts)
       return NextResponse.json(
         {
           error: `Valor inválido: R$ ${(body.shipping_price / 100).toFixed(2)}. Entre em contato com o suporte.`,
@@ -110,28 +74,11 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate email format
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
     if (!emailRegex.test(body.email)) {
       return NextResponse.json({ error: "Email inválido" }, { status: 400 })
     }
 
-    console.log("=== DADOS COMPLETOS RECEBIDOS NA API CHECKOUT ===")
-    console.log("🎯 DADOS DO PRODUTO:")
-    console.log("Tipo:", body.product_type)
-    console.log("Cor:", body.product_color)
-    console.log("Quantidade:", body.product_quantity)
-    console.log("SKU:", body.product_sku)
-    console.log("Nome do Pet:", body.pet_name || "Não informado")
-    console.log(
-      "💰 Valor do checkout:",
-      body.shipping_price,
-      "centavos =",
-      (body.shipping_price / 100).toFixed(2),
-      "reais",
-    )
-
-    // Step 1: Create Customer in Stripe
     const customer = await stripe.customers.create({
       name: body.name,
       email: body.email,
@@ -145,18 +92,14 @@ export async function POST(request: NextRequest) {
         cidade: body.cidade,
         estado: body.estado,
         complemento: body.complemento || "",
-        // 🎯 ADICIONAR METADADOS DO PRODUTO
         product_type: body.product_type,
         product_color: body.product_color,
         product_quantity: body.product_quantity.toString(),
         product_sku: body.product_sku,
-        pet_name: body.pet_name || "", // Adicionar nome do pet
+        pet_name: body.pet_name || "",
       },
     })
 
-    console.log("✅ Customer criado:", customer.id)
-
-    // Step 2: Create PaymentIntent for shipping cost (without payment method)
     const paymentIntent = await stripe.paymentIntents.create({
       amount: body.shipping_price,
       currency: "brl",
@@ -170,7 +113,6 @@ export async function POST(request: NextRequest) {
         customer_name: body.name,
         customer_email: body.email,
         shipping_price: body.shipping_price.toString(),
-        // 🎯 ADICIONAR METADADOS DO PRODUTO
         product_type: body.product_type,
         product_color: body.product_color,
         product_quantity: body.product_quantity.toString(),
@@ -179,16 +121,9 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log("✅ PaymentIntent criado:", paymentIntent.id)
-
-    // Step 3: Create Subscription with 30-day trial IMEDIATAMENTE
     const subscription = await stripe.subscriptions.create({
       customer: customer.id,
-      items: [
-        {
-          price: PRICE_IDS.SUBSCRIPTION,
-        },
-      ],
+      items: [{ price: PRICE_IDS.SUBSCRIPTION }],
       trial_period_days: 30,
       payment_behavior: "default_incomplete",
       payment_settings: {
@@ -199,7 +134,6 @@ export async function POST(request: NextRequest) {
         customer_name: body.name,
         customer_email: body.email,
         trial_start: new Date().toISOString(),
-        // 🎯 ADICIONAR METADADOS DO PRODUTO
         product_type: body.product_type,
         product_color: body.product_color,
         product_quantity: body.product_quantity.toString(),
@@ -208,9 +142,43 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    console.log("✅ Subscription criada:", subscription.id)
-    console.log("🎯 Status da subscription:", subscription.status)
-    console.log("📅 Trial end:", subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null)
+    // Salvar dados no Supabase DIRETAMENTE (sem fetch interno)
+    try {
+      const orderDataForSupabase = {
+        order_id: paymentIntent.id,
+        customer_id: customer.id,
+        customer_name: body.name,
+        customer_email: body.email,
+        customer_phone: body.telefone,
+        customer_cpf: body.cpf,
+        customer_address: `${body.endereco}, ${body.numero}${body.complemento ? `, ${body.complemento}` : ""}, ${body.bairro}`,
+        customer_cep: body.cep,
+        customer_city: body.cidade,
+        customer_state: body.estado,
+        order_amount: body.shipping_price,
+        payment_method: "credit_card" as const,
+        order_status: "paid" as const,
+        product_type: body.product_type,
+        product_color: body.product_color,
+        product_quantity: body.product_quantity,
+        product_sku: body.product_sku,
+        pet_name: body.pet_name || null,
+        pix_code: null,
+      }
+
+      console.log("=== SALVANDO NO SUPABASE DIRETAMENTE ===")
+      console.log("Dados:", JSON.stringify(orderDataForSupabase, null, 2))
+
+      const { data, error } = await supabase.from("orders").insert([orderDataForSupabase]).select()
+
+      if (error) {
+        console.error("❌ Erro ao inserir no Supabase:", error)
+      } else {
+        console.log("✅ Pedido de cartão salvo no Supabase com sucesso!", data)
+      }
+    } catch (error) {
+      console.error("❌ Erro ao salvar pedido de cartão no Supabase:", error)
+    }
 
     // Salvar dados na planilha Google via Make.com
     try {
@@ -226,16 +194,14 @@ export async function POST(request: NextRequest) {
         customer_cep: body.cep,
         customer_city: body.cidade,
         customer_state: body.estado,
-        order_amount: body.shipping_price / 100, // Converter centavos para reais
+        order_amount: body.shipping_price / 100,
         payment_method: "Cartão de Crédito",
-        order_status: "Confirmado", // 🎯 ALTERADO: Sempre "Confirmado" para cartão de crédito
-        // 🎯 USAR DADOS REAIS DO PRODUTO
+        order_status: "Confirmado",
         product_type: body.product_type,
         product_color: body.product_color,
         product_quantity: body.product_quantity,
         product_sku: body.product_sku,
-        pet_name: body.pet_name || "", // Adicionar nome do pet
-        // 🔄 DADOS DA ASSINATURA CRIADA
+        pet_name: body.pet_name || "",
         subscription_id: subscription.id,
         subscription_status: subscription.status,
         subscription_price_id: PRICE_IDS.SUBSCRIPTION,
@@ -243,34 +209,15 @@ export async function POST(request: NextRequest) {
         has_subscription: true,
       }
 
-      console.log("=== ENVIANDO DADOS PARA MAKE.COM ===")
-      console.log("Dados:", JSON.stringify(orderDataForSheets, null, 2))
-
-      // Enviar para Make.com (não aguardar resposta para não bloquear)
       fetch("https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(orderDataForSheets),
-      })
-        .then((response) => {
-          console.log("📡 Resposta do Make.com:", response.status)
-          return response.text()
-        })
-        .then((data) => {
-          console.log("✅ Dados enviados para Make.com com sucesso!")
-        })
-        .catch((error) => {
-          console.warn("⚠️ Erro ao enviar para Make.com (não crítico):", error)
-        })
-
-      console.log("📊 Dados enviados para planilha Google com assinatura ativa")
+      }).catch(console.warn)
     } catch (error) {
       console.warn("⚠️ Erro ao preparar dados para planilha:", error)
     }
 
-    // Step 4: Return response with client_secret and success status
     return NextResponse.json({
       success: true,
       client_secret: paymentIntent.client_secret,
@@ -284,7 +231,6 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("❌ Erro no checkout:", error)
 
-    // Handle Stripe-specific errors
     if (error instanceof Stripe.errors.StripeError) {
       return NextResponse.json(
         {
@@ -296,7 +242,6 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Handle other errors
     return NextResponse.json(
       {
         error: "Erro interno do servidor",
@@ -305,17 +250,4 @@ export async function POST(request: NextRequest) {
       { status: 500 },
     )
   }
-}
-
-// Handle unsupported methods
-export async function GET() {
-  return NextResponse.json({ error: "Método não permitido. Use POST." }, { status: 405 })
-}
-
-export async function PUT() {
-  return NextResponse.json({ error: "Método não permitido. Use POST." }, { status: 405 })
-}
-
-export async function DELETE() {
-  return NextResponse.json({ error: "Método não permitido. Use POST." }, { status: 405 })
 }
