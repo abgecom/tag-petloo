@@ -91,7 +91,8 @@ const normalizeAppmaxOrder = (appmaxOrder: any): Order => {
       },
     },
     total: Number.parseFloat(appmaxOrder.total_order),
-    status: appmaxOrder.status === "Aprovado" ? "Paid" : "Unpaid",
+    // Mapeia múltiplos status de sucesso para "Paid"
+    status: ["Aprovado", "Liberado"].includes(appmaxOrder.status) ? "Paid" : "Unpaid",
     items: appmaxOrder.items.map((item: any) => ({
       id: item.sku || item.product_id,
       name: item.name,
@@ -107,7 +108,7 @@ async function fetchAppmaxOrders(from: Date, to: Date): Promise<Order[]> {
     const fromDate = from.toISOString().split("T")[0]
     const toDate = to.toISOString().split("T")[0]
     const response = await fetch(
-      `${appmaxApiUrl}?access-token=${appmaxAccessToken}&initial_date=${fromDate}&final_date=${toDate}`,
+      `${appmaxApiUrl}?access-token=${appmaxAccessToken}&initial_date=${fromDate}&final_date=${toDate}&status=all`, // Adicionado &status=all
       {
         headers: { "Content-Type": "application/json" },
       },
