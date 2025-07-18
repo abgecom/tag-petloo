@@ -65,7 +65,14 @@ export default function RootLayout({
             width="0"
             style={{ display: "none", visibility: "hidden" }}
           />
-        
+        <noscript>
+          <img
+            height="1"
+            width="1"
+            style={{ display: "none" }}
+            src="https://www.facebook.com/tr?id=1123810912142165&ev=PageView&noscript=1"
+          />
+        </noscript>
 
      
 
