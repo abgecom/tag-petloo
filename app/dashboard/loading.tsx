@@ -1,21 +1,8 @@
-import { Skeleton } from "@/components/ui/skeleton"
-
-export default function DashboardLoading() {
+export default function Loading() {
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <Skeleton className="h-9 w-48" />
-        <Skeleton className="h-10 w-[300px]" />
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-3">
-        <Skeleton className="h-32" />
-        <Skeleton className="h-32" />
-        <Skeleton className="h-32" />
-      </div>
-
-      <div>
-        <Skeleton className="h-96" />
+    <div className="container mx-auto p-6">
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-gray-900"></div>
       </div>
     </div>
   )
