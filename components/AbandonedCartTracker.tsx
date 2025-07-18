@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
+import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
 
 interface AbandonedCartTrackerProps {
   abandonmentTimeSeconds?: number
@@ -76,7 +77,7 @@ export default function AbandonedCartTracker({
   }
 
   // Função para disparar evento de carrinho abandonado
-  const triggerAbandonedCartEvent = (reason: "timeout" | "page_exit") => {
+  const triggerAbandonedCartEvent = async (reason: "timeout" | "page_exit") => {
     if (hasTriggered) return
 
     const cartData = getCartData()
@@ -131,8 +132,19 @@ export default function AbandonedCartTracker({
         engagement_level: engagementLevel,
       })
 
-      // 📱 Meta Pixel - AddToCart (para remarketing)
+      // 📱 Meta Pixel - AddToCart (para remarketing) com Advanced Matching
       if (typeof window.fbq !== "undefined") {
+        // Preparar dados do usuário com hash e formatação correta (se disponível)
+        let metaUserData = {}
+        if (userData.hasUserData) {
+          metaUserData = await prepareMetaPixelUserData({
+            email: userData.email,
+            firstName: userData.firstName,
+            lastName: userData.lastName,
+            phone: userData.phone,
+          })
+        }
+
         window.fbq("track", "AddToCart", {
           value: cartData.value,
           currency: cartData.currency,
@@ -147,19 +159,15 @@ export default function AbandonedCartTracker({
             time_on_page: timeOnPage,
           },
           // Advanced Matching se tiver dados do usuário
-          ...(userData.hasUserData && {
-            em: userData.email,
-            fn: userData.firstName,
-            ln: userData.lastName,
-            ph: userData.phone,
-          }),
+          ...metaUserData,
         })
 
-        console.log("📱 Meta Pixel AddToCart (Abandoned) Event:", {
+        logMetaPixelEvent("AddToCart (Abandoned)", {
           value: cartData.value,
           currency: cartData.currency,
           reason,
           engagement_level: engagementLevel,
+          ...metaUserData,
         })
       } else {
         console.warn("⚠️ Meta Pixel (fbq) not found - Abandoned cart event not sent")

@@ -15,6 +15,7 @@ import AbandonedCartTracker from "@/components/AbandonedCartTracker"
 import LeadCaptureTracker from "@/components/LeadCaptureTracker"
 import PersonalizedTagManager from "@/components/PersonalizedTagManager"
 import { Elements } from "@stripe/react-stripe-js"
+import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
 
 // Initialize Stripe with preload
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!, {
@@ -688,7 +689,7 @@ function CheckoutForm() {
   }
 
   // Função para disparar eventos de add_payment_info
-  const handleAddressFound = () => {
+  const handleAddressFound = async () => {
     const value = 29.39 // Valor do frete expresso
     const items = [
       {
@@ -742,8 +743,16 @@ function CheckoutForm() {
           items: items,
         })
 
-        // 📱 Meta Pixel - AddPaymentInfo
+        // 📱 Meta Pixel - AddPaymentInfo com Advanced Matching
         if (typeof window.fbq !== "undefined") {
+          // Preparar dados do usuário com hash e formatação correta
+          const metaUserData = await prepareMetaPixelUserData({
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+            phone: phone,
+          })
+
           window.fbq("track", "AddPaymentInfo", {
             value: value,
             currency: "BRL",
@@ -752,19 +761,14 @@ function CheckoutForm() {
             content_name: "Tag rastreamento Petloo + App",
             content_category: "Pet Tracking",
             num_items: 1,
-            // Advanced Matching para Meta Pixel
-            em: email,
-            fn: firstName,
-            ln: lastName,
-            ph: phone.replace(/\D/g, ""),
+            // Advanced Matching com dados formatados e hash
+            ...metaUserData,
           })
 
-          console.log("📱 Meta Pixel AddPaymentInfo Event:", {
+          logMetaPixelEvent("AddPaymentInfo", {
             value: value,
             currency: "BRL",
-            em: email,
-            fn: firstName,
-            ln: lastName,
+            ...metaUserData,
           })
         } else {
           console.warn("⚠️ Meta Pixel (fbq) not found - AddPaymentInfo event not sent")

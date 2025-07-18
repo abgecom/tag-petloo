@@ -2,6 +2,7 @@
 
 import { useEffect } from "react"
 import { useSearchParams } from "next/navigation"
+import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
 
 // Extend Window interface to include dataLayer and fbq
 declare global {
@@ -18,7 +19,7 @@ export default function PixPurchaseTracker() {
     // Verificar se estamos no cliente
     if (typeof window === "undefined") return
 
-    const handlePixPurchase = () => {
+    const handlePixPurchase = async () => {
       try {
         // Obter dados da URL ou sessionStorage
         const orderId = searchParams.get("orderId")
@@ -99,8 +100,16 @@ export default function PixPurchaseTracker() {
           items: items,
         })
 
-        // 📱 Meta Pixel - Purchase Event (PIX)
+        // 📱 Meta Pixel - Purchase Event (PIX) com Advanced Matching
         if (typeof window.fbq !== "undefined") {
+          // Preparar dados do usuário com hash e formatação correta
+          const metaUserData = await prepareMetaPixelUserData({
+            email: userEmail,
+            firstName: firstName,
+            lastName: lastName,
+            phone: phone,
+          })
+
           window.fbq("track", "Purchase", {
             value: value,
             currency: "BRL",
@@ -110,21 +119,18 @@ export default function PixPurchaseTracker() {
             content_name: "Tag rastreamento Petloo + App",
             content_category: "Pet Tracking",
             num_items: 1,
-            // Advanced Matching
-            em: userEmail,
-            fn: firstName,
-            ln: lastName,
-            ph: phone,
+            // Advanced Matching com dados formatados e hash
+            ...metaUserData,
             // PIX specific data
             payment_method: "pix",
           })
 
-          console.log("📱 Meta Pixel PIX Purchase Event:", {
+          logMetaPixelEvent("PIX Purchase", {
             value: value,
             currency: "BRL",
             transaction_id: transactionId,
             payment_method: "pix",
-            em: userEmail ? "✅ Presente" : "❌ Ausente",
+            ...metaUserData,
           })
         } else {
           console.warn("⚠️ Meta Pixel (fbq) not found - PIX Purchase event not sent")
