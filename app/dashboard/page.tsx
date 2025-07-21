@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Search, Eye, Package, Clock, CheckCircle, DollarSign } from "lucide-react"
+import { Search, Eye, Package, Clock, CheckCircle, DollarSign, Edit } from "lucide-react"
 import type { Order } from "@/lib/supabase"
 
 interface OrdersResponse {
@@ -33,6 +33,7 @@ export default function Dashboard() {
   const [search, setSearch] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
   const [currentPage, setCurrentPage] = useState(1)
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null)
   const [statistics, setStatistics] = useState({
     total: 0,
     pending: 0,
@@ -69,6 +70,49 @@ export default function Dashboard() {
       console.error("Erro ao buscar pedidos:", error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const updateOrderStatus = async (orderId: string, newStatus: string) => {
+    try {
+      setUpdatingStatus(orderId)
+
+      const response = await fetch(`/api/orders/${orderId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          order_status: newStatus,
+          updated_at: new Date().toISOString(),
+        }),
+      })
+
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar status do pedido")
+      }
+
+      const { order } = await response.json()
+
+      // Atualizar o pedido na lista local
+      setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+          o.order_id === orderId ? { ...o, order_status: newStatus, updated_at: order.updated_at } : o,
+        ),
+      )
+
+      // Se o modal estiver aberto com este pedido, atualizar também
+      if (selectedOrder && selectedOrder.order_id === orderId) {
+        setSelectedOrder({ ...selectedOrder, order_status: newStatus, updated_at: order.updated_at })
+      }
+
+      // Recarregar estatísticas
+      fetchOrders()
+    } catch (error) {
+      console.error("Erro ao atualizar status:", error)
+      alert("Erro ao atualizar status do pedido")
+    } finally {
+      setUpdatingStatus(null)
     }
   }
 
@@ -239,6 +283,25 @@ export default function Dashboard() {
                   </div>
                   <div className="flex items-center gap-4 mt-2 sm:mt-0">
                     <span className="font-bold">{formatCurrency(order.order_amount)}</span>
+
+                    {/* Status Update Dropdown */}
+                    <Select
+                      value={order.order_status}
+                      onValueChange={(newStatus) => updateOrderStatus(order.order_id, newStatus)}
+                      disabled={updatingStatus === order.order_id}
+                    >
+                      <SelectTrigger className="w-32">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="pending">Pendente</SelectItem>
+                        <SelectItem value="paid">Pago</SelectItem>
+                        <SelectItem value="shipped">Enviado</SelectItem>
+                        <SelectItem value="delivered">Entregue</SelectItem>
+                        <SelectItem value="cancelled">Cancelado</SelectItem>
+                      </SelectContent>
+                    </Select>
+
                     <Button variant="outline" size="sm" onClick={() => setSelectedOrder(order)}>
                       <Eye className="h-4 w-4 mr-1" />
                       Ver
@@ -289,6 +352,27 @@ export default function Dashboard() {
                 {getStatusBadge(selectedOrder.order_status)}
                 {getPaymentMethodBadge(selectedOrder.payment_method)}
                 <span className="text-sm text-gray-600">{formatDate(selectedOrder.created_at)}</span>
+
+                {/* Status Update in Modal */}
+                <div className="ml-auto">
+                  <Select
+                    value={selectedOrder.order_status}
+                    onValueChange={(newStatus) => updateOrderStatus(selectedOrder.order_id, newStatus)}
+                    disabled={updatingStatus === selectedOrder.order_id}
+                  >
+                    <SelectTrigger className="w-40">
+                      <Edit className="h-4 w-4 mr-2" />
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">Pendente</SelectItem>
+                      <SelectItem value="paid">Pago</SelectItem>
+                      <SelectItem value="shipped">Enviado</SelectItem>
+                      <SelectItem value="delivered">Entregue</SelectItem>
+                      <SelectItem value="cancelled">Cancelado</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Customer Information */}
