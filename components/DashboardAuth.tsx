@@ -3,7 +3,7 @@
 import type React from "react"
 
 import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, usePathname } from "next/navigation"
 
 interface DashboardAuthProps {
   children: React.ReactNode
@@ -13,23 +13,47 @@ export default function DashboardAuth({ children }: DashboardAuthProps) {
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const router = useRouter()
+  const pathname = usePathname()
 
   useEffect(() => {
-    const checkAuth = () => {
-      const isLoggedIn = localStorage.getItem("dashboard_auth") === "true"
+    // Se já estamos na página de login, não fazer verificação
+    if (pathname === "/dashboard/login") {
+      setIsLoading(false)
+      return
+    }
 
-      if (!isLoggedIn) {
-        router.push("/dashboard/login")
-        return
+    const checkAuth = () => {
+      try {
+        if (typeof window !== "undefined") {
+          const authData = localStorage.getItem("dashboard_auth")
+          if (authData) {
+            const parsed = JSON.parse(authData)
+            if (parsed.authenticated === true) {
+              setIsAuthenticated(true)
+              setIsLoading(false)
+              return
+            }
+          }
+        }
+      } catch (error) {
+        console.error("Erro ao verificar autenticação:", error)
       }
 
-      setIsAuthenticated(true)
-      setIsLoading(false)
+      // Se não autenticado, redirecionar para login
+      setTimeout(() => {
+        router.replace("/dashboard/login")
+      }, 100)
     }
 
     checkAuth()
-  }, [router])
+  }, [pathname, router])
 
+  // Se estamos na página de login, renderizar diretamente
+  if (pathname === "/dashboard/login") {
+    return <>{children}</>
+  }
+
+  // Se ainda carregando, mostrar loading
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -41,9 +65,11 @@ export default function DashboardAuth({ children }: DashboardAuthProps) {
     )
   }
 
-  if (!isAuthenticated) {
-    return null
+  // Se autenticado, renderizar children
+  if (isAuthenticated) {
+    return <>{children}</>
   }
 
-  return <>{children}</>
+  // Fallback - não deveria chegar aqui
+  return null
 }
