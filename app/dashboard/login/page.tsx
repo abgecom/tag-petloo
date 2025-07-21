@@ -123,7 +123,6 @@ export default function LoginPage() {
 
             <div className="mt-6 text-center text-sm text-gray-600">
               <p>Credenciais de acesso:</p>
-              <p className="font-mono text-xs mt-1">acesso@petloo.com.br</p>
             </div>
           </CardContent>
         </Card>
