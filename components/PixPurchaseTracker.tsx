@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { useSearchParams } from "next/navigation"
 import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
 
@@ -14,13 +14,23 @@ declare global {
 
 export default function PixPurchaseTracker() {
   const searchParams = useSearchParams()
+  const hasTrackedRef = useRef(false) // Flag para evitar múltiplos disparos
 
   useEffect(() => {
     // Verificar se estamos no cliente
     if (typeof window === "undefined") return
 
+    // Se já foi executado, não executar novamente
+    if (hasTrackedRef.current) {
+      console.log("🚫 PIX Purchase já foi rastreado, pulando...")
+      return
+    }
+
     const handlePixPurchase = async () => {
       try {
+        // Marcar como executado IMEDIATAMENTE para evitar duplicatas
+        hasTrackedRef.current = true
+
         // Obter dados da URL ou sessionStorage
         const orderId = searchParams.get("orderId")
         const amount = searchParams.get("amount") || "1887"
@@ -67,7 +77,7 @@ export default function PixPurchaseTracker() {
         const lastName = getCookieValue("ploo_last_name")
         const phone = getCookieValue("ploo_phone")
 
-        // 📊 GA4 via GTM - Purchase Event (PIX)
+        // 📊 GA4 via GTM - Purchase Event (PIX) - APENAS UMA VEZ
         window.dataLayer = window.dataLayer || []
         window.dataLayer.push({
           event: "purchase",
@@ -91,7 +101,7 @@ export default function PixPurchaseTracker() {
           timestamp: new Date().toISOString(),
         })
 
-        console.log("📊 GTM PIX Purchase Event:", {
+        console.log("📊 GTM PIX Purchase Event (ÚNICO):", {
           event: "purchase",
           transaction_id: transactionId,
           value: value,
@@ -100,7 +110,7 @@ export default function PixPurchaseTracker() {
           items: items,
         })
 
-        // 📱 Meta Pixel - Purchase Event (PIX) com Advanced Matching
+        // 📱 Meta Pixel - Purchase Event (PIX) com Advanced Matching - APENAS UMA VEZ
         if (typeof window.fbq !== "undefined") {
           // Preparar dados do usuário com hash e formatação correta
           const metaUserData = await prepareMetaPixelUserData({
@@ -125,7 +135,7 @@ export default function PixPurchaseTracker() {
             payment_method: "pix",
           })
 
-          logMetaPixelEvent("PIX Purchase", {
+          logMetaPixelEvent("PIX Purchase (ÚNICO)", {
             value: value,
             currency: "BRL",
             transaction_id: transactionId,
@@ -136,7 +146,7 @@ export default function PixPurchaseTracker() {
           console.warn("⚠️ Meta Pixel (fbq) not found - PIX Purchase event not sent")
         }
 
-        // 🎯 Evento personalizado PIX
+        // 🎯 Evento personalizado PIX - APENAS UMA VEZ
         window.dataLayer.push({
           event: "pix_purchase_initiated",
           transaction_id: transactionId,
@@ -145,13 +155,27 @@ export default function PixPurchaseTracker() {
           timestamp: new Date().toISOString(),
         })
 
-        console.log("✅ PIX Purchase tracking completed!")
+        // Salvar no sessionStorage que o evento já foi disparado
+        sessionStorage.setItem("pix_purchase_tracked", transactionId)
+
+        console.log("✅ PIX Purchase tracking completed (ÚNICO DISPARO)!")
         console.log("Transaction ID:", transactionId)
         console.log("Value:", `R$ ${value.toFixed(2)}`)
         console.log("Payment Method: PIX")
       } catch (error) {
         console.error("Erro no PIX Purchase Tracker:", error)
+        // Em caso de erro, resetar a flag para permitir nova tentativa
+        hasTrackedRef.current = false
       }
+    }
+
+    // Verificar se já foi rastreado no sessionStorage
+    const orderId = searchParams.get("orderId")
+    const alreadyTracked = sessionStorage.getItem("pix_purchase_tracked")
+
+    if (alreadyTracked === orderId) {
+      console.log("🚫 PIX Purchase já foi rastreado para este pedido:", orderId)
+      return
     }
 
     // Executar após um pequeno delay para garantir que os dados estejam disponíveis
@@ -159,8 +183,10 @@ export default function PixPurchaseTracker() {
       handlePixPurchase()
     }, 1500)
 
-    return () => clearTimeout(timer)
-  }, [searchParams]) // Executar quando searchParams mudar
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [searchParams]) // Executar apenas quando searchParams mudar
 
   return null
 }

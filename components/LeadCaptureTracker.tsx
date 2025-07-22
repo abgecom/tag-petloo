@@ -1,299 +1,237 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
+import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
+
+// Extend Window interface to include dataLayer and fbq
+declare global {
+  interface Window {
+    dataLayer: any[]
+    fbq: (action: string, event: string, params?: any) => void
+  }
+}
 
 interface LeadData {
   email: string
   name: string
   phone: string
-  source: string
-  page_url: string
-  timestamp: string
-  product_type: string
-  cart_value: number
+  productType: string
+  cartValue: number
+}
+
+async function sendLeadToMake(leadData: LeadData, pageUrl: string) {
+  try {
+    console.log("📧 Tentando enviar lead para Make.com:", {
+      email: leadData.email,
+      name: leadData.name,
+      phone: leadData.phone,
+      source: "checkout_form",
+      page_url: pageUrl,
+      timestamp: new Date().toISOString(),
+      product_type: leadData.productType,
+      cart_value: leadData.cartValue,
+    })
+
+    const response = await fetch("/api/capture-lead", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: leadData.email,
+        name: leadData.name,
+        phone: leadData.phone,
+        source: "checkout_form",
+        page_url: pageUrl,
+        timestamp: new Date().toISOString(),
+        product_type: leadData.productType,
+        cart_value: leadData.cartValue,
+      }),
+    })
+
+    console.log("📡 Resposta da API capture-lead:", {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+
+    let result
+    const contentType = response.headers.get("content-type")
+
+    if (contentType && contentType.includes("application/json")) {
+      result = await response.json()
+    } else {
+      const textResult = await response.text()
+      console.log("📋 Resposta em texto:", textResult)
+      result = textResult || "Lead capturado e enviado com sucesso"
+    }
+
+    console.log("📋 Resultado da API:", result)
+    return result
+  } catch (error) {
+    console.error("❌ Erro detalhado ao enviar lead:", error)
+
+    if (error instanceof TypeError && error.message.includes("Failed to fetch")) {
+      throw new Error("Erro de conexão - verifique sua internet")
+    }
+
+    if (error instanceof SyntaxError) {
+      throw new Error("Resposta inválida da API - formato não JSON")
+    }
+
+    throw error
+  }
 }
 
 export default function LeadCaptureTracker() {
-  const [capturedLeads, setCapturedLeads] = useState<Set<string>>(new Set())
-  const debounceRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Função para obter dados do produto/carrinho
-  const getProductData = () => {
-    try {
-      const personalizedData = sessionStorage.getItem("personalizedProduct")
-      let cartValue = 18.87 // Valor padrão para produto genérico
-      let productType = "Tag Genérica"
-
-      if (personalizedData) {
-        try {
-          const data = JSON.parse(personalizedData)
-          if (data.color && data.amount && data.petName) {
-            cartValue = data.amount / 100 // Converter de centavos para reais
-            productType = "Tag Personalizada"
-          }
-        } catch (parseError) {
-          console.warn("⚠️ Erro ao parsear produto personalizado:", parseError)
-        }
-      }
-
-      return { cartValue, productType }
-    } catch (error) {
-      console.warn("⚠️ Erro ao obter dados do produto, usando padrões:", error)
-      return { cartValue: 18.87, productType: "Tag Genérica" }
-    }
-  }
-
-  // Função para enviar lead para Make.com
-  const sendLeadToMake = async (leadData: LeadData) => {
-    try {
-      console.log("📧 Tentando enviar lead para Make.com:", leadData)
-
-      // Verificar se estamos no cliente
-      if (typeof window === "undefined") {
-        console.warn("⚠️ Tentativa de enviar lead no servidor, ignorando")
-        return
-      }
-
-      const response = await fetch("/api/capture-lead", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(leadData),
-      })
-
-      console.log("📡 Resposta da API capture-lead:", {
-        status: response.status,
-        statusText: response.statusText,
-        ok: response.ok,
-      })
-
-      // Verificar se a resposta é JSON válido
-      const contentType = response.headers.get("content-type")
-      if (!contentType || !contentType.includes("application/json")) {
-        const textResponse = await response.text()
-        console.error("❌ Resposta não é JSON:", textResponse)
-        throw new Error(`Resposta inválida da API: ${response.status} - ${textResponse}`)
-      }
-
-      const result = await response.json()
-      console.log("📋 Resultado da API:", result)
-
-      if (response.ok && result.success) {
-        console.log("✅ Lead enviado com sucesso:", result)
-
-        // Disparar evento de lead capturado para analytics
-        if (typeof window !== "undefined") {
-          try {
-            // 📊 GA4 via GTM - Lead Captured
-            window.dataLayer = window.dataLayer || []
-            window.dataLayer.push({
-              event: "lead_captured",
-              lead_source: "checkout_form",
-              lead_value: leadData.cart_value,
-              product_type: leadData.product_type,
-              user_data: {
-                email: leadData.email,
-                name: leadData.name,
-                phone: leadData.phone,
-              },
-              page_location: window.location.href,
-              timestamp: new Date().toISOString(),
-            })
-
-            console.log("📊 GTM Lead Captured Event enviado")
-
-            // 📱 Meta Pixel - Lead
-            if (typeof window.fbq !== "undefined") {
-              const nameParts = leadData.name.trim().split(" ")
-              const firstName = nameParts[0] || ""
-              const lastName = nameParts.slice(1).join(" ") || ""
-
-              window.fbq("track", "Lead", {
-                value: leadData.cart_value,
-                currency: "BRL",
-                content_name: leadData.product_type,
-                content_category: "Pet Tracking",
-                // Advanced Matching
-                em: leadData.email,
-                fn: firstName,
-                ln: lastName,
-                ph: leadData.phone.replace(/\D/g, ""),
-              })
-
-              console.log("📱 Meta Pixel Lead Event enviado")
-            } else {
-              console.warn("⚠️ Meta Pixel (fbq) não encontrado")
-            }
-          } catch (analyticsError) {
-            console.warn("⚠️ Erro ao enviar eventos de analytics:", analyticsError)
-          }
-        }
-      } else {
-        console.error("❌ Erro na resposta da API:", result)
-        throw new Error(result.error || `Erro da API: ${response.status}`)
-      }
-    } catch (error) {
-      console.error("❌ Erro detalhado ao enviar lead:", {
-        error: error,
-        message: error instanceof Error ? error.message : "Erro desconhecido",
-        stack: error instanceof Error ? error.stack : undefined,
-        leadData: leadData,
-      })
-
-      // Não re-throw o erro para não quebrar a experiência do usuário
-      // O lead capture é uma funcionalidade adicional, não crítica
-    }
-  }
-
-  // Função para verificar e capturar lead
-  const checkAndCaptureLead = () => {
-    try {
-      // Verificar se estamos no cliente
-      if (typeof window === "undefined") {
-        return
-      }
-
-      const emailField = document.getElementById("email") as HTMLInputElement
-      const nameField = document.getElementById("name") as HTMLInputElement
-      const phoneField = document.getElementById("phone") as HTMLInputElement
-
-      if (!emailField || !nameField || !phoneField) {
-        console.warn("⚠️ Campos do formulário não encontrados ainda")
-        return
-      }
-
-      const email = emailField.value?.trim() || ""
-      const name = nameField.value?.trim() || ""
-      const phone = phoneField.value?.trim() || ""
-
-      // Verificar se temos dados suficientes para um lead
-      const hasValidEmail = email && email.includes("@") && email.includes(".")
-      const hasValidName = name && name.length >= 2
-      const hasValidPhone = phone && phone.replace(/\D/g, "").length >= 10
-
-      console.log("🔍 Verificando dados do lead:", {
-        email: email ? "✅" : "❌",
-        name: name ? "✅" : "❌",
-        phone: phone ? "✅" : "❌",
-        hasValidEmail,
-        hasValidName,
-        hasValidPhone,
-      })
-
-      if (hasValidEmail && hasValidName && hasValidPhone) {
-        // Criar chave única para este lead
-        const leadKey = `${email}-${phone.replace(/\D/g, "")}`
-
-        // Verificar se já capturamos este lead
-        if (!capturedLeads.has(leadKey)) {
-          const { cartValue, productType } = getProductData()
-
-          const leadData: LeadData = {
-            email,
-            name,
-            phone: phone.replace(/\D/g, ""), // Limpar formatação
-            source: "checkout_form",
-            page_url: window.location.href,
-            timestamp: new Date().toISOString(),
-            product_type: productType,
-            cart_value: cartValue,
-          }
-
-          // Marcar como capturado
-          setCapturedLeads((prev) => new Set([...prev, leadKey]))
-
-          // Enviar para Make.com
-          sendLeadToMake(leadData)
-
-          console.log("🎯 Lead capturado:", {
-            email,
-            name,
-            phone: phone.replace(/\D/g, ""),
-            productType,
-            cartValue,
-          })
-        } else {
-          console.log("ℹ️ Lead já foi capturado anteriormente:", leadKey)
-        }
-      }
-    } catch (error) {
-      console.error("❌ Erro ao verificar lead:", error)
-    }
-  }
-
-  // Função com debounce para evitar muitas chamadas
-  const debouncedLeadCheck = () => {
-    if (debounceRef.current) {
-      clearTimeout(debounceRef.current)
-    }
-
-    debounceRef.current = setTimeout(() => {
-      checkAndCaptureLead()
-    }, 1500) // Aumentar para 1.5 segundos para dar tempo dos campos carregarem
-  }
+  const [hasTracked, setHasTracked] = useState(false)
 
   useEffect(() => {
-    // Verificar se estamos no cliente
-    if (typeof window === "undefined") {
-      return
-    }
+    if (typeof window === "undefined" || hasTracked) return
 
-    // Aguardar um pouco para os campos carregarem
-    const initTimer = setTimeout(() => {
+    console.log("✅ LeadCaptureTracker inicializado com sucesso")
+
+    const trackLead = async () => {
       try {
-        // Monitorar mudanças nos campos de entrada
-        const emailField = document.getElementById("email")
-        const nameField = document.getElementById("name")
-        const phoneField = document.getElementById("phone")
+        // Aguardar um pouco para garantir que os campos foram preenchidos
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+
+        // Obter dados dos campos do formulário
+        const emailField = document.querySelector('input[name="email"]') as HTMLInputElement
+        const nameField = document.querySelector('input[name="name"]') as HTMLInputElement
+        const phoneField = document.querySelector('input[name="phone"]') as HTMLInputElement
 
         if (!emailField || !nameField || !phoneField) {
-          console.warn("⚠️ Campos do formulário não encontrados, tentando novamente...")
-          // Tentar novamente após mais tempo
-          setTimeout(() => {
-            debouncedLeadCheck()
-          }, 2000)
+          console.log("🔍 Campos do formulário não encontrados ainda, tentando novamente...")
           return
         }
 
-        const handleInputChange = () => {
-          debouncedLeadCheck()
+        const email = emailField.value?.trim()
+        const name = nameField.value?.trim()
+        const phone = phoneField.value?.trim()
+
+        // Validações básicas
+        const hasValidEmail = email && email.includes("@") && email.includes(".")
+        const hasValidName = name && name.length >= 2
+        const hasValidPhone = phone && phone.length >= 10
+
+        console.log("🔍 Verificando dados do lead:", {
+          email: hasValidEmail ? "✅" : "❌",
+          name: hasValidName ? "✅" : "❌",
+          phone: hasValidPhone ? "✅" : "❌",
+          hasValidEmail,
+          hasValidName,
+          hasValidPhone,
+        })
+
+        if (!hasValidEmail || !hasValidName || !hasValidPhone) {
+          console.log("⏳ Dados ainda não estão completos, aguardando...")
+          return
         }
 
-        // Adicionar listeners
-        emailField.addEventListener("input", handleInputChange)
-        nameField.addEventListener("input", handleInputChange)
-        phoneField.addEventListener("input", handleInputChange)
+        // Verificar se é produto personalizado ou genérico
+        const urlParams = new URLSearchParams(window.location.search)
+        const isPersonalized = urlParams.get("personalized") === "true"
+        const amount = urlParams.get("amount")
 
-        // Verificar também quando os campos perdem o foco
-        emailField.addEventListener("blur", handleInputChange)
-        nameField.addEventListener("blur", handleInputChange)
-        phoneField.addEventListener("blur", handleInputChange)
+        const productType = isPersonalized ? "Tag Personalizada" : "Tag Genérica"
+        const cartValue = amount ? Number(amount) / 100 : isPersonalized ? 49.9 : 18.87
 
-        console.log("✅ LeadCaptureTracker inicializado com sucesso")
+        const leadData: LeadData = {
+          email,
+          name,
+          phone,
+          productType,
+          cartValue,
+        }
 
-        // Cleanup function
-        return () => {
-          emailField?.removeEventListener("input", handleInputChange)
-          nameField?.removeEventListener("input", handleInputChange)
-          phoneField?.removeEventListener("input", handleInputChange)
-          emailField?.removeEventListener("blur", handleInputChange)
-          nameField?.removeEventListener("blur", handleInputChange)
-          phoneField?.removeEventListener("blur", handleInputChange)
+        console.log("🎯 Lead capturado:", leadData)
+
+        // Marcar como rastreado para evitar duplicatas
+        setHasTracked(true)
+
+        // Enviar para Make.com
+        try {
+          const result = await sendLeadToMake(leadData, window.location.href)
+          console.log("✅ Lead enviado com sucesso:", result)
+        } catch (error) {
+          console.error("❌ Erro ao enviar lead:", error)
+          // Não bloquear o tracking mesmo se o webhook falhar
+        }
+
+        // 📊 GA4 via GTM - Lead Event
+        window.dataLayer = window.dataLayer || []
+        window.dataLayer.push({
+          event: "lead_captured",
+          lead_email: email,
+          lead_name: name,
+          lead_phone: phone,
+          lead_source: "checkout_form",
+          product_type: productType,
+          cart_value: cartValue,
+          page_location: window.location.href,
+          timestamp: new Date().toISOString(),
+        })
+
+        console.log("📊 GTM Lead Captured Event enviado")
+
+        // 📱 Meta Pixel - Lead Event com Advanced Matching
+        if (typeof window.fbq !== "undefined") {
+          try {
+            const metaUserData = await prepareMetaPixelUserData({
+              email: email,
+              firstName: name.split(" ")[0],
+              lastName: name.split(" ").slice(1).join(" "),
+              phone: phone,
+            })
+
+            window.fbq("track", "Lead", {
+              content_name: productType,
+              content_category: "Pet Tracking",
+              value: cartValue,
+              currency: "BRL",
+              ...metaUserData,
+            })
+
+            logMetaPixelEvent("Lead Captured", {
+              content_name: productType,
+              value: cartValue,
+              currency: "BRL",
+              ...metaUserData,
+            })
+
+            console.log("📱 Meta Pixel Lead Event enviado")
+          } catch (error) {
+            console.error("❌ Erro no Meta Pixel Lead Event:", error)
+          }
         }
       } catch (error) {
-        console.error("❌ Erro ao inicializar LeadCaptureTracker:", error)
+        console.error("❌ Erro no LeadCaptureTracker:", error)
       }
-    }, 1000) // Aguardar 1 segundo para os campos carregarem
+    }
+
+    // Executar múltiplas vezes para capturar quando os dados estiverem disponíveis
+    const intervals = [5000, 10000, 15000, 20000] // 5s, 10s, 15s, 20s
+    const timeouts: NodeJS.Timeout[] = []
+
+    intervals.forEach((delay) => {
+      const timeout = setTimeout(() => {
+        if (!hasTracked) {
+          trackLead()
+        }
+      }, delay)
+      timeouts.push(timeout)
+    })
 
     // Cleanup
     return () => {
-      clearTimeout(initTimer)
-      if (debounceRef.current) {
-        clearTimeout(debounceRef.current)
-      }
+      timeouts.forEach((timeout) => clearTimeout(timeout))
     }
-  }, [])
+  }, [hasTracked])
 
-  return null // Este componente não renderiza nada
+  return null
 }
