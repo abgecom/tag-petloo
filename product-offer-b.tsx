@@ -350,34 +350,34 @@ export default function ProductOfferB() {
 
             <div className="grid grid-cols-2 gap-6 max-w-4xl mx-auto">
               {/* Primeira linha - 2 imagens */}
-              <div className="aspect-square">
+              <div className="w-full">
                 <img
-                  src="/placeholder.svg?height=300&width=300&text=App+Screenshot+1"
+                  src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20LP2/IMG-20250723-WA0011.jpg"
                   alt="Screenshot do app Petloo 1"
-                  className="w-full h-full object-cover rounded-2xl shadow-lg"
+                  className="w-full h-auto rounded-2xl shadow-lg"
                 />
               </div>
-              <div className="aspect-square">
+              <div className="w-full">
                 <img
-                  src="/placeholder.svg?height=300&width=300&text=App+Screenshot+2"
+                  src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20LP2/IMG-20250723-WA0012.jpg"
                   alt="Screenshot do app Petloo 2"
-                  className="w-full h-full object-cover rounded-2xl shadow-lg"
+                  className="w-full h-auto rounded-2xl shadow-lg"
                 />
               </div>
 
               {/* Segunda linha - 2 imagens */}
-              <div className="aspect-square">
+              <div className="w-full">
                 <img
-                  src="/placeholder.svg?height=300&width=300&text=App+Screenshot+3"
+                  src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20LP2/IMG-20250723-WA0013.jpg"
                   alt="Screenshot do app Petloo 3"
-                  className="w-full h-full object-cover rounded-2xl shadow-lg"
+                  className="w-full h-auto rounded-2xl shadow-lg"
                 />
               </div>
-              <div className="aspect-square">
+              <div className="w-full">
                 <img
-                  src="/placeholder.svg?height=300&width=300&text=App+Screenshot+4"
+                  src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20LP2/IMG-20250723-WA0014.jpg"
                   alt="Screenshot do app Petloo 4"
-                  className="w-full h-full object-cover rounded-2xl shadow-lg"
+                  className="w-full h-auto rounded-2xl shadow-lg"
                 />
               </div>
             </div>
@@ -493,13 +493,13 @@ export default function ProductOfferB() {
 
         {/* Resgate Section Title */}
         <div className="text-center py-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-black">Resgate agora a sua Tag</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-black">Garanta agora a sua Tag</h2>
         </div>
 
         {/* Main Content */}
         <div className="text-center">
           <img
-            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/Frame%208940560-EIvm6iJOyX4PH5iRHdP9ouPNNnFr7D.png"
+            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20LP2/Frame%208940564.png"
             alt="Cachorro com tag no pescoço e mão segurando celular com mapa"
             className="w-full max-w-lg rounded-2xl mx-auto shadow-md"
           />
@@ -515,7 +515,7 @@ export default function ProductOfferB() {
             <ShoppingCart className="w-8 h-8 mr-4" />
             Pedir agora
           </Button>
-          <p className="text-gray-600 text-sm mt-3">Cancele a qualquer momento </p>
+          <p className="text-gray-600 text-sm mt-3">Escolha a cor da sua tag no próximo passo</p>
         </div>
 
         {/* Terms and Checkout */}
