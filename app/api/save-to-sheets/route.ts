@@ -24,6 +24,10 @@ interface OrderData {
   pix_code?: string // Código PIX copia e cola
   pix_qr_code?: string // QR Code em base64
   pix_expiration_date?: string // Data de expiração
+  // 💳 NOVOS CAMPOS DO CARTÃO
+  stripe_customer_id?: string
+  payment_intent_id?: string
+  stripe_payment_status?: string
 }
 
 export async function POST(request: NextRequest) {
@@ -33,7 +37,7 @@ export async function POST(request: NextRequest) {
     // URL do Webhook do Make.com (substitua pela sua URL)
     const MAKE_WEBHOOK_URL = "https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k"
 
-    console.log("=== ENVIANDO DADOS PARA MAKE.COM ===")
+    console.log("=== ENVIANDO DADOS PARA MAKE.COM (SAVE-TO-SHEETS) ===")
     console.log("Dados:", JSON.stringify(orderData, null, 2))
 
     // 💰 LOG ESPECÍFICO PARA DADOS PIX
@@ -44,17 +48,55 @@ export async function POST(request: NextRequest) {
       console.log("PIX Expiration:", orderData.pix_expiration_date || "Não informado")
     }
 
+    // 💳 LOG ESPECÍFICO PARA DADOS CARTÃO
+    if (orderData.payment_method === "Cartão de Crédito") {
+      console.log("💳 DADOS DO CARTÃO INCLUÍDOS:")
+      console.log("Stripe Customer ID:", orderData.stripe_customer_id ? "✅ Presente" : "❌ Ausente")
+      console.log("Payment Intent ID:", orderData.payment_intent_id ? "✅ Presente" : "❌ Ausente")
+      console.log("Stripe Status:", orderData.stripe_payment_status || "Não informado")
+    }
+
     // Enviar dados para o Make.com
     const response = await fetch(MAKE_WEBHOOK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "User-Agent": "Petloo-SaveToSheets/1.0",
       },
-      body: JSON.stringify(orderData),
+      body: JSON.stringify({
+        ...orderData,
+        // Adicionar timestamp e fonte
+        created_at: new Date().toISOString(),
+        source: "save-to-sheets-api",
+        api_version: "1.0",
+      }),
+    })
+
+    console.log("📡 Resposta do Make.com (save-to-sheets):", {
+      status: response.status,
+      statusText: response.statusText,
+      ok: response.ok,
     })
 
     if (!response.ok) {
-      throw new Error(`Erro ao enviar para Make.com: ${response.status}`)
+      // Tentar ler a resposta de erro
+      try {
+        const errorText = await response.text()
+        console.error("📋 Erro detalhado do Make.com:", errorText)
+        throw new Error(`Erro ao enviar para Make.com: ${response.status} - ${errorText}`)
+      } catch (readError) {
+        throw new Error(`Erro ao enviar para Make.com: ${response.status}`)
+      }
+    }
+
+    // Tentar ler a resposta de sucesso
+    try {
+      const responseText = await response.text()
+      if (responseText) {
+        console.log("📋 Resposta do Make.com:", responseText)
+      }
+    } catch (readError) {
+      console.log("📋 Resposta do Make.com recebida (não foi possível ler o conteúdo)")
     }
 
     console.log("✅ Dados enviados para Make.com com sucesso!")
@@ -62,6 +104,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       success: true,
       message: "Dados salvos na planilha com sucesso",
+      timestamp: new Date().toISOString(),
     })
   } catch (error) {
     console.error("❌ Erro ao salvar na planilha:", error)
@@ -71,6 +114,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: "Erro ao salvar dados na planilha",
         details: error instanceof Error ? error.message : "Erro desconhecido",
+        timestamp: new Date().toISOString(),
       },
       { status: 500 },
     )
@@ -97,6 +141,9 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString(),
       update_type: "payment_confirmation",
       is_update: true,
+      // Adicionar dados adicionais se disponíveis
+      payment_method: updateData.payment_method || "Não informado",
+      order_amount: updateData.order_amount || 0,
     }
 
     console.log("📦 Enviando atualização para Make.com:", JSON.stringify(updatePayload, null, 2))
@@ -106,14 +153,28 @@ export async function PUT(request: NextRequest) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "User-Agent": "Petloo-UpdateStatus/1.0",
         },
         body: JSON.stringify(updatePayload),
       })
 
-      console.log("📡 Resposta do Make.com:", {
+      console.log("📡 Resposta do Make.com (atualização):", {
         status: response.status,
+        statusText: response.statusText,
         ok: response.ok,
       })
+
+      if (response.ok) {
+        // Tentar ler a resposta
+        try {
+          const responseText = await response.text()
+          if (responseText) {
+            console.log("📋 Resposta da atualização:", responseText)
+          }
+        } catch (readError) {
+          console.log("📋 Atualização enviada com sucesso")
+        }
+      }
 
       return NextResponse.json({
         success: true,
@@ -130,6 +191,7 @@ export async function PUT(request: NextRequest) {
         message: "Dados processados localmente (erro de conexão)",
         order_id: updateData.order_id,
         warning: "Make.com indisponível",
+        timestamp: new Date().toISOString(),
       })
     }
   } catch (error) {
@@ -140,6 +202,7 @@ export async function PUT(request: NextRequest) {
         success: false,
         error: "Erro interno do servidor",
         details: error instanceof Error ? error.message : "Erro desconhecido",
+        timestamp: new Date().toISOString(),
       },
       { status: 500 },
     )

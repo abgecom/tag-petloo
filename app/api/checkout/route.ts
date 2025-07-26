@@ -180,7 +180,7 @@ export async function POST(request: NextRequest) {
       console.error("❌ Erro ao salvar pedido de cartão no Supabase:", error)
     }
 
-    // Salvar dados na planilha Google via Make.com
+    // 🔧 CORREÇÃO: Enviar como "Confirmado" para Make.com (sem webhook)
     try {
       const orderDataForSheets = {
         order_id: paymentIntent.id,
@@ -196,7 +196,7 @@ export async function POST(request: NextRequest) {
         customer_state: body.estado,
         order_amount: body.shipping_price / 100,
         payment_method: "Cartão de Crédito",
-        order_status: "Confirmado",
+        order_status: "Confirmado", // 🔧 MUDANÇA: Confirmado direto (sem webhook)
         product_type: body.product_type,
         product_color: body.product_color,
         product_quantity: body.product_quantity,
@@ -207,13 +207,32 @@ export async function POST(request: NextRequest) {
         subscription_price_id: PRICE_IDS.SUBSCRIPTION,
         trial_end_date: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
         has_subscription: true,
+        created_at: new Date().toISOString(),
+        payment_intent_id: paymentIntent.id,
       }
 
-      fetch("https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k", {
+      console.log("=== ENVIANDO PEDIDO CONFIRMADO PARA MAKE.COM ===")
+      console.log("Dados:", JSON.stringify(orderDataForSheets, null, 2))
+
+      const makeResponse = await fetch("https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          "User-Agent": "Petloo-Checkout-API",
+        },
         body: JSON.stringify(orderDataForSheets),
-      }).catch(console.warn)
+      })
+
+      console.log("📡 Resposta do Make.com:", {
+        status: makeResponse.status,
+        ok: makeResponse.ok,
+      })
+
+      if (makeResponse.ok) {
+        console.log("✅ Pedido confirmado enviado para Make.com com sucesso!")
+      } else {
+        console.error("❌ Erro ao enviar para Make.com:", makeResponse.status)
+      }
     } catch (error) {
       console.warn("⚠️ Erro ao preparar dados para planilha:", error)
     }

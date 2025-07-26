@@ -36,17 +36,19 @@ interface PersonalizedTag {
   price: number
 }
 
-// Mask functions for credit card fields
+// Mask functions for credit card fields - FIXED with null checks
 const formatCardNumber = (value: string) => {
+  if (!value || typeof value !== "string") return ""
   const cleaned = value.replace(/\D/g, "")
   const match = cleaned.match(/(\d{0,4})(\d{0,4})(\d{0,4})(\d{0,4})/)
   if (match) {
-    return [match[1], match[2], [match[3], match[4]].filter(Boolean).join(" ")]
+    return [match[1], match[2], [match[3], match[4]].filter(Boolean).join(" ")].filter(Boolean).join(" ")
   }
   return cleaned
 }
 
 const formatExpiryDate = (value: string) => {
+  if (!value || typeof value !== "string") return ""
   const cleaned = value.replace(/\D/g, "")
   if (cleaned.length >= 2) {
     const month = cleaned.substring(0, 2)
@@ -66,10 +68,12 @@ const formatExpiryDate = (value: string) => {
 }
 
 const formatCVV = (value: string) => {
+  if (!value || typeof value !== "string") return ""
   return value.replace(/\D/g, "").substring(0, 3)
 }
 
 const getCardType = (number: string) => {
+  if (!number || typeof number !== "string") return "unknown"
   const cleaned = number.replace(/\D/g, "")
   if (cleaned.match(/^4/)) return "visa"
   if (cleaned.match(/^5[1-5]/)) return "mastercard"
@@ -666,7 +670,7 @@ function CheckoutForm() {
   const saveCookiesForGTM = (email: string, name: string, phone: string) => {
     if (typeof document !== "undefined") {
       // Dividir nome em primeiro e último nome
-      const nameParts = name.trim().split(" ")
+      const nameParts = (name || "").trim().split(" ")
       const firstName = nameParts[0] || ""
       const lastName = nameParts.slice(1).join(" ") || ""
 
@@ -674,16 +678,16 @@ function CheckoutForm() {
       const maxAge = "max-age=2592000"
       const path = "path=/"
 
-      document.cookie = `ploo_email=${encodeURIComponent(email)}; ${path}; ${maxAge}`
+      document.cookie = `ploo_email=${encodeURIComponent(email || "")}; ${path}; ${maxAge}`
       document.cookie = `ploo_first_name=${encodeURIComponent(firstName)}; ${path}; ${maxAge}`
       document.cookie = `ploo_last_name=${encodeURIComponent(lastName)}; ${path}; ${maxAge}`
-      document.cookie = `ploo_phone=${encodeURIComponent(phone.replace(/\D/g, ""))}; ${path}; ${maxAge}`
+      document.cookie = `ploo_phone=${encodeURIComponent((phone || "").replace(/\D/g, ""))}; ${path}; ${maxAge}`
 
       console.log("🍪 Cookies salvos para GTM:", {
-        email: email,
+        email: email || "",
         firstName: firstName,
         lastName: lastName,
-        phone: phone.replace(/\D/g, ""),
+        phone: (phone || "").replace(/\D/g, ""),
       })
     }
   }
@@ -711,7 +715,7 @@ function CheckoutForm() {
       saveCookiesForGTM(email, name, phone)
 
       // Dividir nome para Meta Pixel
-      const nameParts = name.trim().split(" ")
+      const nameParts = (name || "").trim().split(" ")
       const firstName = nameParts[0] || ""
       const lastName = nameParts.slice(1).join(" ") || ""
 
@@ -730,7 +734,7 @@ function CheckoutForm() {
             email: email,
             first_name: firstName,
             last_name: lastName,
-            phone: phone.replace(/\D/g, ""),
+            phone: (phone || "").replace(/\D/g, ""),
           },
           page_location: window.location.href,
           timestamp: new Date().toISOString(),
@@ -784,6 +788,7 @@ function CheckoutForm() {
   }
 
   const formatPhone = (value: string) => {
+    if (!value || typeof value !== "string") return ""
     const cleaned = value.replace(/\D/g, "")
     const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/)
     if (match) {
@@ -793,6 +798,7 @@ function CheckoutForm() {
   }
 
   const formatCPF = (value: string) => {
+    if (!value || typeof value !== "string") return ""
     const cleaned = value.replace(/\D/g, "")
     const match = cleaned.match(/^(\d{3})(\d{3})(\d{3})(\d{2})$/)
     if (match) {
@@ -802,6 +808,7 @@ function CheckoutForm() {
   }
 
   const formatCEP = (value: string) => {
+    if (!value || typeof value !== "string") return ""
     // Remove all non-digits
     const cleaned = value.replace(/\D/g, "")
 
@@ -1804,10 +1811,7 @@ function CheckoutForm() {
                         </Suspense>
                       </div>
 
-                      <select className="w-full p-3 border rounded-lg bg-white" defaultValue="">
-                        <option value="" disabled>
-                          Selecione o parcelamento
-                        </option>
+                      <select className="w-full p-3 border rounded-lg bg-white" defaultValue="1x">
                         <option value="1x">1x de R$ {getShippingCost().toFixed(2).replace(".", ",")}</option>
                       </select>
                     </div>
