@@ -60,7 +60,12 @@ export async function POST(request: NextRequest) {
           customer_email: customer.email || "",
           customer_phone: customer.phone || customer.metadata.telefone || "",
           customer_cpf: customer.metadata.cpf || "",
-          customer_address: `${customer.metadata.endereco || ""}, ${customer.metadata.numero || ""}${customer.metadata.complemento ? `, ${customer.metadata.complemento}` : ""}, ${customer.metadata.bairro || ""}`,
+          // INÍCIO: Campos de endereço separados para o Make.com
+          customer_address: customer.metadata.endereco || "",
+          customer_number: customer.metadata.numero || "",
+          customer_complement: customer.metadata.complemento || "",
+          customer_neighborhood: customer.metadata.bairro || "",
+          // FIM: Campos de endereço separados
           customer_cep: customer.metadata.cep || "",
           customer_city: customer.metadata.cidade || "",
           customer_state: customer.metadata.estado || "",
@@ -171,7 +176,12 @@ export async function POST(request: NextRequest) {
           customer_email: customer.email || "",
           customer_phone: customer.phone || customer.metadata.telefone || "",
           customer_cpf: customer.metadata.cpf || "",
-          customer_address: `${customer.metadata.endereco || ""}, ${customer.metadata.numero || ""}${customer.metadata.complemento ? `, ${customer.metadata.complemento}` : ""}, ${customer.metadata.bairro || ""}`,
+          // INÍCIO: Campos de endereço separados para o Make.com
+          customer_address: customer.metadata.endereco || "",
+          customer_number: customer.metadata.numero || "",
+          customer_complement: customer.metadata.complemento || "",
+          customer_neighborhood: customer.metadata.bairro || "",
+          // FIM: Campos de endereço separados
           customer_cep: customer.metadata.cep || "",
           customer_city: customer.metadata.cidade || "",
           customer_state: customer.metadata.estado || "",

@@ -3,7 +3,7 @@ import Stripe from "stripe"
 import { supabase } from "@/lib/supabase"
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-12-18.acacia",
+  apiVersion: "2024-06-20",
 })
 
 interface CheckoutRequestBody {
@@ -27,11 +27,7 @@ interface CheckoutRequestBody {
 }
 
 const PRICE_IDS = {
-  SHIPPING_1887: "price_1Rj0n7RtGASrDbfe40z60yvg",
-  SHIPPING_2939: "price_1Rj0p5RtGASrDbfe9s1cHmhC",
-  PERSONALIZED_ORANGE: "price_1RjRxWRtGASrDbfeP7jp0wb0",
-  PERSONALIZED_PURPLE: "price_1RjRyURtGASrDbfeuppcCqtm",
-  SUBSCRIPTION: "price_1RjOGMRtGASrDbfemNmh2FzT",
+  SUBSCRIPTION: "price_1RjOGMRtGASrDbfemNmh2FzT", // Assinatura App Petloo
 }
 
 export async function POST(request: NextRequest) {
@@ -142,7 +138,6 @@ export async function POST(request: NextRequest) {
       },
     })
 
-    // Salvar dados no Supabase DIRETAMENTE (sem fetch interno)
     try {
       const orderDataForSupabase = {
         order_id: paymentIntent.id,
@@ -165,22 +160,11 @@ export async function POST(request: NextRequest) {
         pet_name: body.pet_name || null,
         pix_code: null,
       }
-
-      console.log("=== SALVANDO NO SUPABASE DIRETAMENTE ===")
-      console.log("Dados:", JSON.stringify(orderDataForSupabase, null, 2))
-
-      const { data, error } = await supabase.from("orders").insert([orderDataForSupabase]).select()
-
-      if (error) {
-        console.error("❌ Erro ao inserir no Supabase:", error)
-      } else {
-        console.log("✅ Pedido de cartão salvo no Supabase com sucesso!", data)
-      }
+      await supabase.from("orders").insert([orderDataForSupabase]).select()
     } catch (error) {
       console.error("❌ Erro ao salvar pedido de cartão no Supabase:", error)
     }
 
-    // 🔧 CORREÇÃO: Enviar como "Confirmado" para Make.com (sem webhook)
     try {
       const orderDataForSheets = {
         order_id: paymentIntent.id,
@@ -190,13 +174,17 @@ export async function POST(request: NextRequest) {
         customer_email: body.email,
         customer_phone: body.telefone,
         customer_cpf: body.cpf,
-        customer_address: `${body.endereco}, ${body.numero}${body.complemento ? `, ${body.complemento}` : ""}, ${body.bairro}`,
+        // ✅ ALTERAÇÃO APLICADA AQUI
+        customer_address: body.endereco,
+        customer_number: body.numero,
+        customer_complement: body.complemento || "",
+        customer_neighborhood: body.bairro,
         customer_cep: body.cep,
         customer_city: body.cidade,
         customer_state: body.estado,
         order_amount: body.shipping_price / 100,
         payment_method: "Cartão de Crédito",
-        order_status: "Confirmado", // 🔧 MUDANÇA: Confirmado direto (sem webhook)
+        order_status: "Confirmado",
         product_type: body.product_type,
         product_color: body.product_color,
         product_quantity: body.product_quantity,
@@ -211,10 +199,7 @@ export async function POST(request: NextRequest) {
         payment_intent_id: paymentIntent.id,
       }
 
-      console.log("=== ENVIANDO PEDIDO CONFIRMADO PARA MAKE.COM ===")
-      console.log("Dados:", JSON.stringify(orderDataForSheets, null, 2))
-
-      const makeResponse = await fetch("https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k", {
+      await fetch("https://hook.us2.make.com/qkwwr3qvpgkkobinbd28lzsq0k51tt6k", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -222,17 +207,6 @@ export async function POST(request: NextRequest) {
         },
         body: JSON.stringify(orderDataForSheets),
       })
-
-      console.log("📡 Resposta do Make.com:", {
-        status: makeResponse.status,
-        ok: makeResponse.ok,
-      })
-
-      if (makeResponse.ok) {
-        console.log("✅ Pedido confirmado enviado para Make.com com sucesso!")
-      } else {
-        console.error("❌ Erro ao enviar para Make.com:", makeResponse.status)
-      }
     } catch (error) {
       console.warn("⚠️ Erro ao preparar dados para planilha:", error)
     }
