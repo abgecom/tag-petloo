@@ -626,13 +626,10 @@ export default function ProductOfferB() {
               </AccordionItem>
               <AccordionItem value="item-2" className="bg-white rounded-lg border border-gray-200 px-6">
                 <AccordionTrigger className="text-left font-semibold text-black hover:no-underline">
-                  Como funciona o acesso ás funcionalidadees do app Petloo?
+                  Como funciona o acesso às funcionalidadees do app Petloo?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-700 pb-4">
-                  Ao adquirir a Tag, você tem acesso gratuito ao app por um período de 1 mês, com todas as
-                  funcionalidades completas: serviço de localização, registro oficial do pet, cartão de vacinas virtual,
-                  seguro pet e muito mais. A partir de 1 mês, será cobrado um valor equivalente a 1 real por dia para
-                  manter todos os serviços funcionando.
+                  Ao adquirir a Tag, você tem acesso gratuito ao app por um período de 1 mês, com todas as funcionalidades completas: serviço de localização, registro oficial do pet, cartão de vacinas virtual e muito mais. A partir de 1 mês, será cobrado um valor equivalente a 1 real por dia para manter todos os serviços funcionando.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-3" className="bg-white rounded-lg border border-gray-200 px-6">
@@ -649,8 +646,7 @@ export default function ProductOfferB() {
                   Como faço para ativar o seguro Petloo?
                 </AccordionTrigger>
                 <AccordionContent className="text-gray-700 pb-4">
-                  Ao cadastrar sua Tag no app Petloo, seu pet fica automaticamente protegido com nosso seguro saúde
-                  gratuito. O seguro tem uma carência de 30 dias.
+                  Ao cadastrar sua Tag no app Petloo, você terá a possibilidade de assinar o seguro Petloo dentro do app.
                 </AccordionContent>
               </AccordionItem>
               <AccordionItem value="item-5" className="bg-white rounded-lg border border-gray-200 px-6">
