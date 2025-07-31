@@ -1116,14 +1116,38 @@ function CheckoutForm() {
           throw fetchError
         }
       } else {
-        // Processar pagamento com cartão (código existente)
+        // Processar pagamento com cartão - NOVO FLUXO SEM PAYMENTINTENTS ÓRFÃOS
         const cardElement = elements.getElement(CardElement)
         if (!cardElement) {
           setCheckoutMessage({ type: "error", text: "Elemento do cartão não encontrado." })
           return
         }
 
-        // Preparar dados para envio (sem dados do cartão)
+        console.log("=== VALIDANDO CARTÃO ANTES DE CRIAR PAYMENTINTENT ===")
+
+        // 1. PRIMEIRO: Criar método de pagamento para validar o cartão
+        const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
+          type: "card",
+          card: cardElement,
+          billing_details: {
+            name: name,
+            email: email,
+            phone: phone.replace(/\D/g, ""),
+          },
+        })
+
+        if (paymentMethodError) {
+          console.error("❌ Erro na validação do cartão:", paymentMethodError)
+          setCheckoutMessage({
+            type: "error",
+            text: `Erro no cartão: ${paymentMethodError.message}`,
+          })
+          return
+        }
+
+        console.log("✅ Cartão validado com sucesso:", paymentMethod.id)
+
+        // 2. AGORA SIM: Preparar dados para envio (COM payment_method_id)
         const checkoutData = {
           name,
           email,
@@ -1136,19 +1160,21 @@ function CheckoutForm() {
           cidade: addressData.city,
           estado: addressData.state,
           complemento: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-          shipping_price: productInfo.amount, // Valor fixo também para cartão
-          // 🎯 ADICIONAR DADOS DO PRODUTO
+          shipping_price: productInfo.amount,
           product_type: productInfo.type,
           product_color: productInfo.color,
-          product_quantity: quantity, // CORREÇÃO: usar quantity em vez de productInfo.quantity
+          product_quantity: quantity,
           product_sku: productInfo.sku,
           pet_name: productInfo.petName || "",
+          // ✅ INCLUIR O PAYMENT METHOD VALIDADO
+          payment_method_id: paymentMethod.id,
         }
 
-        console.log("Dados enviados para API:", checkoutData)
+        console.log("=== ENVIANDO DADOS PARA API COM CARTÃO VALIDADO ===")
+        console.log("Dados:", checkoutData)
 
         try {
-          // Chamar API de checkout
+          // 3. Chamar API com payment_method já validado
           const response = await fetch("/api/checkout", {
             method: "POST",
             headers: {
@@ -1160,7 +1186,6 @@ function CheckoutForm() {
           console.log("Status da resposta:", response.status)
           console.log("Content-Type:", response.headers.get("content-type"))
 
-          // Verificar se a resposta é JSON válido
           const contentType = response.headers.get("content-type")
           if (!contentType || !contentType.includes("application/json")) {
             const textResponse = await response.text()
@@ -1175,55 +1200,24 @@ function CheckoutForm() {
             throw new Error(result.error || `Erro HTTP ${response.status}: ${result.message || "Erro desconhecido"}`)
           }
 
-          // Processar pagamento com cartão usando Stripe
-          console.log("Confirmando pagamento com client_secret:", result.client_secret)
+          // 4. Confirmar pagamento (agora sem risco de falha)
+          console.log("✅ PaymentIntent criado e confirmado automaticamente:", result.payment_intent_id)
 
-          const { error, paymentIntent } = await stripe.confirmCardPayment(result.client_secret, {
-            payment_method: {
-              card: cardElement,
-              billing_details: {
-                name: name,
-                email: email,
-                phone: phone.replace(/\D/g, ""),
-              },
-            },
-          })
-
-          console.log("=== RESPOSTA DO STRIPE ===")
-          console.log("Error:", error)
-          console.log("PaymentIntent:", paymentIntent)
-
-          if (error) {
-            console.error("Erro no pagamento:", error)
-            setCheckoutMessage({
-              type: "error",
-              text: `Erro no pagamento: ${error.message}`,
-            })
-          } else if (paymentIntent && paymentIntent.status === "succeeded") {
-            console.log("✅ PAGAMENTO CONFIRMADO!")
-
-            // Salvar dados do pedido para a página de obrigado
-            const orderSummary = {
-              orderId: paymentIntent.id,
-              customerName: name,
-              customerEmail: email,
-              amount: productInfo.amount, // Usar o valor real da compra em vez de valor fixo
-              paymentMethod: "Cartão de Crédito",
-              personalizedTags: personalizedTags,
-              quantity: quantity,
-            }
-
-            sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))
-
-            // Redirecionar para página de obrigado
-            router.push("/obrigado")
-          } else {
-            console.log("Status do pagamento:", paymentIntent?.status)
-            setCheckoutMessage({
-              type: "error",
-              text: "Pagamento não foi processado. Tente novamente.",
-            })
+          // Salvar dados do pedido para a página de obrigado
+          const orderSummary = {
+            orderId: result.payment_intent_id,
+            customerName: name,
+            customerEmail: email,
+            amount: productInfo.amount,
+            paymentMethod: "Cartão de Crédito",
+            personalizedTags: personalizedTags,
+            quantity: quantity,
           }
+
+          sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))
+
+          // Redirecionar para página de obrigado
+          router.push("/obrigado")
         } catch (fetchError) {
           console.error("Erro na requisição checkout:", fetchError)
           if (fetchError instanceof TypeError && fetchError.message.includes("Failed to fetch")) {
