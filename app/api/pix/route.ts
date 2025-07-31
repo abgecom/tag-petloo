@@ -244,8 +244,8 @@ export async function POST(request: NextRequest) {
         customer_phone: body.phone,
         customer_cpf: body.cpf,
         customer_address: `${body.address.street},${body.address.complement ? `, ${body.address.complement}` : ""}, ${body.address.district}`,
-        customer_number: body.address.number
-        customer_complement: body.address.complement
+        customer_number: body.address.number,
+        customer_complement: body.address.complement,
         customer_cep: body.address.cep,
         customer_city: body.address.city,
         customer_state: body.address.state,
