@@ -60,11 +60,8 @@ export default function FeaturesSectionV2() {
 
           {/* Content */}
           <div className="order-1 lg:order-2">
-            <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
-              O Ecossistema Petloo
-            </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              O App Petloo
+            <h2 className="text-3xl md:text-4xl font-bold text-petloo-purple mb-4">
+              O LooApp
             </h2>
             <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
               A bussola do seu melhor amigo
