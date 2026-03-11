@@ -39,15 +39,15 @@ export default function HeroSectionV2() {
       </div>
 
       {/* Content - Alinhado a esquerda como Tractive */}
-      <div className="relative z-10 container mx-auto px-4 md:px-8 lg:px-12 pt-56 pb-32 md:pt-72 md:pb-36 lg:pt-80 lg:pb-40">
-        <div className="max-w-2xl space-y-6 md:space-y-8">
+      <div className="relative z-10 container mx-auto px-4 md:px-8 lg:px-12 pt-36 pb-24 md:pt-72 md:pb-36 lg:pt-80 lg:pb-40">
+        <div className="max-w-2xl space-y-4 md:space-y-6 lg:space-y-8">
           {/* Headline */}
-          <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.15] text-balance">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.2] md:leading-[1.15] text-balance">
             A liberdade que seu pet ama. A seguranca que voce precisa para respirar aliviada.
           </h1>
           
           {/* Sub-headline */}
-          <p className="text-base md:text-lg lg:text-xl text-white leading-relaxed max-w-lg text-pretty">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-white leading-relaxed max-w-lg text-pretty">
             O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano. A Lootag une design inteligente e tecnologia de precisao para que o seu melhor amigo nunca esteja a mais de um clique de distancia.
           </p>
 
@@ -55,7 +55,7 @@ export default function HeroSectionV2() {
           <div className="pt-2">
             <Link 
               href="#comprar"
-              className="inline-flex items-center justify-center px-8 py-4 bg-petloo-green text-white font-bold text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
+              className="inline-flex items-center justify-center px-6 py-3 md:px-8 md:py-4 bg-petloo-green text-white font-bold text-base md:text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
             >
               Quero uma Lootag
             </Link>
