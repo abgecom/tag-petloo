@@ -5,26 +5,27 @@ import Link from "next/link"
 export default function HeroSectionV2() {
   return (
     <section className="relative min-h-screen md:h-[90vh] flex items-end md:items-center overflow-hidden">
-      {/* Video Background Placeholder */}
+      {/* Video Background */}
       <div className="absolute inset-0 z-0">
-        {/* Placeholder para video - substituir src pelo video real */}
+        {/* Video - substituir src pelo video real */}
         <video
           autoPlay
           loop
           muted
           playsInline
-          className="w-full h-full object-cover"
+          webkit-playsinline="true"
+          className="absolute inset-0 w-full h-full object-cover"
           poster="/placeholder-hero.jpg"
         >
           {/* <source src="/videos/hero-video.mp4" type="video/mp4" /> */}
         </video>
         
-        {/* Overlay gradient */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
+        {/* Overlay gradient - mais leve no mobile para ver o video */}
+        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/80 via-black/50 to-black/30 md:to-transparent" />
         
-        {/* Placeholder visual enquanto nao ha video */}
-        <div className="absolute inset-0 bg-gradient-to-br from-petloo-purple via-petloo-purple/80 to-petloo-green/40">
-          {/* Placeholder indicator */}
+        {/* Placeholder visual enquanto nao ha video - visivel em mobile */}
+        <div className="absolute inset-0 bg-gradient-to-br from-petloo-purple via-petloo-purple/70 to-petloo-green/30">
+          {/* Placeholder indicator - desktop only */}
           <div className="absolute top-1/2 right-1/4 -translate-y-1/2 text-white/10 hidden lg:block">
             <div className="w-64 h-64 border-4 border-dashed border-white/20 rounded-full flex items-center justify-center">
               <div className="text-center">
@@ -39,23 +40,23 @@ export default function HeroSectionV2() {
       </div>
 
       {/* Content - Alinhado a esquerda como Tractive */}
-      <div className="relative z-10 container mx-auto px-5 md:px-8 lg:px-12 pt-32 pb-28 md:pt-72 md:pb-36 lg:pt-80 lg:pb-40">
-        <div className="max-w-2xl space-y-5 md:space-y-6 lg:space-y-8">
+      <div className="relative z-10 container mx-auto px-5 md:px-8 lg:px-12 pt-28 pb-20 md:pt-72 md:pb-36 lg:pt-80 lg:pb-40">
+        <div className="max-w-2xl space-y-4 md:space-y-6 lg:space-y-8">
           {/* Headline */}
-          <h1 className="text-[1.625rem] leading-[1.25] sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white md:leading-[1.15] text-balance">
+          <h1 className="text-xl leading-[1.3] sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white md:leading-[1.15] text-balance">
             A liberdade que seu pet ama. A seguranca que voce precisa para respirar aliviada.
           </h1>
           
           {/* Sub-headline */}
-          <p className="text-[0.9375rem] leading-[1.6] sm:text-base md:text-lg lg:text-xl text-white md:leading-relaxed max-w-lg text-pretty">
-            O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano. A Lootag une design inteligente e tecnologia de precisao para que o seu melhor amigo nunca esteja a mais de um clique de distancia.
+          <p className="text-sm leading-[1.5] sm:text-base md:text-lg lg:text-xl text-white/90 md:text-white md:leading-relaxed max-w-md md:max-w-lg text-pretty">
+            O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano.
           </p>
 
           {/* CTA Button */}
-          <div className="pt-3 md:pt-2">
+          <div className="pt-2 md:pt-2">
             <Link 
               href="#comprar"
-              className="inline-flex items-center justify-center px-6 py-3.5 md:px-8 md:py-4 bg-petloo-green text-white font-bold text-base md:text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
+              className="inline-flex items-center justify-center px-5 py-3 md:px-8 md:py-4 bg-petloo-green text-white font-semibold text-sm md:text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
             >
               Quero uma Lootag
             </Link>
