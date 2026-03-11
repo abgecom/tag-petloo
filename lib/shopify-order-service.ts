@@ -143,7 +143,11 @@ async function shopifyFetch<T>(
     throw new Error("Configuracao Shopify incompleta")
   }
 
-  const url = `${SHOPIFY_STORE_URL}/admin/api/${SHOPIFY_API_VERSION}${endpoint}`
+  // Garantir que a URL tenha o protocolo https://
+  const baseUrl = SHOPIFY_STORE_URL.startsWith("http") 
+    ? SHOPIFY_STORE_URL 
+    : `https://${SHOPIFY_STORE_URL}`
+  const url = `${baseUrl}/admin/api/${SHOPIFY_API_VERSION}${endpoint}`
 
   const response = await fetch(url, {
     ...options,
