@@ -20,7 +20,7 @@ export default function HeaderV2() {
   return (
     <>
       {/* Tarja promocional superior */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-petloo-purple text-white py-2 px-4 text-center">
+      <div className="fixed top-0 left-0 right-0 z-50 bg-petloo-orange text-white py-2 px-4 text-center">
         <p className="text-xs md:text-sm font-medium">
           100% de desconto na primeira mensalidade, pague apenas o frete
         </p>

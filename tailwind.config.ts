@@ -61,6 +61,7 @@ const config: Config = {
         "petloo-green": "#24B14C",
         "petloo-beige": "#F5EFEA",
         "petloo-bg": "#F1E9DB",
+        "petloo-orange": "#F97316",
         // Lootag brand colors (Tractive-inspired)
         "lootag-teal": "#1DB88E",
         "lootag-dark": "#1F2937",
