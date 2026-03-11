@@ -51,34 +51,14 @@ export default function HeaderV2() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link 
-              href="#caes" 
+              href="#funcionalidades" 
               className={`text-sm font-medium transition-colors ${
                 scrolled 
                   ? "text-foreground hover:text-petloo-purple" 
                   : "text-white hover:text-white/80"
               }`}
             >
-              Lootag para caes
-            </Link>
-            <Link 
-              href="#gatos" 
-              className={`text-sm font-medium transition-colors ${
-                scrolled 
-                  ? "text-foreground hover:text-petloo-purple" 
-                  : "text-white hover:text-white/80"
-              }`}
-            >
-              Lootag para gatos
-            </Link>
-            <Link 
-              href="#comprar" 
-              className={`text-sm font-medium transition-colors ${
-                scrolled 
-                  ? "text-foreground hover:text-petloo-purple" 
-                  : "text-white hover:text-white/80"
-              }`}
-            >
-              Preco
+              Beneficios
             </Link>
             <Link 
               href="#como-funciona" 
@@ -89,6 +69,26 @@ export default function HeaderV2() {
               }`}
             >
               Como funciona
+            </Link>
+            <Link 
+              href="#depoimentos" 
+              className={`text-sm font-medium transition-colors ${
+                scrolled 
+                  ? "text-foreground hover:text-petloo-purple" 
+                  : "text-white hover:text-white/80"
+              }`}
+            >
+              Depoimentos
+            </Link>
+            <Link 
+              href="#comprar" 
+              className={`text-sm font-medium transition-colors ${
+                scrolled 
+                  ? "text-foreground hover:text-petloo-purple" 
+                  : "text-white hover:text-white/80"
+              }`}
+            >
+              Preco
             </Link>
           </nav>
 
@@ -119,25 +119,11 @@ export default function HeaderV2() {
           <div className="md:hidden py-4 bg-white rounded-b-2xl shadow-lg">
             <nav className="flex flex-col gap-4 px-4">
               <Link 
-                href="#caes" 
+                href="#funcionalidades" 
                 className="text-sm font-medium text-foreground hover:text-petloo-purple transition-colors py-2"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Lootag para caes
-              </Link>
-              <Link 
-                href="#gatos" 
-                className="text-sm font-medium text-foreground hover:text-petloo-purple transition-colors py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Lootag para gatos
-              </Link>
-              <Link 
-                href="#comprar" 
-                className="text-sm font-medium text-foreground hover:text-petloo-purple transition-colors py-2"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                Preco
+                Beneficios
               </Link>
               <Link 
                 href="#como-funciona" 
@@ -145,6 +131,20 @@ export default function HeaderV2() {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Como funciona
+              </Link>
+              <Link 
+                href="#depoimentos" 
+                className="text-sm font-medium text-foreground hover:text-petloo-purple transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Depoimentos
+              </Link>
+              <Link 
+                href="#comprar" 
+                className="text-sm font-medium text-foreground hover:text-petloo-purple transition-colors py-2"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Preco
               </Link>
               <Link 
                 href="#comprar" 

@@ -7,7 +7,6 @@ import ComparisonSectionV2 from "@/components/v2/ComparisonSectionV2"
 import TestimonialsSectionV2 from "@/components/v2/TestimonialsSectionV2"
 import PricingSectionV2 from "@/components/v2/PricingSectionV2"
 import FAQSectionV2 from "@/components/v2/FAQSectionV2"
-import FooterSectionV2 from "@/components/v2/FooterSectionV2"
 
 export const metadata = {
   title: "Lootag - Rastreador GPS para Pets | Seguranca em Tempo Real",
@@ -26,7 +25,6 @@ export default function V2Page() {
       <TestimonialsSectionV2 />
       <PricingSectionV2 />
       <FAQSectionV2 />
-      <FooterSectionV2 />
     </main>
   )
 }
