@@ -83,7 +83,7 @@ export default function SocialProofSectionV2() {
             className="h-8 w-auto mix-blend-multiply"
           />
           <div className="w-px h-3 bg-border/50" />
-          <span className="text-[10px] text-muted-foreground">+100k pets</span>
+          <span className="text-[10px] text-muted-foreground">+100 MIL Pets Protegidos</span>
         </div>
       </div>
     </section>
