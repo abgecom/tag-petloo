@@ -39,7 +39,7 @@ export default function HeroSectionV2() {
       </div>
 
       {/* Content - Alinhado a esquerda como Tractive */}
-      <div className="relative z-10 container mx-auto px-4 md:px-8 lg:px-12 pt-48 pb-16 md:pt-56 md:pb-20 lg:pt-64 lg:pb-24">
+      <div className="relative z-10 container mx-auto px-4 md:px-8 lg:px-12 pt-56 pb-32 md:pt-72 md:pb-36 lg:pt-80 lg:pb-40">
         <div className="max-w-2xl space-y-6 md:space-y-8">
           {/* Headline */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.15] text-balance">
@@ -75,14 +75,14 @@ export default function HeroSectionV2() {
       {/* Bottom curve - bordas arredondadas estilo Tractive */}
       <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
         <svg 
-          viewBox="0 0 1440 120" 
+          viewBox="0 0 1440 60" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-16 md:h-20 lg:h-24"
+          className="w-full h-12 md:h-14 lg:h-16"
           preserveAspectRatio="none"
         >
           <path 
-            d="M0 120V40C0 17.9086 17.9086 0 40 0H1400C1422.09 0 1440 17.9086 1440 40V120H0Z" 
+            d="M0 60L0 24C0 10.7452 10.7452 0 24 0L1416 0C1429.25 0 1440 10.7452 1440 24V60H0Z" 
             className="fill-petloo-beige"
           />
         </svg>
