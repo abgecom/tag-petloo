@@ -17,7 +17,7 @@ export default function FAQSectionV2() {
     },
     {
       question: "Preciso carregar a bateria?",
-      answer: "Sim, mas nossa tecnologia de baixo consumo garante autonomia para sua paz de espirito. A bateria dura em media de 5 a 14 dias dependendo do uso, e o carregamento completo leva apenas algumas horas.",
+      answer: "Nao, nossa tecnologia de baixo consumo garante autonomia para sua paz de espirito. A bateria dura em media de 12 a 18 meses dependendo do uso. Posteriormente pode ser trocada de forma simples sem necessidade de ferramentas.",
     },
     {
       question: "Como comeco a utilizar o dispositivo?",
