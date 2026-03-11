@@ -41,9 +41,6 @@ export default function PricingSectionV2() {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
-            A Oferta
-          </p>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground text-balance mb-4">
             Ecossistema Completo de Rastreamento
           </h2>
