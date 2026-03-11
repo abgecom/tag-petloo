@@ -76,10 +76,9 @@ export default function TestimonialsSectionV2() {
           style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {testimonials.map((testimonial, index) => (
-            <>
+            <div key={index} className="contents">
               {/* Image placeholder */}
               <div 
-                key={`img-${index}`}
                 className="flex-shrink-0 w-52 md:w-64 aspect-[3/4] bg-white rounded-2xl overflow-hidden flex items-center justify-center shadow-sm"
               >
                 <div className="text-muted-foreground/30 text-center p-4">
@@ -92,7 +91,6 @@ export default function TestimonialsSectionV2() {
 
               {/* Testimonial card */}
               <div 
-                key={`text-${index}`}
                 className="flex-shrink-0 w-64 md:w-72 bg-white rounded-2xl p-6 shadow-sm flex flex-col justify-between"
               >
                 {/* Paw icon */}
@@ -116,7 +114,7 @@ export default function TestimonialsSectionV2() {
                   </div>
                 </div>
               </div>
-            </>
+            </div>
           ))}
 
           {/* Extra image placeholder at the end */}
