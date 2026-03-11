@@ -21,11 +21,11 @@ export default function BenefitsSectionV2() {
   ]
 
   return (
-    <section id="funcionalidades" className="py-16 md:py-24 bg-background">
+    <section id="funcionalidades" className="py-16 md:py-24 bg-petloo-bg">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12 md:mb-16">
-          <p className="text-sm font-semibold text-lootag-teal uppercase tracking-wider mb-3">
+          <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
             Beneficios
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground text-balance">
@@ -40,8 +40,8 @@ export default function BenefitsSectionV2() {
               key={index}
               className="text-center group"
             >
-              <div className="w-16 h-16 mx-auto mb-6 bg-lootag-teal/10 rounded-2xl flex items-center justify-center group-hover:bg-lootag-teal/20 transition-colors">
-                <benefit.icon className="w-8 h-8 text-lootag-teal" />
+              <div className="w-16 h-16 mx-auto mb-6 bg-petloo-purple/10 rounded-2xl flex items-center justify-center group-hover:bg-petloo-purple/20 transition-colors">
+                <benefit.icon className="w-8 h-8 text-petloo-purple" />
               </div>
               <h3 className="text-xl font-bold text-foreground mb-3">
                 {benefit.title}
@@ -57,7 +57,7 @@ export default function BenefitsSectionV2() {
         <div className="text-center">
           <Link 
             href="#comprar"
-            className="inline-flex px-8 py-4 bg-lootag-teal text-white font-bold rounded-full hover:bg-lootag-teal/90 transition-all hover:scale-105"
+            className="inline-flex px-8 py-4 bg-petloo-green text-white font-bold rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105"
           >
             PROTEGER MEU PET AGORA
           </Link>

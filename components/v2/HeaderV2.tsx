@@ -13,10 +13,10 @@ export default function HeaderV2() {
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
           <Link href="/v2" className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-lootag-teal rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-lg">L</span>
+            <div className="w-10 h-10 bg-petloo-purple rounded-full flex items-center justify-center">
+              <span className="text-white font-bold text-lg">P</span>
             </div>
-            <span className="text-xl font-bold text-lootag-dark">Lootag</span>
+            <span className="text-xl font-bold text-petloo-purple">Petloo</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -39,7 +39,7 @@ export default function HeaderV2() {
           <div className="hidden md:flex items-center gap-4">
             <Link 
               href="#comprar" 
-              className="px-6 py-2.5 bg-lootag-teal text-white font-semibold rounded-full hover:bg-lootag-teal/90 transition-colors"
+              className="px-6 py-2.5 bg-petloo-green text-white font-semibold rounded-full hover:bg-petloo-green/90 transition-colors"
             >
               Comprar agora
             </Link>
@@ -89,7 +89,7 @@ export default function HeaderV2() {
               </Link>
               <Link 
                 href="#comprar" 
-                className="mt-2 px-6 py-2.5 bg-lootag-teal text-white font-semibold rounded-full text-center hover:bg-lootag-teal/90 transition-colors"
+                className="mt-2 px-6 py-2.5 bg-petloo-green text-white font-semibold rounded-full text-center hover:bg-petloo-green/90 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Comprar agora

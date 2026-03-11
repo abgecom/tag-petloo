@@ -36,11 +36,11 @@ export default function TestimonialsSectionV2() {
   }
 
   return (
-    <section id="depoimentos" className="py-16 md:py-24 bg-lootag-dark text-white overflow-hidden">
+    <section id="depoimentos" className="py-16 md:py-24 bg-petloo-purple text-white overflow-hidden">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm font-semibold text-lootag-teal uppercase tracking-wider mb-3">
+          <p className="text-sm font-semibold text-petloo-green uppercase tracking-wider mb-3">
             Depoimentos
           </p>
           <h2 className="text-3xl md:text-4xl font-bold text-balance">
@@ -52,7 +52,7 @@ export default function TestimonialsSectionV2() {
         <div className="relative max-w-4xl mx-auto">
           {/* Main testimonial */}
           <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-8 md:p-12 text-center">
-            <Quote className="w-12 h-12 text-lootag-teal mx-auto mb-6 opacity-50" />
+            <Quote className="w-12 h-12 text-petloo-green mx-auto mb-6 opacity-50" />
             <blockquote className="text-xl md:text-2xl lg:text-3xl font-medium mb-8 text-balance leading-relaxed">
               {testimonials[currentIndex].quote}
             </blockquote>
@@ -80,7 +80,7 @@ export default function TestimonialsSectionV2() {
                   onClick={() => setCurrentIndex(index)}
                   className={`w-2 h-2 rounded-full transition-all ${
                     index === currentIndex 
-                      ? "bg-lootag-teal w-8" 
+                      ? "bg-petloo-green w-8" 
                       : "bg-white/30 hover:bg-white/50"
                   }`}
                   aria-label={`Ir para depoimento ${index + 1}`}

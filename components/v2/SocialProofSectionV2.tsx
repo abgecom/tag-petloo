@@ -20,7 +20,7 @@ export default function SocialProofSectionV2() {
   ]
 
   return (
-    <section className="py-8 md:py-12 bg-lootag-gray border-y border-border">
+    <section className="py-8 md:py-12 bg-petloo-beige border-y border-border">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {stats.map((stat, index) => (
@@ -28,8 +28,8 @@ export default function SocialProofSectionV2() {
               key={index}
               className="flex items-center justify-center gap-4 text-center md:text-left"
             >
-              <div className="flex-shrink-0 w-12 h-12 bg-lootag-teal/10 rounded-full flex items-center justify-center">
-                <stat.icon className="w-6 h-6 text-lootag-teal" />
+              <div className="flex-shrink-0 w-12 h-12 bg-petloo-purple/10 rounded-full flex items-center justify-center">
+                <stat.icon className="w-6 h-6 text-petloo-purple" />
               </div>
               <div>
                 <p className="font-bold text-lg text-foreground">{stat.value}</p>

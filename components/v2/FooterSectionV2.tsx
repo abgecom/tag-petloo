@@ -2,7 +2,7 @@ import Link from "next/link"
 
 export default function FooterSectionV2() {
   return (
-    <footer className="bg-lootag-dark text-white">
+    <footer className="bg-petloo-purple text-white">
       {/* Final CTA Section */}
       <div className="py-16 md:py-24 border-b border-white/10">
         <div className="container mx-auto px-4 text-center">
@@ -11,9 +11,9 @@ export default function FooterSectionV2() {
           </h2>
           <Link 
             href="#comprar"
-            className="inline-flex px-8 py-4 bg-lootag-teal text-white font-bold text-lg rounded-full hover:bg-lootag-teal/90 transition-all hover:scale-105"
+            className="inline-flex px-8 py-4 bg-petloo-green text-white font-bold text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105"
           >
-            QUERO A SEGURANCA DO KIT LOOTAG
+            QUERO A SEGURANCA DO KIT PETLOO
           </Link>
         </div>
       </div>
@@ -25,10 +25,10 @@ export default function FooterSectionV2() {
             {/* Brand */}
             <div className="col-span-2 md:col-span-1">
               <Link href="/v2" className="flex items-center gap-2 mb-4">
-                <div className="w-10 h-10 bg-lootag-teal rounded-full flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">L</span>
+                <div className="w-10 h-10 bg-petloo-green rounded-full flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">P</span>
                 </div>
-                <span className="text-xl font-bold">Lootag</span>
+                <span className="text-xl font-bold">Petloo</span>
               </Link>
               <p className="text-white/60 text-sm leading-relaxed">
                 O primeiro ecossistema de protecao via rastreamento em tempo real para pets urbanos.
@@ -110,7 +110,7 @@ export default function FooterSectionV2() {
           {/* Bottom */}
           <div className="pt-8 border-t border-white/10 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-sm text-white/40">
-              2024 Lootag. Todos os direitos reservados.
+              2024 Petloo. Todos os direitos reservados.
             </p>
             <div className="flex items-center gap-4">
               {/* Social Icons */}

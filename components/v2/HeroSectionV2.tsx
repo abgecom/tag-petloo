@@ -22,7 +22,7 @@ export default function HeroSectionV2() {
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
         
         {/* Placeholder visual enquanto não há video */}
-        <div className="absolute inset-0 bg-gradient-to-br from-lootag-dark/90 via-lootag-dark/70 to-lootag-teal/30 flex items-center justify-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-petloo-purple/90 via-petloo-purple/70 to-petloo-green/30 flex items-center justify-center">
           <div className="text-white/20 text-center">
             <div className="w-32 h-32 mx-auto mb-4 border-4 border-dashed border-white/20 rounded-lg flex items-center justify-center">
               <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
@@ -49,9 +49,9 @@ export default function HeroSectionV2() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
             <Link 
               href="#comprar"
-              className="w-full sm:w-auto px-8 py-4 bg-lootag-teal text-white font-bold text-lg rounded-full hover:bg-lootag-teal/90 transition-all hover:scale-105 shadow-lg"
+              className="w-full sm:w-auto px-8 py-4 bg-petloo-green text-white font-bold text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
             >
-              QUERO O KIT LOOTAG AGORA
+              QUERO O KIT PETLOO AGORA
             </Link>
           </div>
 

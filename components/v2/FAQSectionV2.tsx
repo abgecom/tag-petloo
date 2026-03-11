@@ -38,11 +38,11 @@ export default function FAQSectionV2() {
   }
 
   return (
-    <section id="faq" className="py-16 md:py-24 bg-background">
+    <section id="faq" className="py-16 md:py-24 bg-white">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm font-semibold text-lootag-teal uppercase tracking-wider mb-3">
+          <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
             Duvidas?
           </p>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground text-balance">
@@ -56,21 +56,21 @@ export default function FAQSectionV2() {
             {faqs.map((faq, index) => (
               <div 
                 key={index}
-                className="bg-lootag-gray rounded-2xl overflow-hidden"
+                className="bg-petloo-beige rounded-2xl overflow-hidden"
               >
                 <button
                   onClick={() => toggleFAQ(index)}
-                  className="w-full flex items-center justify-between p-6 text-left hover:bg-lootag-gray/80 transition-colors"
+                  className="w-full flex items-center justify-between p-6 text-left hover:bg-petloo-beige/80 transition-colors"
                   aria-expanded={openIndex === index}
                 >
                   <span className="font-semibold text-foreground pr-4">
                     {faq.question}
                   </span>
-                  <span className="flex-shrink-0 w-8 h-8 bg-lootag-teal/10 rounded-full flex items-center justify-center">
+                  <span className="flex-shrink-0 w-8 h-8 bg-petloo-purple/10 rounded-full flex items-center justify-center">
                     {openIndex === index ? (
-                      <Minus className="w-4 h-4 text-lootag-teal" />
+                      <Minus className="w-4 h-4 text-petloo-purple" />
                     ) : (
-                      <Plus className="w-4 h-4 text-lootag-teal" />
+                      <Plus className="w-4 h-4 text-petloo-purple" />
                     )}
                   </span>
                 </button>

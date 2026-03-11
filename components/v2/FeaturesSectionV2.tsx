@@ -27,13 +27,13 @@ export default function FeaturesSectionV2() {
   ]
 
   return (
-    <section id="como-funciona" className="py-16 md:py-24 bg-lootag-gray">
+    <section id="como-funciona" className="py-16 md:py-24 bg-petloo-beige">
       <div className="container mx-auto px-4">
         {/* LooApp Feature */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
           {/* Video/Image Placeholder */}
           <div className="order-2 lg:order-1">
-            <div className="relative aspect-[4/3] bg-gradient-to-br from-lootag-dark to-lootag-dark/80 rounded-3xl overflow-hidden shadow-2xl">
+            <div className="relative aspect-[4/3] bg-gradient-to-br from-petloo-purple to-petloo-purple/80 rounded-3xl overflow-hidden shadow-2xl">
               {/* Placeholder para video do app */}
               <video
                 autoPlay
@@ -60,11 +60,11 @@ export default function FeaturesSectionV2() {
 
           {/* Content */}
           <div className="order-1 lg:order-2">
-            <p className="text-sm font-semibold text-lootag-teal uppercase tracking-wider mb-3">
-              O Ecossistema Lootag
+            <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
+              O Ecossistema Petloo
             </p>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              O LooApp
+              O App Petloo
             </h2>
             <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
               A bussola do seu melhor amigo
@@ -79,11 +79,11 @@ export default function FeaturesSectionV2() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div>
-            <p className="text-sm font-semibold text-lootag-teal uppercase tracking-wider mb-3">
+            <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
               Conforto e Seguranca
             </p>
             <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-              A Coleira Nato Inteligente
+              A Tag Petloo Inteligente
             </h2>
             <p className="text-muted-foreground leading-relaxed text-pretty mb-8">
               Inspirada nas pulseiras de relogios militares, nossa coleira une a durabilidade do tecido premium a seguranca da case exclusiva Lootag. Confortavel para o descanso, elegante para o passeio, robusta para a aventura.
@@ -94,10 +94,10 @@ export default function FeaturesSectionV2() {
               {collarFeatures.map((feature, index) => (
                 <div 
                   key={index}
-                  className="flex items-start gap-3 p-4 bg-background rounded-xl"
+                  className="flex items-start gap-3 p-4 bg-white rounded-xl"
                 >
-                  <div className="flex-shrink-0 w-10 h-10 bg-lootag-teal/10 rounded-lg flex items-center justify-center">
-                    <feature.icon className="w-5 h-5 text-lootag-teal" />
+                  <div className="flex-shrink-0 w-10 h-10 bg-petloo-purple/10 rounded-lg flex items-center justify-center">
+                    <feature.icon className="w-5 h-5 text-petloo-purple" />
                   </div>
                   <div>
                     <p className="font-semibold text-foreground text-sm">{feature.title}</p>
@@ -110,7 +110,7 @@ export default function FeaturesSectionV2() {
 
           {/* Image Placeholder */}
           <div className="relative">
-            <div className="aspect-square bg-gradient-to-br from-lootag-cream to-white rounded-3xl overflow-hidden shadow-xl flex items-center justify-center">
+            <div className="aspect-square bg-gradient-to-br from-petloo-beige to-white rounded-3xl overflow-hidden shadow-xl flex items-center justify-center">
               {/* Placeholder para imagem da coleira */}
               <div className="text-muted-foreground/30 text-center p-8">
                 <div className="w-48 h-48 mx-auto mb-4 border-4 border-dashed border-muted-foreground/20 rounded-full flex items-center justify-center">

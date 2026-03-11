@@ -12,11 +12,11 @@ export default function PricingSectionV2() {
   ]
 
   return (
-    <section id="comprar" className="py-16 md:py-24 bg-gradient-to-b from-lootag-cream to-background">
+    <section id="comprar" className="py-16 md:py-24 bg-gradient-to-b from-petloo-beige to-white">
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm font-semibold text-lootag-teal uppercase tracking-wider mb-3">
+          <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
             A Oferta
           </p>
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-foreground text-balance mb-4">
@@ -29,9 +29,9 @@ export default function PricingSectionV2() {
 
         {/* Pricing Card */}
         <div className="max-w-lg mx-auto">
-          <div className="bg-background rounded-3xl shadow-2xl overflow-hidden border border-border">
+          <div className="bg-white rounded-3xl shadow-2xl overflow-hidden border border-border">
             {/* Card Header */}
-            <div className="bg-lootag-teal p-8 text-center text-white">
+            <div className="bg-petloo-purple p-8 text-center text-white">
               <p className="text-sm font-medium opacity-90 mb-2">Assinatura mensal</p>
               <div className="flex items-baseline justify-center gap-1">
                 <span className="text-lg">R$</span>
@@ -48,8 +48,8 @@ export default function PricingSectionV2() {
               <ul className="space-y-3 mb-8">
                 {features.map((feature, index) => (
                   <li key={index} className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-5 h-5 bg-lootag-teal/20 rounded-full flex items-center justify-center">
-                      <Check className="w-3 h-3 text-lootag-teal" />
+                    <div className="flex-shrink-0 w-5 h-5 bg-petloo-green/20 rounded-full flex items-center justify-center">
+                      <Check className="w-3 h-3 text-petloo-green" />
                     </div>
                     <span className="text-muted-foreground">{feature}</span>
                   </li>
@@ -59,15 +59,15 @@ export default function PricingSectionV2() {
               {/* Guarantees */}
               <div className="flex flex-wrap gap-4 justify-center text-sm text-muted-foreground mb-8">
                 <span className="flex items-center gap-1">
-                  <Check className="w-4 h-4 text-lootag-teal" />
+                  <Check className="w-4 h-4 text-petloo-green" />
                   Sem fidelidade
                 </span>
                 <span className="flex items-center gap-1">
-                  <Check className="w-4 h-4 text-lootag-teal" />
+                  <Check className="w-4 h-4 text-petloo-green" />
                   Sem taxas de instalacao
                 </span>
                 <span className="flex items-center gap-1">
-                  <Check className="w-4 h-4 text-lootag-teal" />
+                  <Check className="w-4 h-4 text-petloo-green" />
                   Sem surpresas
                 </span>
               </div>
@@ -75,7 +75,7 @@ export default function PricingSectionV2() {
               {/* CTA */}
               <Link 
                 href="#"
-                className="block w-full py-4 bg-lootag-teal text-white font-bold text-lg rounded-full text-center hover:bg-lootag-teal/90 transition-all hover:scale-105"
+                className="block w-full py-4 bg-petloo-green text-white font-bold text-lg rounded-full text-center hover:bg-petloo-green/90 transition-all hover:scale-105"
               >
                 GARANTIR MEU KIT AGORA
               </Link>
@@ -89,7 +89,7 @@ export default function PricingSectionV2() {
 
         {/* Product Image Placeholder */}
         <div className="mt-16 max-w-2xl mx-auto">
-          <div className="aspect-video bg-lootag-gray rounded-3xl flex items-center justify-center">
+          <div className="aspect-video bg-petloo-beige rounded-3xl flex items-center justify-center">
             <div className="text-muted-foreground/30 text-center p-8">
               <div className="w-32 h-24 mx-auto mb-4 border-4 border-dashed border-muted-foreground/20 rounded-xl flex items-center justify-center">
                 <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
