@@ -1,31 +1,6 @@
 "use client"
 
-import { Battery, Globe, Smartphone, Droplets } from "lucide-react"
-
 export default function FeaturesSectionV2() {
-  const collarFeatures = [
-    {
-      icon: Battery,
-      title: "Seguranca Extrema",
-      description: "com design ergonomico",
-    },
-    {
-      icon: Globe,
-      title: "Cobertura nacional",
-      description: "em todo o Brasil",
-    },
-    {
-      icon: Smartphone,
-      title: "Pequena e compacta",
-      description: "para caes e gatos com mais de 2kg",
-    },
-    {
-      icon: Droplets,
-      title: "100% a prova d'agua",
-      description: "resistente a chuva e brincadeiras",
-    },
-  ]
-
   return (
     <section id="como-funciona" className="relative">
       {/* Primeira parte - Fundo branco */}
@@ -79,41 +54,26 @@ export default function FeaturesSectionV2() {
       {/* Segunda parte - Fundo roxo com bordas arredondadas superiores */}
       <div className="relative z-10 bg-petloo-purple pt-32 md:pt-44 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem]">
         <div className="container mx-auto px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          {/* Content */}
-          <div>
-            <p className="text-sm font-semibold text-petloo-green uppercase tracking-wider mb-3">
-              Conforto e Seguranca
-            </p>
+          {/* Content - Centralizado superiormente */}
+          <div className="text-center mb-12 md:mb-16">
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-              A Tag Petloo Inteligente
+              A LooTag de Rastreamento
             </h2>
-            <p className="text-white/80 leading-relaxed text-pretty mb-8">
-              Inspirada nas pulseiras de relogios militares, nossa coleira une a durabilidade do tecido premium a seguranca da case exclusiva Lootag. Confortavel para o descanso, elegante para o passeio, robusta para a aventura.
+            <p className="text-white/80 leading-relaxed text-pretty max-w-2xl mx-auto mb-8">
+              Inspirada nas pulseiras de relogios militares, nossa coleira une a durabilidade do tecido premium a seguranca da case exclusiva Lootag.
             </p>
 
-            {/* Features Grid */}
-            <div className="grid grid-cols-2 gap-4">
-              {collarFeatures.map((feature, index) => (
-                <div 
-                  key={index}
-                  className="flex items-start gap-3 p-4 bg-white rounded-xl"
-                >
-                  <div className="flex-shrink-0 w-10 h-10 bg-petloo-purple/10 rounded-lg flex items-center justify-center">
-                    <feature.icon className="w-5 h-5 text-petloo-purple" />
-                  </div>
-                  <div>
-                    <p className="font-semibold text-foreground text-sm">{feature.title}</p>
-                    <p className="text-xs text-muted-foreground">{feature.description}</p>
-                  </div>
-                </div>
-              ))}
+            {/* Quadrante com fundo transparente, sombra e bordas arredondadas */}
+            <div className="inline-block bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 shadow-lg border border-white/20">
+              <p className="text-white font-medium">
+                Confortavel para o descanso, elegante para o passeio, robusta para a aventura.
+              </p>
             </div>
           </div>
 
-          {/* Image Placeholder */}
-          <div className="relative">
-            <div className="aspect-square bg-gradient-to-br from-petloo-beige to-white rounded-3xl overflow-hidden shadow-xl flex items-center justify-center">
+          {/* Image Placeholder - Centralizado inferiormente */}
+          <div className="flex justify-center">
+            <div className="w-full max-w-md aspect-square bg-gradient-to-br from-petloo-beige to-white rounded-3xl overflow-hidden shadow-xl flex items-center justify-center">
               {/* Placeholder para imagem da coleira */}
               <div className="text-muted-foreground/30 text-center p-8">
                 <div className="w-48 h-48 mx-auto mb-4 border-4 border-dashed border-muted-foreground/20 rounded-full flex items-center justify-center">
@@ -125,7 +85,6 @@ export default function FeaturesSectionV2() {
               </div>
             </div>
           </div>
-        </div>
         </div>
       </div>
     </section>
