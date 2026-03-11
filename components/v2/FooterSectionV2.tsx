@@ -13,7 +13,7 @@ export default function FooterSectionV2() {
             href="#comprar"
             className="inline-flex px-8 py-4 bg-petloo-green text-white font-bold text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105"
           >
-            QUERO A SEGURANCA DO KIT PETLOO
+            QUERO MEU PET SEGURO COM A LOOTAG
           </Link>
         </div>
       </div>
