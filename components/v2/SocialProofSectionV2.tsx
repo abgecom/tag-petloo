@@ -3,9 +3,10 @@ import Image from "next/image"
 
 export default function SocialProofSectionV2() {
   return (
-    <section className="py-4 md:py-5 bg-white border-b border-border/50">
+    <section className="-mt-12 md:-mt-14 lg:-mt-16 relative z-30 py-3 md:py-5 bg-white border-b border-border/50 rounded-t-3xl md:rounded-none">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 md:gap-16">
+        {/* Desktop layout */}
+        <div className="hidden sm:flex items-center justify-center gap-12 md:gap-16">
           
           {/* App Store & Play Store */}
           <div className="flex flex-col items-center gap-1.5">
@@ -15,14 +16,14 @@ export default function SocialProofSectionV2() {
                 alt="Apple Store"
                 width={80}
                 height={24}
-                className="h-4 md:h-5 w-auto"
+                className="h-5 w-auto"
               />
               <Image
                 src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Google_Play_2022_logo.svg-MMNPJjaH17jds5WnNcgSsbkC0zXBkw.png"
                 alt="Google Play"
                 width={90}
                 height={24}
-                className="h-4 md:h-5 w-auto"
+                className="h-5 w-auto"
               />
             </div>
             <div className="flex items-center gap-1.5">
@@ -35,8 +36,8 @@ export default function SocialProofSectionV2() {
             </div>
           </div>
 
-          {/* Divider - desktop only */}
-          <div className="hidden sm:block w-px h-4 bg-border" />
+          {/* Divider */}
+          <div className="w-px h-4 bg-border" />
 
           {/* Reclame Aqui RA1000 */}
           <div className="flex items-center">
@@ -45,12 +46,12 @@ export default function SocialProofSectionV2() {
               alt="Certificado RA1000 Reclame Aqui"
               width={200}
               height={80}
-              className="h-16 md:h-20 w-auto mix-blend-multiply"
+              className="h-20 w-auto mix-blend-multiply"
             />
           </div>
 
-          {/* Divider - desktop only */}
-          <div className="hidden sm:block w-px h-4 bg-border" />
+          {/* Divider */}
+          <div className="w-px h-4 bg-border" />
 
           {/* Pets protegidos */}
           <div className="flex items-center gap-2">
@@ -63,6 +64,26 @@ export default function SocialProofSectionV2() {
             <span className="text-xs text-muted-foreground">Pets protegidos em todo o Brasil</span>
           </div>
 
+        </div>
+
+        {/* Mobile layout - mais compacto e clean */}
+        <div className="flex sm:hidden items-center justify-center gap-4">
+          <div className="flex items-center gap-0.5">
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+            ))}
+            <span className="text-[10px] text-muted-foreground ml-1">4.9/5</span>
+          </div>
+          <div className="w-px h-3 bg-border/50" />
+          <Image
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imagens_blog_800x600-5-EjszK0QNgRsF7nHUEoYTDvkc4nBp37.webp"
+            alt="RA1000"
+            width={80}
+            height={32}
+            className="h-8 w-auto mix-blend-multiply"
+          />
+          <div className="w-px h-3 bg-border/50" />
+          <span className="text-[10px] text-muted-foreground">+100k pets</span>
         </div>
       </div>
     </section>

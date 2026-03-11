@@ -79,12 +79,12 @@ export default function HeroSectionV2() {
           viewBox="0 0 1440 60" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-12 md:h-14 lg:h-16"
+          className="w-full h-12 md:h-14 lg:h-16 hidden md:block"
           preserveAspectRatio="none"
         >
           <path 
             d="M0 60L0 24C0 10.7452 10.7452 0 24 0L1416 0C1429.25 0 1440 10.7452 1440 24V60H0Z" 
-            className="fill-petloo-beige"
+            className="fill-white"
           />
         </svg>
       </div>
