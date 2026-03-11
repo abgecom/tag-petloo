@@ -49,7 +49,7 @@ export default function HeroSectionV2() {
           
           {/* Sub-headline */}
           <p className="text-sm leading-[1.5] sm:text-base md:text-lg lg:text-xl text-white/90 md:text-white md:leading-relaxed max-w-md md:max-w-lg text-pretty">
-            O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano.
+            O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano. Seu melhor amigo a um clique de distancia.
           </p>
 
           {/* CTA Button */}
