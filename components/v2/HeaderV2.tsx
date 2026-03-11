@@ -20,7 +20,7 @@ export default function HeaderV2() {
   return (
     <>
       {/* Tarja promocional superior */}
-      <div className="fixed top-0 left-0 right-0 z-50 bg-petloo-orange text-white py-1.5 md:py-2 px-4 text-center">
+      <div className="fixed top-0 left-0 right-0 z-[60] bg-petloo-orange text-white py-1.5 md:py-2 px-4 text-center">
         <p className="text-[0.6875rem] md:text-sm font-medium leading-tight">
           100% de desconto na primeira mensalidade, pague apenas o frete
         </p>
@@ -29,7 +29,7 @@ export default function HeaderV2() {
       <header 
         className={`fixed top-7 md:top-10 left-0 right-0 z-50 transition-all duration-300 ${
           scrolled 
-            ? "bg-white shadow-md" 
+            ? "bg-white/95 backdrop-blur-sm shadow-md" 
             : "bg-transparent"
         }`}
       >
