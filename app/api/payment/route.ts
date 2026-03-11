@@ -260,13 +260,14 @@ async function createPagarmeSubscription(
   cardId: string
 ): Promise<PagarmeSubscriptionResponse> {
   const subscriptionData = {
-    plan_id: PAGARME_CONFIG.subscription.planId,
+    // IMPORTANTE: NAO enviar start_at aqui.
+    // O trial_period_days do plano ja cuida de postergar a primeira cobranca em 30 dias.
+    // Enviar start_at com +30 dias causaria "dupla postergacao" (30 trial + 30 start_at = 60 dias).
+    plan_id: process.env.PETLOO_PLAN_ID || PAGARME_CONFIG.subscription.planId,
     customer_id: customerId,
     card_id: cardId,
     payment_method: "credit_card",
     billing_type: "prepaid",
-    // Trial de 30 dias
-    start_at: new Date(Date.now() + PAGARME_CONFIG.subscription.trialDays * 24 * 60 * 60 * 1000).toISOString(),
     metadata: {
       source: "petloo-checkout",
       trial_days: PAGARME_CONFIG.subscription.trialDays.toString(),
