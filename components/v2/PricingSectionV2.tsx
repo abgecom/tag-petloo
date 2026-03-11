@@ -67,12 +67,17 @@ export default function PricingSectionV2() {
               
               {/* Card Header */}
               <div className={`p-6 text-center ${plan.popular ? "bg-petloo-purple/5" : ""}`}>
-                <p className="text-sm font-medium text-muted-foreground mb-2">{plan.title}</p>
-                <div className="flex items-baseline justify-center gap-1">
-                  <span className="text-base text-foreground">R$</span>
-                  <span className="text-5xl font-bold text-foreground">{plan.priceInt}</span>
-                  <span className="text-xl text-foreground">,{plan.priceDec}</span>
-                  <span className="text-base text-muted-foreground">/mes</span>
+                <p className="text-sm font-medium text-muted-foreground mb-3">{plan.title}</p>
+                
+                {/* Marketing pricing strategy */}
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Pague apenas o frete</p>
+                  <p className="text-2xl md:text-3xl font-bold text-petloo-green">GRATIS por 30 dias</p>
+                  <div className="pt-2 border-t border-border/50">
+                    <p className="text-sm text-muted-foreground">
+                      Depois apenas <span className="font-bold text-foreground text-lg">R$ {plan.price}</span><span className="text-xs">/mes</span>
+                    </p>
+                  </div>
                 </div>
               </div>
 
