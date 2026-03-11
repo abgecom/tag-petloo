@@ -5,7 +5,7 @@ export default function PricingSectionV2() {
   const features = [
     "Coleira Nato Exclusiva",
     "Case Personalizada",
-    "Acesso completo ao App",
+    "Acesso completo ao App de Rastreamento",
     "Rastreamento em tempo real",
     "Alertas de zona segura",
     "Suporte dedicado em PT/BR",
