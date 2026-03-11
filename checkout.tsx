@@ -1,5 +1,18 @@
 "use client"
 
+// Declaração de tipos para variáveis globais (Facebook Pixel e GTM)
+declare global {
+  interface Window {
+    fbq: (
+      action: string,
+      event: string,
+      params?: Record<string, unknown>,
+      userData?: Record<string, unknown>
+    ) => void
+    dataLayer: Array<Record<string, unknown>>
+  }
+}
+
 import { useState, useEffect } from "react"
 import { ChevronUp, ChevronDown, Minus, Plus, Edit2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
@@ -15,6 +28,7 @@ import LeadCaptureTracker from "@/components/LeadCaptureTracker"
 import PersonalizedTagManager from "@/components/PersonalizedTagManager"
 
 import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
+import { exportOrderToShopify, type OrderDataForShopify } from "@/lib/shopify"
 
 
 
@@ -1058,9 +1072,85 @@ function CheckoutForm() {
 
           // Verificar se temos os dados PIX na resposta (estrutura da nova API Pagar.me)
           if (result.success && result.pix?.qrcode && result.pix?.copiacola) {
-            console.log("✅ DADOS PIX RECEBIDOS DA PAGAR.ME!")
-            console.log("QR Code URL:", result.pix.qrcode ? "✅ Presente" : "❌ Ausente")
-            console.log("Copia e Cola:", result.pix.copiacola ? "✅ Presente" : "❌ Ausente")
+            // Disparar eventos de tracking antes do redirecionamento
+            // GTM - dataLayer push
+            if (typeof window !== "undefined") {
+              window.dataLayer = window.dataLayer || []
+              window.dataLayer.push({
+                event: "purchase",
+                ecommerce: {
+                  transaction_id: result.orderId,
+                  value: productInfo.amount / 100,
+                  currency: "BRL",
+                  payment_type: "pix",
+                  items: [
+                    {
+                      item_name: productInfo.name,
+                      item_id: productInfo.sku,
+                      price: productInfo.amount / 100,
+                      quantity: quantity,
+                    },
+                  ],
+                },
+              })
+            }
+
+            // Meta Pixel - InitiateCheckout (PIX pendente)
+            if (typeof window !== "undefined" && typeof window.fbq !== "undefined") {
+              const metaUserData = await prepareMetaPixelUserData({
+                email,
+                phone: phone.replace(/\D/g, ""),
+                firstName: name.split(" ")[0],
+                lastName: name.split(" ").slice(1).join(" "),
+                city: addressData.city,
+                state: addressData.state,
+                zipCode: addressData.cep.replace(/\D/g, ""),
+                country: "BR",
+              })
+
+              window.fbq("track", "InitiateCheckout", {
+                content_name: productInfo.name,
+                content_ids: [productInfo.sku],
+                content_type: "product",
+                value: productInfo.amount / 100,
+                currency: "BRL",
+                num_items: quantity,
+              }, metaUserData)
+
+              logMetaPixelEvent("InitiateCheckout (PIX)", {
+                orderId: result.orderId,
+                amount: productInfo.amount / 100,
+              })
+            }
+
+            // Exportar pedido para Shopify (em background)
+            const shopifyOrderData: OrderDataForShopify = {
+              customer_name: name,
+              customer_email: email,
+              customer_phone: phone.replace(/\D/g, ""),
+              customer_cpf: cpf.replace(/\D/g, ""),
+              address_street: addressData.street,
+              address_number: number,
+              address_complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
+              address_neighborhood: addressData.neighborhood,
+              address_city: addressData.city,
+              address_state: addressData.state,
+              address_cep: addressData.cep.replace(/\D/g, ""),
+              order_id: result.orderId,
+              order_amount: productInfo.amount,
+              payment_method: "pix",
+              payment_status: "pending",
+              product_type: productInfo.type,
+              product_color: productInfo.color,
+              product_quantity: quantity,
+              product_sku: productInfo.sku,
+              pet_name: productInfo.petName,
+            }
+
+            // Chamar exportOrderToShopify em background (não bloquear redirecionamento)
+            exportOrderToShopify(shopifyOrderData).catch((err) => {
+              console.error("Erro ao exportar pedido para Shopify:", err)
+            })
 
             // Salvar dados PIX no sessionStorage para evitar URL muito longa
             const pixDataToSave = {
@@ -1082,10 +1172,6 @@ function CheckoutForm() {
             if (!orderId) {
               throw new Error("ID do pedido não foi retornado pela API")
             }
-
-            console.log("=== REDIRECIONANDO PARA PIX PAYMENT ===")
-            console.log("Order ID:", orderId)
-            console.log("Amount:", productInfo.amount)
 
             router.push(`/pix-payment?orderId=${orderId}&amount=${productInfo.amount}`)
           }
@@ -1186,8 +1272,88 @@ function CheckoutForm() {
             throw new Error(result.error || `Erro HTTP ${response.status}: ${result.message || "Erro desconhecido"}`)
           }
 
-          console.log("✅ Pedido criado com sucesso na Pagar.me:", result.orderId)
-          console.log("✅ Assinatura criada:", result.subscriptionId)
+          // Disparar eventos de tracking antes do redirecionamento
+          // GTM - dataLayer push - Purchase (cartão aprovado)
+          if (typeof window !== "undefined") {
+            window.dataLayer = window.dataLayer || []
+            window.dataLayer.push({
+              event: "purchase",
+              ecommerce: {
+                transaction_id: result.orderId,
+                value: productInfo.amount / 100,
+                currency: "BRL",
+                payment_type: "credit_card",
+                subscription_id: result.subscriptionId,
+                items: [
+                  {
+                    item_name: productInfo.name,
+                    item_id: productInfo.sku,
+                    price: productInfo.amount / 100,
+                    quantity: quantity,
+                  },
+                ],
+              },
+            })
+          }
+
+          // Meta Pixel - Purchase (cartão aprovado)
+          if (typeof window !== "undefined" && typeof window.fbq !== "undefined") {
+            const metaUserData = await prepareMetaPixelUserData({
+              email,
+              phone: phone.replace(/\D/g, ""),
+              firstName: name.split(" ")[0],
+              lastName: name.split(" ").slice(1).join(" "),
+              city: addressData.city,
+              state: addressData.state,
+              zipCode: addressData.cep.replace(/\D/g, ""),
+              country: "BR",
+            })
+
+            window.fbq("track", "Purchase", {
+              content_name: productInfo.name,
+              content_ids: [productInfo.sku],
+              content_type: "product",
+              value: productInfo.amount / 100,
+              currency: "BRL",
+              num_items: quantity,
+            }, metaUserData)
+
+            logMetaPixelEvent("Purchase (Credit Card)", {
+              orderId: result.orderId,
+              subscriptionId: result.subscriptionId,
+              amount: productInfo.amount / 100,
+            })
+          }
+
+          // Exportar pedido para Shopify
+          const shopifyOrderData: OrderDataForShopify = {
+            customer_name: name,
+            customer_email: email,
+            customer_phone: phone.replace(/\D/g, ""),
+            customer_cpf: cpf.replace(/\D/g, ""),
+            address_street: addressData.street,
+            address_number: number,
+            address_complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
+            address_neighborhood: addressData.neighborhood,
+            address_city: addressData.city,
+            address_state: addressData.state,
+            address_cep: addressData.cep.replace(/\D/g, ""),
+            order_id: result.orderId,
+            order_amount: productInfo.amount,
+            payment_method: "credit_card",
+            payment_status: "paid",
+            product_type: productInfo.type,
+            product_color: productInfo.color,
+            product_quantity: quantity,
+            product_sku: productInfo.sku,
+            pet_name: productInfo.petName,
+            subscription_id: result.subscriptionId,
+          }
+
+          // Chamar exportOrderToShopify (em background para não bloquear)
+          exportOrderToShopify(shopifyOrderData).catch((err) => {
+            console.error("Erro ao exportar pedido para Shopify:", err)
+          })
 
           // Salvar dados do pedido para a página de obrigado
           const orderSummary = {
