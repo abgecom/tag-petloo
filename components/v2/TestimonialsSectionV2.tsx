@@ -1,122 +1,151 @@
 "use client"
 
-import { useState } from "react"
-import { ChevronLeft, ChevronRight, Quote } from "lucide-react"
+import { useState, useRef } from "react"
+import { ChevronLeft, ChevronRight } from "lucide-react"
 
 export default function TestimonialsSectionV2() {
-  const [currentIndex, setCurrentIndex] = useState(0)
+  const scrollRef = useRef<HTMLDivElement>(null)
 
   const testimonials = [
     {
       quote: "A tranquilidade de soltar o Thor no parque sabendo que ele esta 'no meu radar' nao tem preco.",
       author: "Mariana S.",
-      location: "Sao Paulo",
+      petType: "CAO",
       petName: "Thor",
     },
     {
       quote: "Nunca mais tive aquele frio na barriga quando o portao fica aberto por acidente. A Lootag me da paz.",
       author: "Carlos R.",
-      location: "Rio de Janeiro",
+      petType: "CAO",
       petName: "Luna",
     },
     {
       quote: "Meu gato adora fugir pela janela. Com a Lootag, sei exatamente onde ele esta em segundos.",
       author: "Patricia M.",
-      location: "Belo Horizonte",
+      petType: "GATO",
       petName: "Milo",
     },
   ]
 
-  const nextSlide = () => {
-    setCurrentIndex((prev) => (prev + 1) % testimonials.length)
-  }
-
-  const prevSlide = () => {
-    setCurrentIndex((prev) => (prev - 1 + testimonials.length) % testimonials.length)
+  const scroll = (direction: "left" | "right") => {
+    if (scrollRef.current) {
+      const scrollAmount = 320
+      scrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      })
+    }
   }
 
   return (
-    <section id="depoimentos" className="py-16 md:py-24 bg-petloo-purple text-white overflow-hidden">
+    <section id="depoimentos" className="py-16 md:py-24 bg-petloo-beige overflow-hidden">
       <div className="container mx-auto px-4">
         {/* Section Header */}
-        <div className="text-center mb-12">
-          <p className="text-sm font-semibold text-petloo-green uppercase tracking-wider mb-3">
-            Depoimentos
-          </p>
-          <h2 className="text-3xl md:text-4xl font-bold text-balance">
-            O que os tutores tem a dizer
-          </h2>
-        </div>
-
-        {/* Testimonials Carousel */}
-        <div className="relative max-w-4xl mx-auto">
-          {/* Main testimonial */}
-          <div className="bg-white/5 backdrop-blur-sm rounded-3xl p-8 md:p-12 text-center">
-            <Quote className="w-12 h-12 text-petloo-green mx-auto mb-6 opacity-50" />
-            <blockquote className="text-xl md:text-2xl lg:text-3xl font-medium mb-8 text-balance leading-relaxed">
-              {testimonials[currentIndex].quote}
-            </blockquote>
-            <div>
-              <p className="font-bold text-lg">{testimonials[currentIndex].author}</p>
-              <p className="text-white/60">{testimonials[currentIndex].location}</p>
-            </div>
+        <div className="flex items-start md:items-center justify-between mb-10">
+          <div>
+            <span className="inline-block px-4 py-1.5 bg-petloo-purple/10 text-petloo-purple text-sm font-medium rounded-full mb-4">
+              Testemunhos
+            </span>
+            <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground text-balance">
+              Testado e aprovado por mais de 100 mil tutores
+            </h2>
           </div>
-
-          {/* Navigation */}
-          <div className="flex items-center justify-center gap-4 mt-8">
+          {/* Navigation arrows */}
+          <div className="hidden md:flex items-center gap-2">
             <button
-              onClick={prevSlide}
-              className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-              aria-label="Depoimento anterior"
+              onClick={() => scroll("left")}
+              className="w-10 h-10 rounded-full border border-border hover:bg-white flex items-center justify-center transition-colors"
+              aria-label="Anterior"
             >
-              <ChevronLeft className="w-6 h-6" />
+              <ChevronLeft className="w-5 h-5 text-foreground" />
             </button>
-            
-            {/* Dots */}
-            <div className="flex gap-2">
-              {testimonials.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all ${
-                    index === currentIndex 
-                      ? "bg-petloo-green w-8" 
-                      : "bg-white/30 hover:bg-white/50"
-                  }`}
-                  aria-label={`Ir para depoimento ${index + 1}`}
-                />
-              ))}
-            </div>
-
             <button
-              onClick={nextSlide}
-              className="w-12 h-12 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
-              aria-label="Proximo depoimento"
+              onClick={() => scroll("right")}
+              className="w-10 h-10 rounded-full border border-border hover:bg-white flex items-center justify-center transition-colors"
+              aria-label="Proximo"
             >
-              <ChevronRight className="w-6 h-6" />
+              <ChevronRight className="w-5 h-5 text-foreground" />
             </button>
           </div>
         </div>
 
-        {/* Instagram-style grid placeholder */}
-        <div className="mt-16">
-          <p className="text-center text-white/60 mb-8">Pets protegidos por todo o Brasil</p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((item) => (
+        {/* Testimonials Horizontal Scroll */}
+        <div 
+          ref={scrollRef}
+          className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide -mx-4 px-4"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {testimonials.map((testimonial, index) => (
+            <>
+              {/* Image placeholder */}
               <div 
-                key={item}
-                className="aspect-square bg-white/5 rounded-2xl overflow-hidden flex items-center justify-center"
+                key={`img-${index}`}
+                className="flex-shrink-0 w-52 md:w-64 aspect-[3/4] bg-white rounded-2xl overflow-hidden flex items-center justify-center shadow-sm"
               >
-                {/* Placeholder para fotos estilo Instagram */}
-                <div className="text-white/20 text-center p-4">
+                <div className="text-muted-foreground/30 text-center p-4">
                   <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
                   </svg>
-                  <p className="text-xs">Foto {item}</p>
+                  <p className="text-xs">Foto do pet</p>
                 </div>
               </div>
-            ))}
+
+              {/* Testimonial card */}
+              <div 
+                key={`text-${index}`}
+                className="flex-shrink-0 w-64 md:w-72 bg-white rounded-2xl p-6 shadow-sm flex flex-col justify-between"
+              >
+                {/* Paw icon */}
+                <div>
+                  <svg className="w-6 h-6 text-petloo-purple mb-4" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm6-4c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zM6 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 8c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
+                  </svg>
+                  <p className="text-sm text-foreground leading-relaxed mb-4">
+                    {testimonial.quote}
+                  </p>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="font-semibold text-foreground text-sm">{testimonial.author}</p>
+                    <p className="text-xs text-muted-foreground">{testimonial.petType}</p>
+                  </div>
+                  <div className="w-8 h-8 bg-petloo-beige rounded-lg flex items-center justify-center">
+                    <svg className="w-4 h-4 text-petloo-purple" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z"/>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </>
+          ))}
+
+          {/* Extra image placeholder at the end */}
+          <div className="flex-shrink-0 w-52 md:w-64 aspect-[3/4] bg-white rounded-2xl overflow-hidden flex items-center justify-center shadow-sm">
+            <div className="text-muted-foreground/30 text-center p-4">
+              <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+              </svg>
+              <p className="text-xs">Foto do pet</p>
+            </div>
           </div>
+        </div>
+
+        {/* Mobile Navigation */}
+        <div className="flex md:hidden items-center justify-center gap-2 mt-6">
+          <button
+            onClick={() => scroll("left")}
+            className="w-10 h-10 rounded-full border border-border hover:bg-white flex items-center justify-center transition-colors"
+            aria-label="Anterior"
+          >
+            <ChevronLeft className="w-5 h-5 text-foreground" />
+          </button>
+          <button
+            onClick={() => scroll("right")}
+            className="w-10 h-10 rounded-full border border-border hover:bg-white flex items-center justify-center transition-colors"
+            aria-label="Proximo"
+          >
+            <ChevronRight className="w-5 h-5 text-foreground" />
+          </button>
         </div>
       </div>
     </section>
