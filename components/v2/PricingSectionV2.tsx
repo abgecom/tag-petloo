@@ -54,26 +54,29 @@ export default function PricingSectionV2() {
           {plans.map((plan, index) => (
             <div 
               key={index} 
-              className={`bg-white rounded-3xl shadow-xl overflow-hidden border ${
-                plan.popular ? "border-petloo-purple ring-2 ring-petloo-purple" : "border-border"
+              className={`bg-white rounded-3xl overflow-hidden border transition-all hover:-translate-y-1 ${
+                plan.popular 
+                  ? "border-petloo-purple ring-2 ring-petloo-purple shadow-2xl shadow-petloo-purple/20" 
+                  : "border-border shadow-xl shadow-black/10 hover:shadow-2xl hover:shadow-black/15"
               }`}
             >
-              {/* Popular badge */}
-              {plan.popular && (
-                <div className="bg-petloo-purple text-white text-center py-2 text-sm font-medium">
-                  Mais Popular
-                </div>
-              )}
+              {/* Plan Title as Headline */}
+              <div className={`py-4 px-6 text-center border-b border-border/30 ${plan.popular ? "bg-petloo-purple text-white" : "bg-petloo-beige"}`}>
+                <h3 className={`text-lg font-bold ${plan.popular ? "text-white" : "text-foreground"}`}>
+                  {plan.title}
+                </h3>
+              </div>
               
-              {/* Card Header */}
+              {/* Card Header - Pricing */}
               <div className={`p-6 text-center ${plan.popular ? "bg-petloo-purple/5" : ""}`}>
-                <p className="text-sm font-medium text-muted-foreground mb-3">{plan.title}</p>
-                
                 {/* Marketing pricing strategy */}
-                <div className="space-y-2">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider">Pague apenas o frete</p>
-                  <p className="text-2xl md:text-3xl font-bold text-petloo-green">GRATIS por 30 dias</p>
-                  <div className="pt-2 border-t border-border/50">
+                <div className="space-y-3">
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider underline underline-offset-2">Pague apenas o frete</p>
+                  <div>
+                    <span className="text-3xl md:text-4xl font-bold text-petloo-orange">GRATIS</span>
+                    <span className="text-base md:text-lg font-medium text-petloo-orange/80 ml-1">por 30 dias</span>
+                  </div>
+                  <div className="pt-3 border-t border-border/50">
                     <p className="text-sm text-muted-foreground">
                       Depois apenas <span className="font-bold text-foreground text-lg">R$ {plan.price}</span><span className="text-xs">/mes</span>
                     </p>
