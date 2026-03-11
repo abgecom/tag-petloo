@@ -61,6 +61,12 @@ const config: Config = {
         "petloo-green": "#24B14C",
         "petloo-beige": "#F5EFEA",
         "petloo-bg": "#F1E9DB",
+        // Lootag brand colors (Tractive-inspired)
+        "lootag-teal": "#1DB88E",
+        "lootag-dark": "#1F2937",
+        "lootag-cream": "#FFFBEB",
+        "lootag-gray": "#F3F4F6",
+        "lootag-light": "#F9FAFB",
       },
       borderRadius: {
         lg: "var(--radius)",
