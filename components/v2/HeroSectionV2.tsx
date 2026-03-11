@@ -48,51 +48,27 @@ export default function HeroSectionV2() {
           </div>
 
           {/* Headline */}
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-            Localizador inteligente para pets
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6 text-balance">
+            A liberdade que seu pet ama. A seguranca que voce precisa para respirar aliviada.
           </h1>
           
           {/* Sub-headline */}
-          <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl">
-            O localizador por GPS e monitor de saude para animais de companhia. Saiba onde seu pet esta a qualquer momento.
+          <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl text-pretty">
+            O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano. A Lootag une design inteligente e tecnologia de precisao para que o seu melhor amigo nunca esteja a mais de um clique de distancia.
           </p>
 
-          {/* CTA Buttons - Estilo Tractive */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-8">
+          {/* CTA Button */}
+          <div className="flex flex-col gap-3 mb-8">
             <Link 
-              href="#caes"
-              className="inline-flex items-center justify-center px-8 py-4 bg-petloo-green text-white font-bold text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
+              href="#comprar"
+              className="inline-flex items-center justify-center w-fit px-8 py-4 bg-petloo-green text-white font-bold text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
             >
-              Quero uma Lootag
+              Adquirir Lootag
             </Link>
-            <Link 
-              href="#como-funciona"
-              className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-bold text-lg rounded-full hover:bg-white/20 transition-all border border-white/20"
-            >
-              Como funciona
-            </Link>
-          </div>
-
-          {/* Trust indicators */}
-          <div className="flex flex-wrap items-center gap-6 text-white/70 text-sm">
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-petloo-green" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Cobertura nacional</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-petloo-green" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Sem fidelidade</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-petloo-green" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              <span>Cancele quando quiser</span>
-            </div>
+            {/* Micro-copy */}
+            <p className="text-white/70 text-sm">
+              Apenas R$ 29,90/mes. Cancele quando quiser.
+            </p>
           </div>
         </div>
       </div>
