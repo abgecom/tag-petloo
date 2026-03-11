@@ -39,15 +39,15 @@ export default function HeroSectionV2() {
       </div>
 
       {/* Content - Alinhado a esquerda como Tractive */}
-      <div className="relative z-10 container mx-auto px-4 md:px-8 lg:px-12 pt-32 pb-24 md:pt-40 md:pb-32">
-        <div className="max-w-2xl space-y-8">
+      <div className="relative z-10 container mx-auto px-4 md:px-8 lg:px-12 pt-48 pb-16 md:pt-56 md:pb-20 lg:pt-64 lg:pb-24">
+        <div className="max-w-2xl space-y-6 md:space-y-8">
           {/* Headline */}
           <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white leading-[1.15] text-balance">
             A liberdade que seu pet ama. A seguranca que voce precisa para respirar aliviada.
           </h1>
           
           {/* Sub-headline */}
-          <p className="text-base md:text-lg lg:text-xl text-white/85 leading-relaxed max-w-lg text-pretty">
+          <p className="text-base md:text-lg lg:text-xl text-white leading-relaxed max-w-lg text-pretty">
             O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano. A Lootag une design inteligente e tecnologia de precisao para que o seu melhor amigo nunca esteja a mais de um clique de distancia.
           </p>
 
@@ -64,7 +64,7 @@ export default function HeroSectionV2() {
       </div>
 
       {/* Scroll indicator */}
-      <div className="absolute bottom-12 left-1/2 -translate-x-1/2 z-10">
+      <div className="absolute bottom-24 left-1/2 -translate-x-1/2 z-10">
         <div className="animate-bounce">
           <svg className="w-6 h-6 text-white/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
@@ -73,16 +73,16 @@ export default function HeroSectionV2() {
       </div>
 
       {/* Bottom curve - bordas arredondadas estilo Tractive */}
-      <div className="absolute bottom-0 left-0 right-0 z-10">
+      <div className="absolute bottom-0 left-0 right-0 z-20 pointer-events-none">
         <svg 
-          viewBox="0 0 1440 80" 
+          viewBox="0 0 1440 120" 
           fill="none" 
           xmlns="http://www.w3.org/2000/svg"
-          className="w-full h-auto"
+          className="w-full h-16 md:h-20 lg:h-24"
           preserveAspectRatio="none"
         >
           <path 
-            d="M0 80V60C0 26.8629 26.8629 0 60 0H1380C1413.14 0 1440 26.8629 1440 60V80H0Z" 
+            d="M0 120V40C0 17.9086 17.9086 0 40 0H1400C1422.09 0 1440 17.9086 1440 40V120H0Z" 
             className="fill-petloo-beige"
           />
         </svg>
