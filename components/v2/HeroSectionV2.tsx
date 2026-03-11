@@ -4,7 +4,7 @@ import Link from "next/link"
 
 export default function HeroSectionV2() {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16 md:pt-20">
+    <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Video Background Placeholder */}
       <div className="absolute inset-0 z-0">
         {/* Placeholder para video - substituir src pelo video real */}
@@ -18,47 +18,82 @@ export default function HeroSectionV2() {
         >
           {/* <source src="/videos/hero-video.mp4" type="video/mp4" /> */}
         </video>
-        {/* Overlay para melhor legibilidade */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/30 to-black/50" />
         
-        {/* Placeholder visual enquanto não há video */}
-        <div className="absolute inset-0 bg-gradient-to-br from-petloo-purple/90 via-petloo-purple/70 to-petloo-green/30 flex items-center justify-center">
-          <div className="text-white/20 text-center">
-            <div className="w-32 h-32 mx-auto mb-4 border-4 border-dashed border-white/20 rounded-lg flex items-center justify-center">
-              <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M8 5v14l11-7z"/>
-              </svg>
+        {/* Overlay gradient */}
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-transparent" />
+        
+        {/* Placeholder visual enquanto nao ha video */}
+        <div className="absolute inset-0 bg-gradient-to-br from-petloo-purple via-petloo-purple/80 to-petloo-green/40">
+          {/* Placeholder indicator */}
+          <div className="absolute top-1/2 right-1/4 -translate-y-1/2 text-white/10 hidden lg:block">
+            <div className="w-64 h-64 border-4 border-dashed border-white/20 rounded-full flex items-center justify-center">
+              <div className="text-center">
+                <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M8 5v14l11-7z"/>
+                </svg>
+                <p className="text-sm text-white/30">Video placeholder</p>
+              </div>
             </div>
-            <p className="text-sm">Video placeholder</p>
           </div>
         </div>
       </div>
 
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 text-center">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight text-balance mb-6">
-            A liberdade que seu pet ama. A seguranca que voce precisa para respirar aliviada.
+      {/* Content - Alinhado a esquerda como Tractive */}
+      <div className="relative z-10 container mx-auto px-4 py-20 md:py-0">
+        <div className="max-w-2xl">
+          {/* Badge/Label */}
+          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full mb-6">
+            <span className="w-2 h-2 bg-petloo-green rounded-full animate-pulse"></span>
+            <span className="text-sm text-white font-medium">Rastreamento GPS em tempo real</span>
+          </div>
+
+          {/* Headline */}
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+            Localizador inteligente para pets
           </h1>
           
-          <p className="text-base md:text-xl text-white/90 max-w-2xl mx-auto mb-8 text-pretty leading-relaxed">
-            O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano. A Lootag une design inteligente e tecnologia de precisao para que o seu melhor amigo nunca esteja a mais de um clique de distancia.
+          {/* Sub-headline */}
+          <p className="text-lg md:text-xl text-white/90 mb-8 leading-relaxed max-w-xl">
+            O localizador por GPS e monitor de saude para animais de companhia. Saiba onde seu pet esta a qualquer momento.
           </p>
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+          {/* CTA Buttons - Estilo Tractive */}
+          <div className="flex flex-col sm:flex-row gap-4 mb-8">
             <Link 
-              href="#comprar"
-              className="w-full sm:w-auto px-8 py-4 bg-petloo-green text-white font-bold text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
+              href="#caes"
+              className="inline-flex items-center justify-center px-8 py-4 bg-petloo-green text-white font-bold text-lg rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105 shadow-lg"
             >
-              QUERO O KIT PETLOO AGORA
+              Quero uma Lootag
+            </Link>
+            <Link 
+              href="#como-funciona"
+              className="inline-flex items-center justify-center px-8 py-4 bg-white/10 backdrop-blur-sm text-white font-bold text-lg rounded-full hover:bg-white/20 transition-all border border-white/20"
+            >
+              Como funciona
             </Link>
           </div>
 
-          {/* Micro-copy */}
-          <p className="text-sm text-white/70">
-            Assinatura unica de R$ 30,00/mes. Cancele quando quiser.
-          </p>
+          {/* Trust indicators */}
+          <div className="flex flex-wrap items-center gap-6 text-white/70 text-sm">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-petloo-green" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              <span>Cobertura nacional</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-petloo-green" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              <span>Sem fidelidade</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-petloo-green" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+              </svg>
+              <span>Cancele quando quiser</span>
+            </div>
+          </div>
         </div>
       </div>
 
