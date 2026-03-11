@@ -40,7 +40,7 @@ export default function HeroSectionV2() {
       </div>
 
       {/* Content - Alinhado a esquerda como Tractive */}
-      <div className="relative z-10 container mx-auto px-5 md:px-8 lg:px-12 pt-28 pb-20 md:pt-72 md:pb-36 lg:pt-80 lg:pb-40">
+      <div className="relative z-10 container mx-auto px-5 md:px-8 lg:px-12 pt-28 pb-20 md:pt-72 md:pb-48 lg:pt-80 lg:pb-56">
         <div className="max-w-2xl space-y-4 md:space-y-6 lg:space-y-8">
           {/* Headline */}
           <h1 className="text-xl leading-[1.3] sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white md:leading-[1.15] text-balance">
