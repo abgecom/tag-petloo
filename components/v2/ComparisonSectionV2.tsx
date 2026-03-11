@@ -1,5 +1,6 @@
 import { Check, X } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function ComparisonSectionV2() {
   const comparisons = [
@@ -7,7 +8,7 @@ export default function ComparisonSectionV2() {
       feature: "Localizacao Tempo Real (Satelite)",
       lootag: true,
       othersGPS: true,
-      airtag: "Apenas no alcance Bluetooth do iPhone (15-20m)",
+      airtag: "Depende de outro dispositivo Apple em um raio de 15m",
     },
     {
       feature: "Design Integrado e Ergonomico",
@@ -16,16 +17,16 @@ export default function ComparisonSectionV2() {
       airtag: false,
     },
     {
-      feature: "Configuracao",
+      feature: "Pronta para uso",
       lootag: true,
-      othersGPS: "Manual complexo",
+      othersGPS: false,
       airtag: true,
     },
     {
       feature: "Custo acessivel",
       lootag: true,
       othersGPS: false,
-      airtag: true,
+      airtag: false,
     },
     {
       feature: "Feito para pets. Pequeno e leve",
@@ -61,9 +62,9 @@ export default function ComparisonSectionV2() {
       <div className="container mx-auto px-4">
         {/* Section Header */}
         <div className="text-center mb-12">
-          <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
-            Comparativo
-          </p>
+          <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground text-balance">
+            4 a cada 5 usuarios sentiram essas diferencas ao optarem pela Lootag
+          </h2>
         </div>
 
         {/* Comparison Table */}
@@ -75,7 +76,13 @@ export default function ComparisonSectionV2() {
                 <th className="p-4 text-left"></th>
                 <th className="p-4 bg-petloo-beige rounded-t-2xl">
                   <div className="flex flex-col items-center gap-2">
-                    <span className="text-lg md:text-xl font-bold text-petloo-purple">Petloo</span>
+                    <Image
+                      src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Petloosemfundo%202-wiHpYOGK6l8BekDtGwMXaJxrq0maQN.png"
+                      alt="Petloo Logo"
+                      width={100}
+                      height={32}
+                      className="h-6 md:h-8 w-auto"
+                    />
                   </div>
                 </th>
                 <th className="p-4 text-center">
@@ -87,7 +94,6 @@ export default function ComparisonSectionV2() {
                 <th className="p-4 text-center">
                   <div className="flex flex-col items-center gap-1">
                     <span className="text-sm md:text-base font-semibold text-foreground">AirTag</span>
-                    <span className="text-xs text-muted-foreground">e outros Bluetooth Trackers</span>
                   </div>
                 </th>
               </tr>
