@@ -33,8 +33,8 @@ export default function BenefitsSectionV2() {
               key={index}
               className="text-center group"
             >
-              {/* Image placeholder with shadow - 16:9 aspect ratio (1920x1080) */}
-              <div className="w-full aspect-video mx-auto mb-6 bg-white rounded-2xl shadow-lg shadow-petloo-purple/20 flex items-center justify-center overflow-hidden group-hover:shadow-xl group-hover:shadow-petloo-purple/30 transition-shadow">
+              {/* Image placeholder with shadow - 9:16 aspect ratio (1080x1920 portrait) */}
+              <div className="w-full aspect-[9/16] mx-auto mb-6 bg-white rounded-2xl shadow-lg shadow-petloo-purple/20 flex items-center justify-center overflow-hidden group-hover:shadow-xl group-hover:shadow-petloo-purple/30 transition-shadow">
                 <div className="w-full h-full bg-gradient-to-br from-petloo-beige to-white flex items-center justify-center">
                   <svg className="w-12 h-12 text-muted-foreground/30" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
