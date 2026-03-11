@@ -7,18 +7,32 @@ export default function SocialProofSectionV2() {
       <div className="container mx-auto px-4">
         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 md:gap-16">
           
-          {/* Trustpilot / App Store */}
-          <div className="flex items-center gap-2">
+          {/* App Store & Play Store */}
+          <div className="flex flex-col items-center gap-1.5">
+            <div className="flex items-center gap-3">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Apple_Store-2lLkKW2aqKH9dY6B8WTQjy9prOlmyj.png"
+                alt="Apple Store"
+                width={80}
+                height={24}
+                className="h-4 md:h-5 w-auto"
+              />
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Google_Play_2022_logo.svg-MMNPJjaH17jds5WnNcgSsbkC0zXBkw.png"
+                alt="Google Play"
+                width={90}
+                height={24}
+                className="h-4 md:h-5 w-auto"
+              />
+            </div>
             <div className="flex items-center gap-1.5">
-              <Star className="w-3.5 h-3.5 text-petloo-green fill-petloo-green" />
-              <span className="text-xs font-semibold text-foreground">App Store</span>
+              <div className="flex items-center gap-0.5">
+                {[...Array(5)].map((_, i) => (
+                  <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+                ))}
+              </div>
+              <span className="text-xs text-muted-foreground">4.9/5 | App Store & Play Store</span>
             </div>
-            <div className="flex items-center gap-0.5">
-              {[...Array(5)].map((_, i) => (
-                <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
-              ))}
-            </div>
-            <span className="text-xs text-muted-foreground">4.9/5 | App Store & Play Store</span>
           </div>
 
           {/* Divider - desktop only */}
