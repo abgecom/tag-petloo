@@ -44,7 +44,7 @@ export default function HeroSectionV2() {
         <div className="max-w-2xl space-y-4 md:space-y-6 lg:space-y-8">
           {/* Headline */}
           <h1 className="text-xl leading-[1.3] sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white md:leading-[1.15] text-balance">
-            A liberdade que seu pet ama. A seguranca que voce precisa para respirar aliviada.
+            A liberdade que seu pet ama. A seguranca que voce precisa.
           </h1>
           
           {/* Sub-headline */}
