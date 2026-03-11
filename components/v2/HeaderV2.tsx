@@ -18,13 +18,21 @@ export default function HeaderV2() {
   }, [])
 
   return (
-    <header 
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? "bg-white shadow-md" 
-          : "bg-transparent"
-      }`}
-    >
+    <>
+      {/* Tarja promocional superior */}
+      <div className="fixed top-0 left-0 right-0 z-50 bg-petloo-purple text-white py-2 px-4 text-center">
+        <p className="text-xs md:text-sm font-medium">
+          100% de desconto na primeira mensalidade, pague apenas o frete
+        </p>
+      </div>
+
+      <header 
+        className={`fixed top-8 md:top-10 left-0 right-0 z-50 transition-all duration-300 ${
+          scrolled 
+            ? "bg-white shadow-md" 
+            : "bg-transparent"
+        }`}
+      >
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16 md:h-20">
           {/* Logo */}
@@ -150,5 +158,6 @@ export default function HeaderV2() {
         )}
       </div>
     </header>
+    </>
   )
 }
