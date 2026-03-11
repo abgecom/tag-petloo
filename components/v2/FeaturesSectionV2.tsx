@@ -27,9 +27,9 @@ export default function FeaturesSectionV2() {
   ]
 
   return (
-    <section id="como-funciona" className="bg-petloo-purple/10">
-      {/* LooApp Feature - Light background card */}
-      <div className="py-16 md:py-24 bg-white rounded-b-[2.5rem] md:rounded-b-[4rem]">
+    <section id="como-funciona" className="relative">
+      {/* Primeira parte - Fundo branco */}
+      <div className="bg-white pt-16 md:pt-24 pb-32 md:pb-40">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Video/Image Placeholder */}
@@ -75,19 +75,19 @@ export default function FeaturesSectionV2() {
         </div>
       </div>
 
-      {/* Collar Feature - Tinted background */}
-      <div className="py-16 md:py-24 bg-petloo-beige rounded-t-[2.5rem] md:rounded-t-[4rem] -mt-8 md:-mt-12">
+      {/* Segunda parte - Fundo roxo com bordas arredondadas superiores */}
+      <div className="bg-petloo-purple pt-16 md:pt-24 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem] -mt-8 md:-mt-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div>
-            <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
+            <p className="text-sm font-semibold text-petloo-green uppercase tracking-wider mb-3">
               Conforto e Seguranca
             </p>
-            <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
               A Tag Petloo Inteligente
             </h2>
-            <p className="text-muted-foreground leading-relaxed text-pretty mb-8">
+            <p className="text-white/80 leading-relaxed text-pretty mb-8">
               Inspirada nas pulseiras de relogios militares, nossa coleira une a durabilidade do tecido premium a seguranca da case exclusiva Lootag. Confortavel para o descanso, elegante para o passeio, robusta para a aventura.
             </p>
 
