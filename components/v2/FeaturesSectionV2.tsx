@@ -31,7 +31,7 @@ export default function FeaturesSectionV2() {
       {/* Primeira parte - Fundo branco */}
       <div className="bg-white pt-16 md:pt-24 pb-32 md:pb-40">
         {/* Card bege sobrepondo o fundo branco */}
-        <div className="mx-4 md:mx-8 lg:mx-16 xl:mx-24 bg-petloo-beige rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 lg:p-14">
+        <div className="relative z-10 mx-4 md:mx-8 lg:mx-16 xl:mx-24 bg-petloo-beige rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 lg:p-14">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Video/Image Placeholder */}
             <div className="order-2 lg:order-1">
@@ -77,7 +77,7 @@ export default function FeaturesSectionV2() {
       </div>
 
       {/* Segunda parte - Fundo roxo com bordas arredondadas superiores */}
-      <div className="bg-petloo-purple pt-16 md:pt-24 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem] -mt-8 md:-mt-12">
+      <div className="relative z-0 bg-petloo-purple pt-24 md:pt-32 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem] -mt-20 md:-mt-28">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
