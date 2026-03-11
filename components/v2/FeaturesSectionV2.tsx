@@ -27,53 +27,58 @@ export default function FeaturesSectionV2() {
   ]
 
   return (
-    <section id="como-funciona" className="py-16 md:py-24 bg-petloo-beige">
-      <div className="container mx-auto px-4">
-        {/* LooApp Feature */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-24">
-          {/* Video/Image Placeholder */}
-          <div className="order-2 lg:order-1">
-            <div className="relative aspect-[4/3] bg-gradient-to-br from-petloo-purple to-petloo-purple/80 rounded-3xl overflow-hidden shadow-2xl">
-              {/* Placeholder para video do app */}
-              <video
-                autoPlay
-                loop
-                muted
-                playsInline
-                className="w-full h-full object-cover"
-              >
-                {/* <source src="/videos/app-demo.mp4" type="video/mp4" /> */}
-              </video>
-              {/* Placeholder visual */}
-              <div className="absolute inset-0 flex items-center justify-center">
-                <div className="text-white/30 text-center p-8">
-                  <div className="w-24 h-40 mx-auto mb-4 border-4 border-dashed border-white/30 rounded-3xl flex items-center justify-center">
-                    <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M8 5v14l11-7z"/>
-                    </svg>
+    <section id="como-funciona" className="bg-petloo-purple/10">
+      {/* LooApp Feature - Light background card */}
+      <div className="py-16 md:py-24 bg-white rounded-b-[2.5rem] md:rounded-b-[4rem]">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            {/* Video/Image Placeholder */}
+            <div className="order-2 lg:order-1">
+              <div className="relative aspect-[4/3] bg-gradient-to-br from-petloo-purple to-petloo-purple/80 rounded-3xl overflow-hidden shadow-2xl">
+                {/* Placeholder para video do app */}
+                <video
+                  autoPlay
+                  loop
+                  muted
+                  playsInline
+                  className="w-full h-full object-cover"
+                >
+                  {/* <source src="/videos/app-demo.mp4" type="video/mp4" /> */}
+                </video>
+                {/* Placeholder visual */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <div className="text-white/30 text-center p-8">
+                    <div className="w-24 h-40 mx-auto mb-4 border-4 border-dashed border-white/30 rounded-3xl flex items-center justify-center">
+                      <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M8 5v14l11-7z"/>
+                      </svg>
+                    </div>
+                    <p className="text-sm">Video do App placeholder</p>
                   </div>
-                  <p className="text-sm">Video do App placeholder</p>
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Content */}
-          <div className="order-1 lg:order-2">
-            <h2 className="text-3xl md:text-4xl font-bold text-petloo-purple mb-4">
-              O LooApp
-            </h2>
-            <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
-              A bussola do seu melhor amigo
-            </p>
-            <p className="text-muted-foreground leading-relaxed text-pretty">
-              Uma interface desenhada para momentos de urgencia. Sem menus complexos, apenas o que importa: o ponto azul indicando o caminho de volta para casa.
-            </p>
+            {/* Content */}
+            <div className="order-1 lg:order-2">
+              <h2 className="text-3xl md:text-4xl font-bold text-petloo-purple mb-4">
+                O LooApp
+              </h2>
+              <p className="text-xl text-muted-foreground mb-6 leading-relaxed">
+                A bussola do seu melhor amigo
+              </p>
+              <p className="text-muted-foreground leading-relaxed text-pretty">
+                Uma interface desenhada para momentos de urgencia. Sem menus complexos, apenas o que importa: o ponto azul indicando o caminho de volta para casa.
+              </p>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Collar Feature */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* Collar Feature - Tinted background */}
+      <div className="py-16 md:py-24 bg-petloo-beige rounded-t-[2.5rem] md:rounded-t-[4rem] -mt-8 md:-mt-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
           <div>
             <p className="text-sm font-semibold text-petloo-purple uppercase tracking-wider mb-3">
@@ -119,6 +124,7 @@ export default function FeaturesSectionV2() {
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </section>
