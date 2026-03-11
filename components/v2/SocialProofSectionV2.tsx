@@ -68,11 +68,14 @@ export default function SocialProofSectionV2() {
 
         {/* Mobile layout - mais compacto e clean */}
         <div className="flex sm:hidden items-center justify-center gap-4">
-          <div className="flex items-center gap-0.5">
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
-            ))}
-            <span className="text-[10px] text-muted-foreground ml-1">4.9/5</span>
+          <div className="flex flex-col items-center gap-0.5">
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-2.5 h-2.5 text-yellow-400 fill-yellow-400" />
+              ))}
+              <span className="text-[10px] text-muted-foreground ml-1">4.9/5</span>
+            </div>
+            <span className="text-[9px] text-muted-foreground">App Store & Play Store</span>
           </div>
           <div className="w-px h-3 bg-border/50" />
           <Image
