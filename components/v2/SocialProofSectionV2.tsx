@@ -29,9 +29,9 @@ export default function SocialProofSectionV2() {
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imagens_blog_800x600-5-EjszK0QNgRsF7nHUEoYTDvkc4nBp37.webp"
               alt="Certificado RA1000 Reclame Aqui"
-              width={100}
-              height={40}
-              className="h-8 md:h-10 w-auto mix-blend-multiply"
+              width={200}
+              height={80}
+              className="h-16 md:h-20 w-auto mix-blend-multiply"
             />
           </div>
 
