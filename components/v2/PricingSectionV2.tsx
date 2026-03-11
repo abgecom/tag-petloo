@@ -71,11 +71,11 @@ export default function PricingSectionV2() {
               <div className={`p-6 text-center ${plan.popular ? "bg-petloo-purple/5" : ""}`}>
                 {/* Marketing pricing strategy */}
                 <div className="space-y-3">
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider underline underline-offset-2">Pague apenas o frete</p>
                   <div>
-                    <span className="text-3xl md:text-4xl font-bold text-petloo-orange">GRATIS</span>
-                    <span className="text-base md:text-lg font-medium text-petloo-orange/80 ml-1">por 30 dias</span>
+                    <span className="text-3xl md:text-4xl font-bold text-petloo-purple">GRATIS</span>
+                    <span className="text-base md:text-lg font-medium text-petloo-purple/80 ml-1">por 30 dias</span>
                   </div>
+                  <p className="text-xs text-muted-foreground uppercase tracking-wider underline underline-offset-2">Pague apenas o frete</p>
                   <div className="pt-3 border-t border-border/50">
                     <p className="text-sm text-muted-foreground">
                       Depois apenas <span className="font-bold text-foreground text-lg">R$ {plan.price}</span><span className="text-xs">/mes</span>
