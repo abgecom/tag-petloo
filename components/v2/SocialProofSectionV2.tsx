@@ -24,15 +24,15 @@ export default function SocialProofSectionV2() {
           {/* Divider - desktop only */}
           <div className="hidden sm:block w-px h-4 bg-border" />
 
-          {/* Reclame Aqui */}
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1.5">
-              <svg className="w-3.5 h-3.5 text-petloo-green" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-              </svg>
-              <span className="text-xs font-semibold text-foreground">Reclame Aqui</span>
-            </div>
-            <span className="text-xs text-muted-foreground">Selo de Excelencia</span>
+          {/* Reclame Aqui RA1000 */}
+          <div className="flex items-center">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/imagens_blog_800x600-5-EjszK0QNgRsF7nHUEoYTDvkc4nBp37.webp"
+              alt="Certificado RA1000 Reclame Aqui"
+              width={100}
+              height={40}
+              className="h-8 md:h-10 w-auto mix-blend-multiply"
+            />
           </div>
 
           {/* Divider - desktop only */}
