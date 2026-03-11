@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabase, supabaseAdmin } from "@/lib/supabase"
 import {
   pagarmeRequest,
   formatPhoneForPagarme,
@@ -470,11 +470,10 @@ async function saveOrderToSupabase(
   console.log("Pedido salvo no Supabase:", data)
 
   // === SALVAR TAMBEM NA TABELA 'pedidos' (compatibilidade com Looneca) ===
+  // Usa supabaseAdmin para bypass do RLS (tabela pedidos tem RLS sem policies)
   try {
-    console.log("[v0] Salvando pedido na tabela 'pedidos'...")
-
     // Gerar proximo numero de pedido
-    const { data: ultimoPedido } = await supabase
+    const { data: ultimoPedido } = await supabaseAdmin
       .from("pedidos")
       .select("pedido_numero")
       .order("pedido_numero", { ascending: false })
@@ -506,18 +505,15 @@ async function saveOrderToSupabase(
       atualizacao_pagamento: new Date().toISOString(),
     }
 
-    const { data: novoPedido, error: pedidoError } = await supabase
+    const { error: pedidoError } = await supabaseAdmin
       .from("pedidos")
       .insert(pedidoData)
-      .select()
 
     if (pedidoError) {
-      console.error("[v0] Erro ao salvar na tabela pedidos (nao bloqueia o fluxo):", pedidoError)
-    } else {
-      console.log("[v0] Pedido salvo na tabela 'pedidos' com sucesso. Numero:", novoPedidoNumero)
+      console.error("Erro ao salvar na tabela pedidos:", pedidoError)
     }
   } catch (pedidosError) {
-    console.error("[v0] Erro ao salvar na tabela pedidos (nao bloqueia o fluxo):", pedidosError)
+    console.error("Erro ao salvar na tabela pedidos:", pedidosError)
   }
 
   return data
