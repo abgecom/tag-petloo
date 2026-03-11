@@ -29,6 +29,7 @@ import PersonalizedTagManager from "@/components/PersonalizedTagManager"
 
 import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
 import { exportOrderToShopify, type CheckoutInput } from "@/actions/shopify-actions"
+import { calculatePaymentAmount, formatCurrency } from "@/lib/payment-constants"
 
 
 
@@ -408,6 +409,7 @@ function CheckoutForm() {
     cvv: "",
   })
   const [installments, setInstallments] = useState("1")
+  const [installmentOptions, setInstallmentOptions] = useState<Array<{ value: string; label: string }>>([])
   const [cardErrors, setCardErrors] = useState({
     number: false,
     name: false,
@@ -447,6 +449,29 @@ function CheckoutForm() {
     }, 800)
     return () => clearTimeout(timer)
   }, [])
+
+  // Calcular opcoes de parcelamento quando o valor total mudar
+  useEffect(() => {
+    const total = getShippingCost()
+    if (total > 0) {
+      const options: Array<{ value: string; label: string }> = []
+      for (let i = 1; i <= 12; i++) {
+        const calc = calculatePaymentAmount(total, "credit_card", i)
+        if (i <= 3) {
+          options.push({
+            value: i.toString(),
+            label: `${i}x de R$ ${formatCurrency(calc.installmentAmount)} sem juros`,
+          })
+        } else {
+          options.push({
+            value: i.toString(),
+            label: `${i}x de R$ ${formatCurrency(calc.installmentAmount)}*`,
+          })
+        }
+      }
+      setInstallmentOptions(options)
+    }
+  }, [quantity, shippingMethod, addressFound, personalizedTags, productInfo])
 
   // Handle URL params and personalized product data
   useEffect(() => {
@@ -2128,22 +2153,13 @@ function CheckoutForm() {
                           onChange={(e) => setInstallments(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] bg-white"
                         >
-                          {(() => {
-                            const totalValue = getShippingCost()
-                            const options = []
-                            // Máximo de 12 parcelas, mínimo de R$ 5,00 por parcela
-                            const maxInstallments = Math.min(12, Math.floor(totalValue / 5))
-                            for (let i = 1; i <= Math.max(1, maxInstallments); i++) {
-                              const installmentValue = (totalValue / i).toFixed(2).replace(".", ",")
-                              options.push(
-                                <option key={i} value={i.toString()}>
-                                  {i}x de R$ {installmentValue} {i === 1 ? "(à vista)" : ""}
-                                </option>
-                              )
-                            }
-                            return options
-                          })()}
+                          {installmentOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
                         </select>
+                        <p className="text-xs text-green-600 font-medium mt-1">Ate 3x sem juros</p>
                       </div>
 
 
