@@ -1993,22 +1993,46 @@ function CheckoutForm() {
                       <img
                         src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-visa%20%281%29.svg"
                         alt="Visa"
-                        className="h-5"
+                        className={`h-5 transition-all duration-200 ${
+                          getCardType(cardData.number) === "visa"
+                            ? "opacity-100"
+                            : cardData.number.length > 0
+                              ? "opacity-30 grayscale"
+                              : "opacity-100"
+                        }`}
                       />
                       <img
                         src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-mastercard%20%281%29.svg"
                         alt="Mastercard"
-                        className="h-5"
+                        className={`h-5 transition-all duration-200 ${
+                          getCardType(cardData.number) === "mastercard"
+                            ? "opacity-100"
+                            : cardData.number.length > 0
+                              ? "opacity-30 grayscale"
+                              : "opacity-100"
+                        }`}
                       />
                       <img
                         src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/amex.Csr7hRoy%20%281%29.svg"
                         alt="Amex"
-                        className="h-5"
+                        className={`h-5 transition-all duration-200 ${
+                          getCardType(cardData.number) === "amex"
+                            ? "opacity-100"
+                            : cardData.number.length > 0
+                              ? "opacity-30 grayscale"
+                              : "opacity-100"
+                        }`}
                       />
                       <img
                         src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-discover%20%281%29.svg"
                         alt="Discover"
-                        className="h-5"
+                        className={`h-5 transition-all duration-200 ${
+                          getCardType(cardData.number) === "discover"
+                            ? "opacity-100"
+                            : cardData.number.length > 0
+                              ? "opacity-30 grayscale"
+                              : "opacity-100"
+                        }`}
                       />
                       <span className="text-xs text-gray-500 ml-1">E muito mais...</span>
                     </div>
@@ -2037,45 +2061,6 @@ function CheckoutForm() {
                             cardErrors.number ? "border-red-500" : "border-gray-300"
                           }`}
                         />
-                        {/* Indicador visual de bandeira do cartao */}
-                        <div className="mt-2 flex items-center gap-2">
-                          <img
-                            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-visa%20%281%29.svg"
-                            alt="Visa"
-                            className={`h-6 transition-all duration-200 ${
-                              getCardType(cardData.number) === "visa"
-                                ? "opacity-100"
-                                : "opacity-30 grayscale"
-                            }`}
-                          />
-                          <img
-                            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-mastercard%20%281%29.svg"
-                            alt="Mastercard"
-                            className={`h-6 transition-all duration-200 ${
-                              getCardType(cardData.number) === "mastercard"
-                                ? "opacity-100"
-                                : "opacity-30 grayscale"
-                            }`}
-                          />
-                          <img
-                            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/amex.Csr7hRoy%20%281%29.svg"
-                            alt="Amex"
-                            className={`h-6 transition-all duration-200 ${
-                              getCardType(cardData.number) === "amex"
-                                ? "opacity-100"
-                                : "opacity-30 grayscale"
-                            }`}
-                          />
-                          <img
-                            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-discover%20%281%29.svg"
-                            alt="Discover"
-                            className={`h-6 transition-all duration-200 ${
-                              getCardType(cardData.number) === "discover"
-                                ? "opacity-100"
-                                : "opacity-30 grayscale"
-                            }`}
-                          />
-                        </div>
                       </div>
 
                       {/* Nome no Cartão */}
