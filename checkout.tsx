@@ -1,32 +1,22 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect } from "react"
 import { ChevronUp, ChevronDown, Minus, Plus, Edit2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { loadStripe } from "@stripe/stripe-js"
-import { useStripe, useElements, CardElement } from "@stripe/react-stripe-js"
+
 import { fetchAddressByCEP } from "@/utils/fetchAddressByCEP"
 import { useRouter } from "next/navigation"
 import InitiateCheckoutTracker from "@/components/InitiateCheckoutTracker"
 import AbandonedCartTracker from "@/components/AbandonedCartTracker"
 import LeadCaptureTracker from "@/components/LeadCaptureTracker"
 import PersonalizedTagManager from "@/components/PersonalizedTagManager"
-import { Elements } from "@stripe/react-stripe-js"
+
 import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
 
-// Initialize Stripe with preload
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!, {
-  // Preload Stripe.js to improve performance
-  stripeAccount: undefined,
-})
 
-// Preload Stripe immediately
-if (typeof window !== "undefined") {
-  stripePromise
-}
 
 // Interface para tags personalizadas
 interface PersonalizedTag {
@@ -81,21 +71,7 @@ const getCardType = (number: string) => {
   return "unknown"
 }
 
-// Stripe Card Element styles
-const cardElementOptions = {
-  style: {
-    base: {
-      fontSize: "16px",
-      color: "#424770",
-      "::placeholder": {
-        color: "#aab7c4",
-      },
-    },
-    invalid: {
-      color: "#9e2146",
-    },
-  },
-}
+
 
 function OrderSummaryContent({
   quantity,
@@ -395,8 +371,6 @@ function OrderSummaryContent({
 }
 
 function CheckoutForm() {
-  const stripe = useStripe()
-  const elements = useElements()
   const router = useRouter()
 
   // All hooks must be called before any conditional returns
@@ -417,6 +391,13 @@ function CheckoutForm() {
     name: "",
     expiry: "",
     cvv: "",
+  })
+  const [installments, setInstallments] = useState("1")
+  const [cardErrors, setCardErrors] = useState({
+    number: false,
+    name: false,
+    expiry: false,
+    cvv: false,
   })
   const [isProcessing, setIsProcessing] = useState(false)
   const [checkoutMessage, setCheckoutMessage] = useState<{ type: "success" | "error"; text: string } | null>(null)
@@ -836,11 +817,6 @@ function CheckoutForm() {
   }
 
   const handleCheckout = async () => {
-    if (!stripe || !elements) {
-      console.error("Stripe não foi carregado")
-      return
-    }
-
     // 🆕 VALIDAÇÃO PARA PRODUTOS PERSONALIZADOS
     const personalizedData = sessionStorage.getItem("personalizedProduct")
     let isPersonalized = false
@@ -1019,40 +995,46 @@ function CheckoutForm() {
         }
         sessionStorage.setItem("orderDataForObrigado", JSON.stringify(orderDataForObrigado))
 
-        // Processar pagamento PIX
-        const pixData = {
-          name,
-          email,
-          cpf: cpf.replace(/\D/g, ""),
-          phone: phone.replace(/\D/g, ""),
-          address: {
+        // Processar pagamento PIX via nova API Pagar.me
+        const pixPayload = {
+          amount: productInfo.amount, // Valor em centavos
+          paymentMethod: "pix",
+          customer: {
+            name,
+            email,
+            cpf: cpf.replace(/\D/g, ""),
+            phone: phone.replace(/\D/g, ""),
+          },
+          shipping: {
             cep: addressData.cep.replace(/\D/g, ""),
             street: addressData.street,
             number: number,
             complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-            district: addressData.neighborhood,
+            neighborhood: addressData.neighborhood,
             city: addressData.city,
             state: addressData.state,
           },
-          shipping_price: productInfo.amount, // Valor em centavos
-          // 🎯 ADICIONAR DADOS DO PRODUTO
-          product_type: productInfo.type,
-          product_color: productInfo.color,
-          product_quantity: quantity,
-          product_sku: productInfo.sku,
-          pet_name: productInfo.petName || "",
+          items: [
+            {
+              name: productInfo.name,
+              quantity: quantity,
+              price: Math.round(productInfo.amount / quantity), // Preço unitário em centavos
+              sku: productInfo.sku,
+            },
+          ],
+          petName: productInfo.petName || "",
         }
 
-        console.log("=== DADOS ENVIADOS PARA PIX API ===")
-        console.log("PIX Data:", JSON.stringify(pixData, null, 2))
+        console.log("=== DADOS ENVIADOS PARA API PAYMENT (PIX) ===")
+        console.log("PIX Payload:", JSON.stringify(pixPayload, null, 2))
 
         try {
-          const response = await fetch("/api/pix", {
+          const response = await fetch("/api/payment", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(pixData),
+            body: JSON.stringify(pixPayload),
           })
 
           console.log("=== RESPOSTA DA PIX API ===")
@@ -1074,29 +1056,28 @@ function CheckoutForm() {
             throw new Error(result.error || `Erro HTTP ${response.status}: ${result.message || "Erro desconhecido"}`)
           }
 
-          // Verificar se temos os dados PIX diretamente na resposta
-          if (result.success && result.qrcode && result.copiacola) {
-            console.log("✅ DADOS PIX RECEBIDOS DIRETAMENTE!")
-            console.log("QR Code:", result.qrcode ? "✅ Presente" : "❌ Ausente")
-            console.log("Copia e Cola:", result.copiacola ? "✅ Presente" : "❌ Ausente")
+          // Verificar se temos os dados PIX na resposta (estrutura da nova API Pagar.me)
+          if (result.success && result.pix?.qrcode && result.pix?.copiacola) {
+            console.log("✅ DADOS PIX RECEBIDOS DA PAGAR.ME!")
+            console.log("QR Code URL:", result.pix.qrcode ? "✅ Presente" : "❌ Ausente")
+            console.log("Copia e Cola:", result.pix.copiacola ? "✅ Presente" : "❌ Ausente")
 
             // Salvar dados PIX no sessionStorage para evitar URL muito longa
-            const pixData = {
-              orderId: result.order_id,
-              amount: result.amount,
-              qrcode: result.qrcode,
-              copiacola: result.copiacola,
-              expiration_date: result.expiration_date || "",
+            const pixDataToSave = {
+              orderId: result.orderId,
+              amount: productInfo.amount,
+              qrcode: result.pix.qrcode,
+              copiacola: result.pix.copiacola,
+              expiration_date: result.pix.expiration_date || "",
             }
 
-            sessionStorage.setItem("pixPaymentData", JSON.stringify(pixData))
+            sessionStorage.setItem("pixPaymentData", JSON.stringify(pixDataToSave))
 
-            // Redirecionar apenas com o order ID
-            router.push(`/pix-payment?orderId=${result.order_id}&amount=${result.amount}`)
+            // Redirecionar para página de pagamento PIX
+            router.push(`/pix-payment?orderId=${result.orderId}&amount=${productInfo.amount}`)
           } else {
-            // Fallback para o fluxo antigo se necessário
-            const orderId = result.order_id
-            const amount = result.amount || 2939 // Default para frete expresso
+            // Fallback se não receber dados completos
+            const orderId = result.orderId
 
             if (!orderId) {
               throw new Error("ID do pedido não foi retornado pela API")
@@ -1104,9 +1085,9 @@ function CheckoutForm() {
 
             console.log("=== REDIRECIONANDO PARA PIX PAYMENT ===")
             console.log("Order ID:", orderId)
-            console.log("Amount:", amount)
+            console.log("Amount:", productInfo.amount)
 
-            router.push(`/pix-payment?orderId=${orderId}&amount=${amount}`)
+            router.push(`/pix-payment?orderId=${orderId}&amount=${productInfo.amount}`)
           }
         } catch (fetchError) {
           console.error("Erro na requisição PIX:", fetchError)
@@ -1116,71 +1097,76 @@ function CheckoutForm() {
           throw fetchError
         }
       } else {
-        // Processar pagamento com cartão - NOVO FLUXO SEM PAYMENTINTENTS ÓRFÃOS
-        const cardElement = elements.getElement(CardElement)
-        if (!cardElement) {
-          setCheckoutMessage({ type: "error", text: "Elemento do cartão não encontrado." })
+        // Processar pagamento com cartão de crédito via Pagar.me
+        // Validar campos do cartão
+        const newCardErrors = {
+          number: !cardData.number || cardData.number.replace(/\s/g, "").length < 13,
+          name: !cardData.name || cardData.name.trim().length < 3,
+          expiry: !cardData.expiry || cardData.expiry.length < 5,
+          cvv: !cardData.cvv || cardData.cvv.length < 3,
+        }
+
+        setCardErrors(newCardErrors)
+
+        if (Object.values(newCardErrors).some((hasError) => hasError)) {
+          setCheckoutMessage({ type: "error", text: "Preencha todos os dados do cartão corretamente." })
+          setIsProcessing(false)
           return
         }
 
-        console.log("=== VALIDANDO CARTÃO ANTES DE CRIAR PAYMENTINTENT ===")
+        // Extrair mês e ano da validade
+        const [expMonth, expYear] = cardData.expiry.split("/")
 
-        // 1. PRIMEIRO: Criar método de pagamento para validar o cartão
-        const { error: paymentMethodError, paymentMethod } = await stripe.createPaymentMethod({
-          type: "card",
-          card: cardElement,
-          billing_details: {
-            name: name,
-            email: email,
+        console.log("=== PROCESSANDO CARTÃO VIA PAGAR.ME ===")
+
+        // Preparar payload para a nova API de pagamento
+        const cardPayload = {
+          amount: productInfo.amount, // Valor em centavos
+          paymentMethod: "credit_card",
+          installments: parseInt(installments, 10),
+          customer: {
+            name,
+            email,
+            cpf: cpf.replace(/\D/g, ""),
             phone: phone.replace(/\D/g, ""),
           },
-        })
-
-        if (paymentMethodError) {
-          console.error("❌ Erro na validação do cartão:", paymentMethodError)
-          setCheckoutMessage({
-            type: "error",
-            text: `Erro no cartão: ${paymentMethodError.message}`,
-          })
-          return
+          shipping: {
+            cep: addressData.cep.replace(/\D/g, ""),
+            street: addressData.street,
+            number: number,
+            complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
+            neighborhood: addressData.neighborhood,
+            city: addressData.city,
+            state: addressData.state,
+          },
+          items: [
+            {
+              name: productInfo.name,
+              quantity: quantity,
+              price: Math.round(productInfo.amount / quantity), // Preço unitário em centavos
+              sku: productInfo.sku,
+            },
+          ],
+          card: {
+            number: cardData.number.replace(/\s/g, ""),
+            holder_name: cardData.name,
+            exp_month: parseInt(expMonth, 10),
+            exp_year: parseInt(`20${expYear}`, 10),
+            cvv: cardData.cvv,
+          },
+          petName: productInfo.petName || "",
         }
 
-        console.log("✅ Cartão validado com sucesso:", paymentMethod.id)
-
-        // 2. AGORA SIM: Preparar dados para envio (COM payment_method_id)
-        const checkoutData = {
-          name,
-          email,
-          cpf: cpf.replace(/\D/g, ""),
-          telefone: phone.replace(/\D/g, ""),
-          cep: addressData.cep.replace(/\D/g, ""),
-          endereco: addressData.street,
-          numero: number,
-          bairro: addressData.neighborhood,
-          cidade: addressData.city,
-          estado: addressData.state,
-          complemento: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-          shipping_price: productInfo.amount,
-          product_type: productInfo.type,
-          product_color: productInfo.color,
-          product_quantity: quantity,
-          product_sku: productInfo.sku,
-          pet_name: productInfo.petName || "",
-          // ✅ INCLUIR O PAYMENT METHOD VALIDADO
-          payment_method_id: paymentMethod.id,
-        }
-
-        console.log("=== ENVIANDO DADOS PARA API COM CARTÃO VALIDADO ===")
-        console.log("Dados:", checkoutData)
+        console.log("=== ENVIANDO DADOS PARA API PAYMENT (CARTÃO) ===")
+        console.log("Card Payload:", { ...cardPayload, card: { ...cardPayload.card, number: "****", cvv: "***" } })
 
         try {
-          // 3. Chamar API com payment_method já validado
-          const response = await fetch("/api/checkout", {
+          const response = await fetch("/api/payment", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify(checkoutData),
+            body: JSON.stringify(cardPayload),
           })
 
           console.log("Status da resposta:", response.status)
@@ -1196,22 +1182,23 @@ function CheckoutForm() {
           const result = await response.json()
           console.log("Resposta da API:", result)
 
-          if (!response.ok) {
+          if (!response.ok || !result.success) {
             throw new Error(result.error || `Erro HTTP ${response.status}: ${result.message || "Erro desconhecido"}`)
           }
 
-          // 4. Confirmar pagamento (agora sem risco de falha)
-          console.log("✅ PaymentIntent criado e confirmado automaticamente:", result.payment_intent_id)
+          console.log("✅ Pedido criado com sucesso na Pagar.me:", result.orderId)
+          console.log("✅ Assinatura criada:", result.subscriptionId)
 
           // Salvar dados do pedido para a página de obrigado
           const orderSummary = {
-            orderId: result.payment_intent_id,
+            orderId: result.orderId,
             customerName: name,
             customerEmail: email,
             amount: productInfo.amount,
             paymentMethod: "Cartão de Crédito",
             personalizedTags: personalizedTags,
             quantity: quantity,
+            subscriptionId: result.subscriptionId,
           }
 
           sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))
@@ -1793,21 +1780,157 @@ function CheckoutForm() {
                     </div>
                   </div>
 
-                  {/* Lazy load CardElement only when credit card is selected */}
+                  {/* Campos de cartão nativos - Layout Looneca */}
                   {paymentMethod === "credit" && (
-                    <div className="space-y-4">
-                      <div className="p-3 border rounded-lg bg-gray-50">
-                        <Label className="text-sm font-medium mb-2 block text-gray-600">
-                          Processamento seguro (preencha os dados do cartão aqui)
+                    <div className="space-y-4 mt-4">
+                      {/* Número do Cartão */}
+                      <div>
+                        <Label htmlFor="cardNumber" className="text-sm font-medium">
+                          Número do Cartão
                         </Label>
-                        <Suspense fallback={<div className="h-10 bg-gray-200 animate-pulse rounded"></div>}>
-                          <CardElement options={cardElementOptions} />
-                        </Suspense>
+                        <input
+                          id="cardNumber"
+                          type="text"
+                          placeholder="0000 0000 0000 0000"
+                          value={cardData.number}
+                          onChange={(e) => {
+                            const formatted = formatCardNumber(e.target.value)
+                            setCardData((prev) => ({ ...prev, number: formatted }))
+                            setCardErrors((prev) => ({ ...prev, number: false }))
+                          }}
+                          maxLength={19}
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] ${
+                            cardErrors.number ? "border-red-500" : "border-gray-300"
+                          }`}
+                        />
+                        {cardData.number && (
+                          <div className="mt-1 flex items-center gap-2">
+                            <span className="text-xs text-gray-500">
+                              {getCardType(cardData.number) === "visa" && "Visa"}
+                              {getCardType(cardData.number) === "mastercard" && "Mastercard"}
+                              {getCardType(cardData.number) === "amex" && "American Express"}
+                              {getCardType(cardData.number) === "unknown" && ""}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
-                      <select className="w-full p-3 border rounded-lg bg-white" defaultValue="1x">
-                        <option value="1x">1x de R$ {getShippingCost().toFixed(2).replace(".", ",")}</option>
-                      </select>
+                      {/* Nome no Cartão */}
+                      <div>
+                        <Label htmlFor="cardName" className="text-sm font-medium">
+                          Nome no Cartão
+                        </Label>
+                        <input
+                          id="cardName"
+                          type="text"
+                          placeholder="Nome como está no cartão"
+                          value={cardData.name}
+                          onChange={(e) => {
+                            setCardData((prev) => ({ ...prev, name: e.target.value.toUpperCase() }))
+                            setCardErrors((prev) => ({ ...prev, name: false }))
+                          }}
+                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] ${
+                            cardErrors.name ? "border-red-500" : "border-gray-300"
+                          }`}
+                        />
+                      </div>
+
+                      {/* Grid para Validade e CVV */}
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="cardExpiry" className="text-sm font-medium">
+                            Validade
+                          </Label>
+                          <input
+                            id="cardExpiry"
+                            type="text"
+                            placeholder="MM/AA"
+                            value={cardData.expiry}
+                            onChange={(e) => {
+                              const formatted = formatExpiryDate(e.target.value)
+                              setCardData((prev) => ({ ...prev, expiry: formatted }))
+                              setCardErrors((prev) => ({ ...prev, expiry: false }))
+                            }}
+                            maxLength={5}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] ${
+                              cardErrors.expiry ? "border-red-500" : "border-gray-300"
+                            }`}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="cardCvv" className="text-sm font-medium">
+                            CVV
+                          </Label>
+                          <input
+                            id="cardCvv"
+                            type="text"
+                            placeholder="123"
+                            value={cardData.cvv}
+                            onChange={(e) => {
+                              const formatted = formatCVV(e.target.value)
+                              setCardData((prev) => ({ ...prev, cvv: formatted }))
+                              setCardErrors((prev) => ({ ...prev, cvv: false }))
+                            }}
+                            maxLength={4}
+                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] ${
+                              cardErrors.cvv ? "border-red-500" : "border-gray-300"
+                            }`}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Select para Parcelas */}
+                      <div>
+                        <Label htmlFor="installments" className="text-sm font-medium">
+                          Parcelas
+                        </Label>
+                        <select
+                          id="installments"
+                          value={installments}
+                          onChange={(e) => setInstallments(e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] bg-white"
+                        >
+                          {(() => {
+                            const totalValue = getShippingCost()
+                            const options = []
+                            // Máximo de 12 parcelas, mínimo de R$ 5,00 por parcela
+                            const maxInstallments = Math.min(12, Math.floor(totalValue / 5))
+                            for (let i = 1; i <= Math.max(1, maxInstallments); i++) {
+                              const installmentValue = (totalValue / i).toFixed(2).replace(".", ",")
+                              options.push(
+                                <option key={i} value={i.toString()}>
+                                  {i}x de R$ {installmentValue} {i === 1 ? "(à vista)" : ""}
+                                </option>
+                              )
+                            }
+                            return options
+                          })()}
+                        </select>
+                      </div>
+
+                      {/* Bandeiras aceitas */}
+                      <div className="flex items-center gap-2 mt-2">
+                        <img
+                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/visa-BRBd7AI7oDhyBwzy47g6H1kt5cjCOs.svg"
+                          alt="Visa"
+                          className="h-6"
+                        />
+                        <img
+                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/mastercard-RHKlJLfpzUysKGBW778wrPcURdL1Vs.svg"
+                          alt="Mastercard"
+                          className="h-6"
+                        />
+                        <img
+                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/amex-4TaBJhfHdUqFFRkB0TpA2LpnRrLjQV.svg"
+                          alt="American Express"
+                          className="h-6"
+                        />
+                        <img
+                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/elo-zTNVKSvGFOJWKKCNQSMJQSHvHANflJ.svg"
+                          alt="Elo"
+                          className="h-6"
+                        />
+                      </div>
                     </div>
                   )}
                 </div>
@@ -1886,7 +2009,7 @@ function CheckoutForm() {
             <Button
               className="w-full bg-red-500 hover:bg-red-600 text-white py-4 text-lg font-semibold mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleCheckout}
-              disabled={isProcessing || !stripe || showPixPayment}
+              disabled={isProcessing || showPixPayment}
             >
               {isProcessing ? (paymentMethod === "pix" ? "Gerando PIX..." : "Processando...") : "Finalizar compra"}
             </Button>
@@ -2017,9 +2140,5 @@ function CheckoutForm() {
 }
 
 export default function CheckoutPage() {
-  return (
-    <Elements stripe={stripePromise}>
-      <CheckoutForm />
-    </Elements>
-  )
+  return <CheckoutForm />
 }

@@ -17,6 +17,7 @@ import { PAGARME_CONFIG } from "@/lib/pagarme/config"
 interface PaymentRequestBody {
   amount: number // Valor em centavos
   paymentMethod: "credit_card" | "pix"
+  installments?: number // Número de parcelas (apenas para cartão)
   customer: {
     name: string
     email: string
@@ -321,7 +322,7 @@ async function createCreditCardOrder(
         payment_method: "credit_card",
         credit_card: {
           card_id: cardId,
-          installments: 1,
+          installments: body.installments || 1,
           statement_descriptor: "PETLOO",
         },
         amount: body.amount,
