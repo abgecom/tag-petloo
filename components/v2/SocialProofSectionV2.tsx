@@ -1,42 +1,54 @@
-import { Star, CheckCircle, Users } from "lucide-react"
+import { Star } from "lucide-react"
+import Image from "next/image"
 
 export default function SocialProofSectionV2() {
-  const stats = [
-    {
-      icon: Star,
-      value: "4.9/5",
-      label: "na App Store & Play Store",
-    },
-    {
-      icon: CheckCircle,
-      value: "Selo de Excelencia",
-      label: "no Reclame Aqui",
-    },
-    {
-      icon: Users,
-      value: "+100.000",
-      label: "Pets protegidos em todo o Brasil",
-    },
-  ]
-
   return (
-    <section className="py-8 md:py-12 bg-petloo-beige border-y border-border">
+    <section className="py-4 md:py-5 bg-white border-b border-border/50">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {stats.map((stat, index) => (
-            <div 
-              key={index}
-              className="flex items-center justify-center gap-4 text-center md:text-left"
-            >
-              <div className="flex-shrink-0 w-12 h-12 bg-petloo-purple/10 rounded-full flex items-center justify-center">
-                <stat.icon className="w-6 h-6 text-petloo-purple" />
-              </div>
-              <div>
-                <p className="font-bold text-lg text-foreground">{stat.value}</p>
-                <p className="text-sm text-muted-foreground">{stat.label}</p>
-              </div>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12 md:gap-16">
+          
+          {/* Trustpilot / App Store */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <Star className="w-3.5 h-3.5 text-petloo-green fill-petloo-green" />
+              <span className="text-xs font-semibold text-foreground">App Store</span>
             </div>
-          ))}
+            <div className="flex items-center gap-0.5">
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} className="w-3 h-3 text-yellow-400 fill-yellow-400" />
+              ))}
+            </div>
+            <span className="text-xs text-muted-foreground">4.9/5 | App Store & Play Store</span>
+          </div>
+
+          {/* Divider - desktop only */}
+          <div className="hidden sm:block w-px h-4 bg-border" />
+
+          {/* Reclame Aqui */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-petloo-green" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+              </svg>
+              <span className="text-xs font-semibold text-foreground">Reclame Aqui</span>
+            </div>
+            <span className="text-xs text-muted-foreground">Selo de Excelencia</span>
+          </div>
+
+          {/* Divider - desktop only */}
+          <div className="hidden sm:block w-px h-4 bg-border" />
+
+          {/* Pets protegidos */}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <svg className="w-3.5 h-3.5 text-petloo-purple" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+              </svg>
+              <span className="text-xs font-semibold text-foreground">+100.000</span>
+            </div>
+            <span className="text-xs text-muted-foreground">Pets protegidos em todo o Brasil</span>
+          </div>
+
         </div>
       </div>
     </section>
