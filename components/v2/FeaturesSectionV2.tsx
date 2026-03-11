@@ -29,9 +29,9 @@ export default function FeaturesSectionV2() {
   return (
     <section id="como-funciona" className="relative">
       {/* Primeira parte - Fundo branco */}
-      <div className="relative z-10 bg-white pt-16 md:pt-24 pb-16 md:pb-20">
-        {/* Card bege sobrepondo o fundo branco */}
-        <div className="relative z-10 mx-4 md:mx-8 lg:mx-16 xl:mx-24 bg-petloo-beige rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 lg:p-14">
+      <div className="bg-white pt-16 md:pt-24 pb-0">
+        {/* Card bege sobrepondo o fundo branco e parte do roxo */}
+        <div className="relative z-20 mx-4 md:mx-8 lg:mx-16 xl:mx-24 bg-petloo-beige rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 lg:p-14 mb-[-80px] md:mb-[-120px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Video/Image Placeholder */}
             <div className="order-2 lg:order-1">
@@ -77,7 +77,7 @@ export default function FeaturesSectionV2() {
       </div>
 
       {/* Segunda parte - Fundo roxo com bordas arredondadas superiores */}
-      <div className="relative z-0 bg-petloo-purple pt-40 md:pt-52 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem] -mt-32 md:-mt-44">
+      <div className="relative z-10 bg-petloo-purple pt-32 md:pt-44 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem]">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Content */}
