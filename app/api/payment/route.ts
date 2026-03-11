@@ -468,6 +468,58 @@ async function saveOrderToSupabase(
   }
 
   console.log("Pedido salvo no Supabase:", data)
+
+  // === SALVAR TAMBEM NA TABELA 'pedidos' (compatibilidade com Looneca) ===
+  try {
+    console.log("[v0] Salvando pedido na tabela 'pedidos'...")
+
+    // Gerar proximo numero de pedido
+    const { data: ultimoPedido } = await supabase
+      .from("pedidos")
+      .select("pedido_numero")
+      .order("pedido_numero", { ascending: false })
+      .limit(1)
+
+    const novoPedidoNumero =
+      ultimoPedido && ultimoPedido.length > 0 ? ultimoPedido[0].pedido_numero + 1 : 1001
+
+    const pedidoData = {
+      pedido_numero: novoPedidoNumero,
+      email_cliente: body.customer.email,
+      nome_cliente: body.customer.name,
+      telefone_cliente: body.customer.phone,
+      cpf_cliente: body.customer.cpf,
+      cep_cliente: body.shipping.cep,
+      cidade_cliente: body.shipping.city,
+      estado_cliente: body.shipping.state,
+      endereco_cliente: body.shipping.street,
+      numero_residencia_cliente: body.shipping.number,
+      complemento_cliente: body.shipping.complement || "",
+      bairro_cliente: body.shipping.neighborhood,
+      itens_escolhidos: body.items,
+      produtos_recorrentes: { appPetloo: true, loobook: false },
+      metodo_pagamento: body.paymentMethod,
+      total_pago: body.amount,
+      id_pagamento: orderId,
+      status_pagamento: orderStatus || "pending",
+      data_pagamento: new Date().toISOString(),
+      atualizacao_pagamento: new Date().toISOString(),
+    }
+
+    const { data: novoPedido, error: pedidoError } = await supabase
+      .from("pedidos")
+      .insert(pedidoData)
+      .select()
+
+    if (pedidoError) {
+      console.error("[v0] Erro ao salvar na tabela pedidos (nao bloqueia o fluxo):", pedidoError)
+    } else {
+      console.log("[v0] Pedido salvo na tabela 'pedidos' com sucesso. Numero:", novoPedidoNumero)
+    }
+  } catch (pedidosError) {
+    console.error("[v0] Erro ao salvar na tabela pedidos (nao bloqueia o fluxo):", pedidosError)
+  }
+
   return data
 }
 
