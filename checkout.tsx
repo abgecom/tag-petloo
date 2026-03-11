@@ -28,7 +28,7 @@ import LeadCaptureTracker from "@/components/LeadCaptureTracker"
 import PersonalizedTagManager from "@/components/PersonalizedTagManager"
 
 import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
-import { exportOrderToShopify, type OrderDataForShopify } from "@/lib/shopify"
+import { exportOrderToShopify, type CheckoutInput } from "@/actions/shopify-actions"
 
 
 
@@ -1124,31 +1124,43 @@ function CheckoutForm() {
             }
 
             // Exportar pedido para Shopify (em background)
-            const shopifyOrderData: OrderDataForShopify = {
-              customer_name: name,
-              customer_email: email,
-              customer_phone: phone.replace(/\D/g, ""),
-              customer_cpf: cpf.replace(/\D/g, ""),
-              address_street: addressData.street,
-              address_number: number,
-              address_complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-              address_neighborhood: addressData.neighborhood,
-              address_city: addressData.city,
-              address_state: addressData.state,
-              address_cep: addressData.cep.replace(/\D/g, ""),
-              order_id: result.orderId,
-              order_amount: productInfo.amount,
-              payment_method: "pix",
-              payment_status: "pending",
-              product_type: productInfo.type,
-              product_color: productInfo.color,
-              product_quantity: quantity,
-              product_sku: productInfo.sku,
-              pet_name: productInfo.petName,
+            const shopifyData: CheckoutInput = {
+              customer: {
+                name,
+                email,
+                phone: phone.replace(/\D/g, ""),
+                cpf: cpf.replace(/\D/g, ""),
+              },
+              shipping: {
+                cep: addressData.cep.replace(/\D/g, ""),
+                street: addressData.street,
+                number: number,
+                complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
+                neighborhood: addressData.neighborhood,
+                city: addressData.city,
+                state: addressData.state,
+                method: "Frete Expresso",
+                price: 0, // Frete incluso no total
+              },
+              items: [
+                {
+                  quantity: quantity,
+                  price: productInfo.amount,
+                  type: productInfo.type,
+                  color: productInfo.color,
+                  petName: productInfo.petName,
+                },
+              ],
+              paymentMethod: "pix",
+              totalAmount: productInfo.amount,
+              paymentId: result.orderId,
+              paymentStatus: "pending",
+              petName: productInfo.petName,
+              hasSubscription: false,
             }
 
-            // Chamar exportOrderToShopify em background (não bloquear redirecionamento)
-            exportOrderToShopify(shopifyOrderData).catch((err) => {
+            // Chamar exportOrderToShopify em background (nao bloquear redirecionamento)
+            exportOrderToShopify(shopifyData).catch((err) => {
               console.error("Erro ao exportar pedido para Shopify:", err)
             })
 
@@ -1326,32 +1338,43 @@ function CheckoutForm() {
           }
 
           // Exportar pedido para Shopify
-          const shopifyOrderData: OrderDataForShopify = {
-            customer_name: name,
-            customer_email: email,
-            customer_phone: phone.replace(/\D/g, ""),
-            customer_cpf: cpf.replace(/\D/g, ""),
-            address_street: addressData.street,
-            address_number: number,
-            address_complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-            address_neighborhood: addressData.neighborhood,
-            address_city: addressData.city,
-            address_state: addressData.state,
-            address_cep: addressData.cep.replace(/\D/g, ""),
-            order_id: result.orderId,
-            order_amount: productInfo.amount,
-            payment_method: "credit_card",
-            payment_status: "paid",
-            product_type: productInfo.type,
-            product_color: productInfo.color,
-            product_quantity: quantity,
-            product_sku: productInfo.sku,
-            pet_name: productInfo.petName,
-            subscription_id: result.subscriptionId,
+          const shopifyData: CheckoutInput = {
+            customer: {
+              name,
+              email,
+              phone: phone.replace(/\D/g, ""),
+              cpf: cpf.replace(/\D/g, ""),
+            },
+            shipping: {
+              cep: addressData.cep.replace(/\D/g, ""),
+              street: addressData.street,
+              number: number,
+              complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
+              neighborhood: addressData.neighborhood,
+              city: addressData.city,
+              state: addressData.state,
+              method: "Frete Expresso",
+              price: 0, // Frete incluso no total
+            },
+            items: [
+              {
+                quantity: quantity,
+                price: productInfo.amount,
+                type: productInfo.type,
+                color: productInfo.color,
+                petName: productInfo.petName,
+              },
+            ],
+            paymentMethod: "credit_card",
+            totalAmount: productInfo.amount,
+            paymentId: result.orderId,
+            paymentStatus: "paid",
+            petName: productInfo.petName,
+            hasSubscription: true, // Cartao sempre cria assinatura
           }
 
-          // Chamar exportOrderToShopify (em background para não bloquear)
-          exportOrderToShopify(shopifyOrderData).catch((err) => {
+          // Chamar exportOrderToShopify (em background para nao bloquear)
+          exportOrderToShopify(shopifyData).catch((err) => {
             console.error("Erro ao exportar pedido para Shopify:", err)
           })
 
