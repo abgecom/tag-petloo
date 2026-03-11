@@ -28,7 +28,8 @@ import LeadCaptureTracker from "@/components/LeadCaptureTracker"
 import PersonalizedTagManager from "@/components/PersonalizedTagManager"
 
 import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
-import { exportOrderToShopify, type OrderDataForShopify } from "@/lib/shopify"
+import { exportOrderToShopify, type CheckoutInput } from "@/actions/shopify-actions"
+import { calculatePaymentAmount, formatCurrency } from "@/lib/payment-constants"
 
 
 
@@ -82,6 +83,7 @@ const getCardType = (number: string) => {
   if (cleaned.match(/^4/)) return "visa"
   if (cleaned.match(/^5[1-5]/)) return "mastercard"
   if (cleaned.match(/^3[47]/)) return "amex"
+  if (cleaned.match(/^6(?:011|5)/)) return "discover"
   return "unknown"
 }
 
@@ -407,6 +409,7 @@ function CheckoutForm() {
     cvv: "",
   })
   const [installments, setInstallments] = useState("1")
+  const [installmentOptions, setInstallmentOptions] = useState<Array<{ value: string; label: string }>>([])
   const [cardErrors, setCardErrors] = useState({
     number: false,
     name: false,
@@ -446,6 +449,29 @@ function CheckoutForm() {
     }, 800)
     return () => clearTimeout(timer)
   }, [])
+
+  // Calcular opcoes de parcelamento quando o valor total mudar
+  useEffect(() => {
+    const total = getShippingCost()
+    if (total > 0) {
+      const options: Array<{ value: string; label: string }> = []
+      for (let i = 1; i <= 12; i++) {
+        const calc = calculatePaymentAmount(total, "credit_card", i)
+        if (i <= 3) {
+          options.push({
+            value: i.toString(),
+            label: `${i}x de R$ ${formatCurrency(calc.installmentAmount)} sem juros`,
+          })
+        } else {
+          options.push({
+            value: i.toString(),
+            label: `${i}x de R$ ${formatCurrency(calc.installmentAmount)}*`,
+          })
+        }
+      }
+      setInstallmentOptions(options)
+    }
+  }, [quantity, shippingMethod, addressFound, personalizedTags, productInfo])
 
   // Handle URL params and personalized product data
   useEffect(() => {
@@ -1124,31 +1150,43 @@ function CheckoutForm() {
             }
 
             // Exportar pedido para Shopify (em background)
-            const shopifyOrderData: OrderDataForShopify = {
-              customer_name: name,
-              customer_email: email,
-              customer_phone: phone.replace(/\D/g, ""),
-              customer_cpf: cpf.replace(/\D/g, ""),
-              address_street: addressData.street,
-              address_number: number,
-              address_complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-              address_neighborhood: addressData.neighborhood,
-              address_city: addressData.city,
-              address_state: addressData.state,
-              address_cep: addressData.cep.replace(/\D/g, ""),
-              order_id: result.orderId,
-              order_amount: productInfo.amount,
-              payment_method: "pix",
-              payment_status: "pending",
-              product_type: productInfo.type,
-              product_color: productInfo.color,
-              product_quantity: quantity,
-              product_sku: productInfo.sku,
-              pet_name: productInfo.petName,
+            const shopifyData: CheckoutInput = {
+              customer: {
+                name,
+                email,
+                phone: phone.replace(/\D/g, ""),
+                cpf: cpf.replace(/\D/g, ""),
+              },
+              shipping: {
+                cep: addressData.cep.replace(/\D/g, ""),
+                street: addressData.street,
+                number: number,
+                complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
+                neighborhood: addressData.neighborhood,
+                city: addressData.city,
+                state: addressData.state,
+                method: "Frete Expresso",
+                price: 0, // Frete incluso no total
+              },
+              items: [
+                {
+                  quantity: quantity,
+                  price: productInfo.amount,
+                  type: productInfo.type,
+                  color: productInfo.color,
+                  petName: productInfo.petName,
+                },
+              ],
+              paymentMethod: "pix",
+              totalAmount: productInfo.amount,
+              paymentId: result.orderId,
+              paymentStatus: "pending",
+              petName: productInfo.petName,
+              hasSubscription: false,
             }
 
-            // Chamar exportOrderToShopify em background (não bloquear redirecionamento)
-            exportOrderToShopify(shopifyOrderData).catch((err) => {
+            // Chamar exportOrderToShopify em background (nao bloquear redirecionamento)
+            exportOrderToShopify(shopifyData).catch((err) => {
               console.error("Erro ao exportar pedido para Shopify:", err)
             })
 
@@ -1326,32 +1364,43 @@ function CheckoutForm() {
           }
 
           // Exportar pedido para Shopify
-          const shopifyOrderData: OrderDataForShopify = {
-            customer_name: name,
-            customer_email: email,
-            customer_phone: phone.replace(/\D/g, ""),
-            customer_cpf: cpf.replace(/\D/g, ""),
-            address_street: addressData.street,
-            address_number: number,
-            address_complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
-            address_neighborhood: addressData.neighborhood,
-            address_city: addressData.city,
-            address_state: addressData.state,
-            address_cep: addressData.cep.replace(/\D/g, ""),
-            order_id: result.orderId,
-            order_amount: productInfo.amount,
-            payment_method: "credit_card",
-            payment_status: "paid",
-            product_type: productInfo.type,
-            product_color: productInfo.color,
-            product_quantity: quantity,
-            product_sku: productInfo.sku,
-            pet_name: productInfo.petName,
-            subscription_id: result.subscriptionId,
+          const shopifyData: CheckoutInput = {
+            customer: {
+              name,
+              email,
+              phone: phone.replace(/\D/g, ""),
+              cpf: cpf.replace(/\D/g, ""),
+            },
+            shipping: {
+              cep: addressData.cep.replace(/\D/g, ""),
+              street: addressData.street,
+              number: number,
+              complement: (document.getElementById("complement") as HTMLInputElement)?.value || "",
+              neighborhood: addressData.neighborhood,
+              city: addressData.city,
+              state: addressData.state,
+              method: "Frete Expresso",
+              price: 0, // Frete incluso no total
+            },
+            items: [
+              {
+                quantity: quantity,
+                price: productInfo.amount,
+                type: productInfo.type,
+                color: productInfo.color,
+                petName: productInfo.petName,
+              },
+            ],
+            paymentMethod: "credit_card",
+            totalAmount: productInfo.amount,
+            paymentId: result.orderId,
+            paymentStatus: "paid",
+            petName: productInfo.petName,
+            hasSubscription: true, // Cartao sempre cria assinatura
           }
 
-          // Chamar exportOrderToShopify (em background para não bloquear)
-          exportOrderToShopify(shopifyOrderData).catch((err) => {
+          // Chamar exportOrderToShopify (em background para nao bloquear)
+          exportOrderToShopify(shopifyData).catch((err) => {
             console.error("Erro ao exportar pedido para Shopify:", err)
           })
 
@@ -1940,9 +1989,52 @@ function CheckoutForm() {
                         Cartão de Crédito
                       </label>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <img src="/placeholder.svg?height=20&width=100&text=Cards" alt="Payment Method" className="h-5" />
-                      <span className="text-xs text-gray-500">E muito mais...</span>
+                    <div className="flex items-center gap-1.5">
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-visa%20%281%29.svg"
+                        alt="Visa"
+                        className={`h-5 transition-all duration-200 ${
+                          getCardType(cardData.number) === "visa"
+                            ? "opacity-100"
+                            : cardData.number.length > 0
+                              ? "opacity-30 grayscale"
+                              : "opacity-100"
+                        }`}
+                      />
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-mastercard%20%281%29.svg"
+                        alt="Mastercard"
+                        className={`h-5 transition-all duration-200 ${
+                          getCardType(cardData.number) === "mastercard"
+                            ? "opacity-100"
+                            : cardData.number.length > 0
+                              ? "opacity-30 grayscale"
+                              : "opacity-100"
+                        }`}
+                      />
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/amex.Csr7hRoy%20%281%29.svg"
+                        alt="Amex"
+                        className={`h-5 transition-all duration-200 ${
+                          getCardType(cardData.number) === "amex"
+                            ? "opacity-100"
+                            : cardData.number.length > 0
+                              ? "opacity-30 grayscale"
+                              : "opacity-100"
+                        }`}
+                      />
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-discover%20%281%29.svg"
+                        alt="Discover"
+                        className={`h-5 transition-all duration-200 ${
+                          getCardType(cardData.number) === "discover"
+                            ? "opacity-100"
+                            : cardData.number.length > 0
+                              ? "opacity-30 grayscale"
+                              : "opacity-100"
+                        }`}
+                      />
+                      <span className="text-xs text-gray-500 ml-1">E muito mais...</span>
                     </div>
                   </div>
 
@@ -1969,16 +2061,6 @@ function CheckoutForm() {
                             cardErrors.number ? "border-red-500" : "border-gray-300"
                           }`}
                         />
-                        {cardData.number && (
-                          <div className="mt-1 flex items-center gap-2">
-                            <span className="text-xs text-gray-500">
-                              {getCardType(cardData.number) === "visa" && "Visa"}
-                              {getCardType(cardData.number) === "mastercard" && "Mastercard"}
-                              {getCardType(cardData.number) === "amex" && "American Express"}
-                              {getCardType(cardData.number) === "unknown" && ""}
-                            </span>
-                          </div>
-                        )}
                       </div>
 
                       {/* Nome no Cartão */}
@@ -2056,47 +2138,16 @@ function CheckoutForm() {
                           onChange={(e) => setInstallments(e.target.value)}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] bg-white"
                         >
-                          {(() => {
-                            const totalValue = getShippingCost()
-                            const options = []
-                            // Máximo de 12 parcelas, mínimo de R$ 5,00 por parcela
-                            const maxInstallments = Math.min(12, Math.floor(totalValue / 5))
-                            for (let i = 1; i <= Math.max(1, maxInstallments); i++) {
-                              const installmentValue = (totalValue / i).toFixed(2).replace(".", ",")
-                              options.push(
-                                <option key={i} value={i.toString()}>
-                                  {i}x de R$ {installmentValue} {i === 1 ? "(à vista)" : ""}
-                                </option>
-                              )
-                            }
-                            return options
-                          })()}
+                          {installmentOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
                         </select>
+                        <p className="text-xs text-green-600 font-medium mt-1">Ate 3x sem juros</p>
                       </div>
 
-                      {/* Bandeiras aceitas */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <img
-                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/visa-BRBd7AI7oDhyBwzy47g6H1kt5cjCOs.svg"
-                          alt="Visa"
-                          className="h-6"
-                        />
-                        <img
-                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/mastercard-RHKlJLfpzUysKGBW778wrPcURdL1Vs.svg"
-                          alt="Mastercard"
-                          className="h-6"
-                        />
-                        <img
-                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/amex-4TaBJhfHdUqFFRkB0TpA2LpnRrLjQV.svg"
-                          alt="American Express"
-                          className="h-6"
-                        />
-                        <img
-                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/elo-zTNVKSvGFOJWKKCNQSMJQSHvHANflJ.svg"
-                          alt="Elo"
-                          className="h-6"
-                        />
-                      </div>
+
                     </div>
                   )}
                 </div>

@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { supabase } from "@/lib/supabase"
+import { supabase, supabaseAdmin } from "@/lib/supabase"
 import {
   pagarmeRequest,
   formatPhoneForPagarme,
@@ -9,6 +9,7 @@ import {
   PagarmeError,
 } from "@/lib/pagarme/api"
 import { PAGARME_CONFIG } from "@/lib/pagarme/config"
+import { calculatePaymentAmount } from "@/lib/payment-constants"
 
 // ============================================
 // TIPOS
@@ -104,12 +105,6 @@ interface PagarmeSubscriptionResponse {
 // VALIDAÇÃO
 // ============================================
 
-const VALID_AMOUNTS = [
-  1887, 2939, 3929, 3960, 4919, 4950, 4990, 5909, 5940, 5980, 
-  6042, 6930, 6970, 7920, 7960, 8910, 8950, 9940, 10930,
-  11920, 12910, 13900, 7032, 8022,
-]
-
 function validatePayload(body: PaymentRequestBody): string | null {
   const requiredFields = ["amount", "paymentMethod", "customer", "shipping", "items"]
   
@@ -141,8 +136,9 @@ function validatePayload(body: PaymentRequestBody): string | null {
     return "Email inválido"
   }
 
-  // Validar valor
-  if (!VALID_AMOUNTS.includes(body.amount)) {
+  // Validar valor - aceitar qualquer valor positivo ate R$ 1000
+  // (com juros dinamicos os valores possiveis sao muitos)
+  if (body.amount <= 0 || body.amount > 100000) {
     return `Valor inválido: R$ ${(body.amount / 100).toFixed(2)}`
   }
 
@@ -260,13 +256,14 @@ async function createPagarmeSubscription(
   cardId: string
 ): Promise<PagarmeSubscriptionResponse> {
   const subscriptionData = {
-    plan_id: PAGARME_CONFIG.subscription.planId,
+    // IMPORTANTE: NAO enviar start_at aqui.
+    // O trial_period_days do plano ja cuida de postergar a primeira cobranca em 30 dias.
+    // Enviar start_at com +30 dias causaria "dupla postergacao" (30 trial + 30 start_at = 60 dias).
+    plan_id: process.env.PETLOO_PLAN_ID || PAGARME_CONFIG.subscription.planId,
     customer_id: customerId,
     card_id: cardId,
     payment_method: "credit_card",
     billing_type: "prepaid",
-    // Trial de 30 dias
-    start_at: new Date(Date.now() + PAGARME_CONFIG.subscription.trialDays * 24 * 60 * 60 * 1000).toISOString(),
     metadata: {
       source: "petloo-checkout",
       trial_days: PAGARME_CONFIG.subscription.trialDays.toString(),
@@ -296,7 +293,7 @@ async function createCreditCardOrder(
   body: PaymentRequestBody,
   customerId: string,
   cardId: string
-): Promise<PagarmeOrderResponse> {
+): Promise<PagarmeOrderResponse & { paymentCalculation?: ReturnType<typeof calculatePaymentAmount> }> {
   const document = formatDocumentForPagarme(body.customer.cpf)
   const phone = formatPhoneForPagarme(body.customer.phone)
   const address = formatAddressForPagarme({
@@ -308,6 +305,16 @@ async function createCreditCardOrder(
     state: body.shipping.state,
     cep: body.shipping.cep,
   })
+
+  // Calcular valor com juros para parcelamento
+  const installments = body.installments || 1
+  const originalAmountReais = body.amount / 100
+  const calculation = calculatePaymentAmount(originalAmountReais, "credit_card", installments)
+  const finalAmountCents = Math.round(calculation.finalAmount * 100)
+
+  console.log("=== CALCULO PARCELAMENTO ===")
+  console.log("Valor original:", originalAmountReais, "Parcelas:", installments)
+  console.log("Valor final com juros:", calculation.finalAmount, "Juros:", calculation.interestAmount)
 
   const orderData = {
     customer_id: customerId,
@@ -322,10 +329,10 @@ async function createCreditCardOrder(
         payment_method: "credit_card",
         credit_card: {
           card_id: cardId,
-          installments: body.installments || 1,
+          installments: installments,
           statement_descriptor: "PETLOO",
         },
-        amount: body.amount,
+        amount: finalAmountCents, // Valor com juros aplicados
       },
     ],
     shipping: {
@@ -350,7 +357,12 @@ async function createCreditCardOrder(
   )
 
   console.log("Pedido criado:", response.id, "Status:", response.status)
-  return response
+  
+  // Retornar response com dados do parcelamento
+  return {
+    ...response,
+    paymentCalculation: calculation,
+  }
 }
 
 /**
@@ -467,6 +479,54 @@ async function saveOrderToSupabase(
   }
 
   console.log("Pedido salvo no Supabase:", data)
+
+  // === SALVAR TAMBEM NA TABELA 'pedidos' (compatibilidade com Looneca) ===
+  // Usa supabaseAdmin para bypass do RLS (tabela pedidos tem RLS sem policies)
+  try {
+    // Gerar proximo numero de pedido
+    const { data: ultimoPedido } = await supabaseAdmin
+      .from("pedidos")
+      .select("pedido_numero")
+      .order("pedido_numero", { ascending: false })
+      .limit(1)
+
+    const novoPedidoNumero =
+      ultimoPedido && ultimoPedido.length > 0 ? ultimoPedido[0].pedido_numero + 1 : 1001
+
+    const pedidoData = {
+      pedido_numero: novoPedidoNumero,
+      email_cliente: body.customer.email,
+      nome_cliente: body.customer.name,
+      telefone_cliente: body.customer.phone,
+      cpf_cliente: body.customer.cpf,
+      cep_cliente: body.shipping.cep,
+      cidade_cliente: body.shipping.city,
+      estado_cliente: body.shipping.state,
+      endereco_cliente: body.shipping.street,
+      numero_residencia_cliente: body.shipping.number,
+      complemento_cliente: body.shipping.complement || "",
+      bairro_cliente: body.shipping.neighborhood,
+      itens_escolhidos: body.items,
+      produtos_recorrentes: { appPetloo: true, loobook: false },
+      metodo_pagamento: body.paymentMethod,
+      total_pago: body.amount,
+      id_pagamento: orderId,
+      status_pagamento: orderStatus || "pending",
+      data_pagamento: new Date().toISOString(),
+      atualizacao_pagamento: new Date().toISOString(),
+    }
+
+    const { error: pedidoError } = await supabaseAdmin
+      .from("pedidos")
+      .insert(pedidoData)
+
+    if (pedidoError) {
+      console.error("Erro ao salvar na tabela pedidos:", pedidoError)
+    }
+  } catch (pedidosError) {
+    console.error("Erro ao salvar na tabela pedidos:", pedidosError)
+  }
+
   return data
 }
 
@@ -668,6 +728,11 @@ export async function POST(request: NextRequest) {
       subscriptionId: subscription.id,
       subscriptionStatus: subscription.status,
       trialEndsAt: subscription.start_at,
+      // Dados do parcelamento
+      installments: body.installments || 1,
+      installmentAmount: order.paymentCalculation?.installmentAmount,
+      finalAmount: order.paymentCalculation?.finalAmount,
+      interestAmount: order.paymentCalculation?.interestAmount,
       message: "Pagamento processado com sucesso! Assinatura do app iniciada com 30 dias grátis.",
     })
   } catch (error) {
