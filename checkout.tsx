@@ -82,6 +82,7 @@ const getCardType = (number: string) => {
   if (cleaned.match(/^4/)) return "visa"
   if (cleaned.match(/^5[1-5]/)) return "mastercard"
   if (cleaned.match(/^3[47]/)) return "amex"
+  if (cleaned.match(/^6(?:011|5)/)) return "discover"
   return "unknown"
 }
 
@@ -1963,9 +1964,28 @@ function CheckoutForm() {
                         Cartão de Crédito
                       </label>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <img src="/placeholder.svg?height=20&width=100&text=Cards" alt="Payment Method" className="h-5" />
-                      <span className="text-xs text-gray-500">E muito mais...</span>
+                    <div className="flex items-center gap-1.5">
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-visa%20%281%29.svg"
+                        alt="Visa"
+                        className="h-5"
+                      />
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-mastercard%20%281%29.svg"
+                        alt="Mastercard"
+                        className="h-5"
+                      />
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/amex.Csr7hRoy%20%281%29.svg"
+                        alt="Amex"
+                        className="h-5"
+                      />
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-discover%20%281%29.svg"
+                        alt="Discover"
+                        className="h-5"
+                      />
+                      <span className="text-xs text-gray-500 ml-1">E muito mais...</span>
                     </div>
                   </div>
 
@@ -1992,16 +2012,45 @@ function CheckoutForm() {
                             cardErrors.number ? "border-red-500" : "border-gray-300"
                           }`}
                         />
-                        {cardData.number && (
-                          <div className="mt-1 flex items-center gap-2">
-                            <span className="text-xs text-gray-500">
-                              {getCardType(cardData.number) === "visa" && "Visa"}
-                              {getCardType(cardData.number) === "mastercard" && "Mastercard"}
-                              {getCardType(cardData.number) === "amex" && "American Express"}
-                              {getCardType(cardData.number) === "unknown" && ""}
-                            </span>
-                          </div>
-                        )}
+                        {/* Indicador visual de bandeira do cartao */}
+                        <div className="mt-2 flex items-center gap-2">
+                          <img
+                            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-visa%20%281%29.svg"
+                            alt="Visa"
+                            className={`h-6 transition-all duration-200 ${
+                              getCardType(cardData.number) === "visa"
+                                ? "opacity-100"
+                                : "opacity-30 grayscale"
+                            }`}
+                          />
+                          <img
+                            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-mastercard%20%281%29.svg"
+                            alt="Mastercard"
+                            className={`h-6 transition-all duration-200 ${
+                              getCardType(cardData.number) === "mastercard"
+                                ? "opacity-100"
+                                : "opacity-30 grayscale"
+                            }`}
+                          />
+                          <img
+                            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/amex.Csr7hRoy%20%281%29.svg"
+                            alt="Amex"
+                            className={`h-6 transition-all duration-200 ${
+                              getCardType(cardData.number) === "amex"
+                                ? "opacity-100"
+                                : "opacity-30 grayscale"
+                            }`}
+                          />
+                          <img
+                            src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-discover%20%281%29.svg"
+                            alt="Discover"
+                            className={`h-6 transition-all duration-200 ${
+                              getCardType(cardData.number) === "discover"
+                                ? "opacity-100"
+                                : "opacity-30 grayscale"
+                            }`}
+                          />
+                        </div>
                       </div>
 
                       {/* Nome no Cartão */}
@@ -2097,29 +2146,7 @@ function CheckoutForm() {
                         </select>
                       </div>
 
-                      {/* Bandeiras aceitas */}
-                      <div className="flex items-center gap-2 mt-2">
-                        <img
-                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/visa-BRBd7AI7oDhyBwzy47g6H1kt5cjCOs.svg"
-                          alt="Visa"
-                          className="h-6"
-                        />
-                        <img
-                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/mastercard-RHKlJLfpzUysKGBW778wrPcURdL1Vs.svg"
-                          alt="Mastercard"
-                          className="h-6"
-                        />
-                        <img
-                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/amex-4TaBJhfHdUqFFRkB0TpA2LpnRrLjQV.svg"
-                          alt="American Express"
-                          className="h-6"
-                        />
-                        <img
-                          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/elo-zTNVKSvGFOJWKKCNQSMJQSHvHANflJ.svg"
-                          alt="Elo"
-                          className="h-6"
-                        />
-                      </div>
+
                     </div>
                   )}
                 </div>
