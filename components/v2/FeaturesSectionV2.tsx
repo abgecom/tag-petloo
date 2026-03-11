@@ -30,7 +30,8 @@ export default function FeaturesSectionV2() {
     <section id="como-funciona" className="relative">
       {/* Primeira parte - Fundo branco */}
       <div className="bg-white pt-16 md:pt-24 pb-32 md:pb-40">
-        <div className="container mx-auto px-4">
+        {/* Card bege sobrepondo o fundo branco */}
+        <div className="mx-4 md:mx-8 lg:mx-16 xl:mx-24 bg-petloo-beige rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 lg:p-14">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             {/* Video/Image Placeholder */}
             <div className="order-2 lg:order-1">
