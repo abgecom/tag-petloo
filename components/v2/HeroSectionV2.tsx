@@ -13,7 +13,7 @@ export default function HeroSectionV2() {
             src="https://www.youtube.com/embed/ldwr6IpTNNk?autoplay=1&mute=1&loop=1&playlist=ldwr6IpTNNk&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
             title="Petloo Hero Video"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300%] h-[300%] md:w-[180%] md:h-[180%] pointer-events-none"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400%] h-[400%] md:w-[180%] md:h-[180%] pointer-events-none"
           />
         </div>
         
