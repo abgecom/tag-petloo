@@ -11,7 +11,7 @@ export default function BenefitsSectionV2() {
     {
       title: "Design que nao incomoda",
       description: "Esqueca rastreadores pesados. Nossa tecnologia foi integrada a uma coleira leve e ergonomica, feita para acompanhar a energia do seu pet sem causar desconforto.",
-      image: null,
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_jcqwoajcqwoajcqw.png-VCRCol3emioiwaXbyGCtHTea4VFfx9.jpeg",
     },
     {
       title: "Seguranca em Tempo Real",
