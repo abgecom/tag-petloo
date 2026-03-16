@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 export default function FeaturesSectionV2() {
   return (
     <section id="como-funciona" className="relative">
@@ -57,18 +59,16 @@ export default function FeaturesSectionV2() {
             </div>
           </div>
 
-          {/* Image Placeholder - Centralizado inferiormente */}
+          {/* Imagem da coleira LooTag */}
           <div className="flex justify-center">
-            <div className="w-full max-w-md aspect-square bg-gradient-to-br from-petloo-beige to-white rounded-3xl overflow-hidden shadow-xl flex items-center justify-center">
-              {/* Placeholder para imagem da coleira */}
-              <div className="text-muted-foreground/30 text-center p-8">
-                <div className="w-48 h-48 mx-auto mb-4 border-4 border-dashed border-muted-foreground/20 rounded-full flex items-center justify-center">
-                  <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                  </svg>
-                </div>
-                <p className="text-sm">Imagem da coleira placeholder</p>
-              </div>
+            <div className="w-full max-w-lg">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_c38vscc38vscc38v.png-BPRiPL2KO5JzBnnjoHKTdKia4K1fvS.jpeg"
+                alt="LooTag de Rastreamento - Coleira com design ergonomico, cobertura nacional, pequena e compacta para caes e gatos com mais de 2kg, 100% a prova d'agua"
+                width={600}
+                height={600}
+                className="w-full h-auto"
+              />
             </div>
           </div>
         </div>
