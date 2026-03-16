@@ -16,7 +16,7 @@ export default function BenefitsSectionV2() {
     {
       title: "Seguranca em Tempo Real",
       description: "Receba alertas instantaneos se ele sair de uma zona segura. Visualize o trajeto e a localizacao exata em segundos. O elo entre voces dois agora e inquebravel, nao importa a distancia.",
-      image: null,
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_7ccjcu7ccjcu7ccj.png-QoDc3IZ9hu92lV1i6rzEcnxWuukwgS.jpeg",
     },
   ]
 
