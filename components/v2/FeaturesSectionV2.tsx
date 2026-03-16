@@ -1,5 +1,7 @@
 "use client"
 
+import Image from "next/image"
+
 export default function FeaturesSectionV2() {
   return (
     <section id="como-funciona" className="relative">
@@ -8,30 +10,16 @@ export default function FeaturesSectionV2() {
         {/* Card bege sobrepondo o fundo branco e parte do roxo */}
         <div className="relative z-20 mx-4 md:mx-8 lg:mx-16 xl:mx-24 bg-petloo-beige rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 lg:p-14 mb-[-80px] md:mb-[-120px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Video/Image Placeholder */}
+            {/* Video do YouTube */}
             <div className="order-2 lg:order-1">
               <div className="relative aspect-[4/3] bg-gradient-to-br from-petloo-purple to-petloo-purple/80 rounded-3xl overflow-hidden shadow-2xl">
-                {/* Placeholder para video do app */}
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                >
-                  {/* <source src="/videos/app-demo.mp4" type="video/mp4" /> */}
-                </video>
-                {/* Placeholder visual */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-white/30 text-center p-8">
-                    <div className="w-24 h-40 mx-auto mb-4 border-4 border-dashed border-white/30 rounded-3xl flex items-center justify-center">
-                      <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                    <p className="text-sm">Video do App placeholder</p>
-                  </div>
-                </div>
+                <iframe
+                  src="https://www.youtube.com/embed/ldwr6IpTNNk?autoplay=1&mute=1&loop=1&playlist=ldwr6IpTNNk&controls=0&showinfo=0&rel=0&modestbranding=1"
+                  title="Petloo App Demo"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
               </div>
             </div>
 
@@ -71,18 +59,16 @@ export default function FeaturesSectionV2() {
             </div>
           </div>
 
-          {/* Image Placeholder - Centralizado inferiormente */}
+          {/* Imagem da coleira LooTag */}
           <div className="flex justify-center">
-            <div className="w-full max-w-md aspect-square bg-gradient-to-br from-petloo-beige to-white rounded-3xl overflow-hidden shadow-xl flex items-center justify-center">
-              {/* Placeholder para imagem da coleira */}
-              <div className="text-muted-foreground/30 text-center p-8">
-                <div className="w-48 h-48 mx-auto mb-4 border-4 border-dashed border-muted-foreground/20 rounded-full flex items-center justify-center">
-                  <svg className="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                  </svg>
-                </div>
-                <p className="text-sm">Imagem da coleira placeholder</p>
-              </div>
+            <div className="w-full max-w-lg">
+              <Image
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_ns1uq1ns1uq1ns1u.png-USrboOfmkfnE2kXpVutRXpNiUK9lgN.jpeg"
+                alt="LooTag de Rastreamento - Coleira com design ergonomico, cobertura nacional, pequena e compacta para caes e gatos com mais de 2kg, 100% a prova d'agua"
+                width={600}
+                height={600}
+                className="w-full h-auto"
+              />
             </div>
           </div>
         </div>

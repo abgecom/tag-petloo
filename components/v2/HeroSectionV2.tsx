@@ -5,38 +5,20 @@ import Link from "next/link"
 export default function HeroSectionV2() {
   return (
     <section className="relative min-h-screen md:h-[90vh] flex items-end md:items-center overflow-hidden">
-      {/* Video Background */}
+      {/* Video Background - YouTube Embed */}
       <div className="absolute inset-0 z-0">
-        {/* Video - substituir src pelo video real */}
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          webkit-playsinline="true"
-          className="absolute inset-0 w-full h-full object-cover"
-          poster="/placeholder-hero.jpg"
-        >
-          {/* <source src="/videos/hero-video.mp4" type="video/mp4" /> */}
-        </video>
-        
-        {/* Overlay gradient - mais leve no mobile para ver o video */}
-        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/80 via-black/50 to-black/30 md:to-transparent" />
-        
-        {/* Placeholder visual enquanto nao ha video - visivel em mobile */}
-        <div className="absolute inset-0 bg-gradient-to-br from-petloo-purple via-petloo-purple/70 to-petloo-green/30">
-          {/* Placeholder indicator - desktop only */}
-          <div className="absolute top-1/2 right-1/4 -translate-y-1/2 text-white/10 hidden lg:block">
-            <div className="w-64 h-64 border-4 border-dashed border-white/20 rounded-full flex items-center justify-center">
-              <div className="text-center">
-                <svg className="w-16 h-16 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M8 5v14l11-7z"/>
-                </svg>
-                <p className="text-sm text-white/30">Video placeholder</p>
-              </div>
-            </div>
-          </div>
+        {/* YouTube Video - muted, autoplay, loop */}
+        <div className="absolute inset-0 overflow-hidden">
+          <iframe
+            src="https://www.youtube.com/embed/ldwr6IpTNNk?autoplay=1&mute=1&loop=1&playlist=ldwr6IpTNNk&controls=0&showinfo=0&rel=0&modestbranding=1&playsinline=1&enablejsapi=1"
+            title="Petloo Hero Video"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[400%] h-[400%] md:w-[180%] md:h-[180%] pointer-events-none"
+          />
         </div>
+        
+        {/* Overlay gradient - para legibilidade do texto */}
+        <div className="absolute inset-0 bg-gradient-to-t md:bg-gradient-to-r from-black/80 via-black/50 to-black/30 md:to-transparent" />
       </div>
 
       {/* Content - Alinhado a esquerda como Tractive */}
