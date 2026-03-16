@@ -8,30 +8,16 @@ export default function FeaturesSectionV2() {
         {/* Card bege sobrepondo o fundo branco e parte do roxo */}
         <div className="relative z-20 mx-4 md:mx-8 lg:mx-16 xl:mx-24 bg-petloo-beige rounded-3xl md:rounded-[2.5rem] p-6 md:p-10 lg:p-14 mb-[-80px] md:mb-[-120px]">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            {/* Video/Image Placeholder */}
+            {/* Video do YouTube */}
             <div className="order-2 lg:order-1">
               <div className="relative aspect-[4/3] bg-gradient-to-br from-petloo-purple to-petloo-purple/80 rounded-3xl overflow-hidden shadow-2xl">
-                {/* Placeholder para video do app */}
-                <video
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-cover"
-                >
-                  {/* <source src="/videos/app-demo.mp4" type="video/mp4" /> */}
-                </video>
-                {/* Placeholder visual */}
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-white/30 text-center p-8">
-                    <div className="w-24 h-40 mx-auto mb-4 border-4 border-dashed border-white/30 rounded-3xl flex items-center justify-center">
-                      <svg className="w-10 h-10" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M8 5v14l11-7z"/>
-                      </svg>
-                    </div>
-                    <p className="text-sm">Video do App placeholder</p>
-                  </div>
-                </div>
+                <iframe
+                  src="https://www.youtube.com/embed/ldwr6IpTNNk?autoplay=1&mute=1&loop=1&playlist=ldwr6IpTNNk&controls=0&showinfo=0&rel=0&modestbranding=1"
+                  title="Petloo App Demo"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
               </div>
             </div>
 
