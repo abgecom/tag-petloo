@@ -16,17 +16,17 @@ export default function TestimonialsSectionV2() {
       image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_7jj51p7jj51p7jj5.png-rEgM1LhcA51od2OshWBVnPzXkm89P2.jpeg",
     },
     {
-      quote: "Nunca mais tive aquele frio na barriga quando o portao fica aberto por acidente. A Lootag me da paz.",
-      author: "Carlos R.",
-      petType: "CAO",
-      petName: "Luna",
-      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_xy2pklxy2pklxy2p.png-BK2NOn2hZd2fms4z5sSAJOBo5sR9ko.jpeg",
-    },
-    {
       quote: "Meu gato adora fugir pela janela. Com a Lootag, sei exatamente onde ele esta em segundos.",
       author: "Patricia M.",
       petType: "GATO",
       petName: "Milo",
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_xy2pklxy2pklxy2p.png-BK2NOn2hZd2fms4z5sSAJOBo5sR9ko.jpeg",
+    },
+    {
+      quote: "Nunca mais tive aquele frio na barriga quando o portao fica aberto por acidente. A Lootag me da paz.",
+      author: "Carlos R.",
+      petType: "CAO",
+      petName: "Luna",
       image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_j52kij52kij52kij.png-BMZY8msaTPn7buFWp2EhotBMFlEWYO.jpeg",
     },
   ]
