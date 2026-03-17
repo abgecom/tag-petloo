@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
+import Image from "next/image"
 
 export default function TestimonialsSectionV2() {
   const scrollRef = useRef<HTMLDivElement>(null)
@@ -12,18 +13,21 @@ export default function TestimonialsSectionV2() {
       author: "Mariana S.",
       petType: "CAO",
       petName: "Thor",
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_7jj51p7jj51p7jj5.png-rEgM1LhcA51od2OshWBVnPzXkm89P2.jpeg",
     },
     {
       quote: "Nunca mais tive aquele frio na barriga quando o portao fica aberto por acidente. A Lootag me da paz.",
       author: "Carlos R.",
       petType: "CAO",
       petName: "Luna",
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_xy2pklxy2pklxy2p.png-BK2NOn2hZd2fms4z5sSAJOBo5sR9ko.jpeg",
     },
     {
       quote: "Meu gato adora fugir pela janela. Com a Lootag, sei exatamente onde ele esta em segundos.",
       author: "Patricia M.",
       petType: "GATO",
       petName: "Milo",
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_j52kij52kij52kij.png-BMZY8msaTPn7buFWp2EhotBMFlEWYO.jpeg",
     },
   ]
 
@@ -77,16 +81,17 @@ export default function TestimonialsSectionV2() {
         >
           {testimonials.map((testimonial, index) => (
             <div key={index} className="contents">
-              {/* Image placeholder */}
+              {/* Image */}
               <div 
                 className="flex-shrink-0 w-52 md:w-64 aspect-[3/4] bg-white rounded-2xl overflow-hidden flex items-center justify-center shadow-sm"
               >
-                <div className="text-muted-foreground/30 text-center p-4">
-                  <svg className="w-12 h-12 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                  </svg>
-                  <p className="text-xs">Foto do pet</p>
-                </div>
+                <Image
+                  src={testimonial.image}
+                  alt={`${testimonial.petName} - ${testimonial.petType}`}
+                  width={300}
+                  height={400}
+                  className="w-full h-full object-cover"
+                />
               </div>
 
               {/* Testimonial card */}
