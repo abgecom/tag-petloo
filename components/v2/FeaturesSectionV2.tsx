@@ -63,10 +63,10 @@ export default function FeaturesSectionV2() {
           <div className="flex justify-center">
             <div className="w-full max-w-lg">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_ns1uq1ns1uq1ns1u.png-USrboOfmkfnE2kXpVutRXpNiUK9lgN.jpeg"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_2kn9jl2kn9jl2kn9.png-bJUXVlZxVQCBgl37PBQ4tefRYGdlj1.jpeg"
                 alt="LooTag de Rastreamento - Coleira com design ergonomico, cobertura nacional, pequena e compacta para caes e gatos com mais de 2kg, 100% a prova d'agua"
                 width={600}
-                height={600}
+                height={800}
                 className="w-full h-auto"
               />
             </div>
