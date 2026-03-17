@@ -29,13 +29,6 @@ export default function TestimonialsSectionV2() {
       petName: "Luna",
       image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_j52kij52kij52kij.png-BMZY8msaTPn7buFWp2EhotBMFlEWYO.jpeg",
     },
-    {
-      quote: "Finalmente posso deixar minha gata sair pelo quintal sem preocupacao. A Lootag e simplesmente perfeita!",
-      author: "Ana B.",
-      petType: "GATO",
-      petName: "Bella",
-      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_oxva7voxva7voxva.png-lGYTV4xZu9pLTcLgzLFKOfgGONPe50.jpeg",
-    },
   ]
 
   const scroll = (direction: "left" | "right") => {
