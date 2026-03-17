@@ -39,8 +39,8 @@ export default function FeaturesSectionV2() {
         </div>
       </div>
 
-      {/* Segunda parte - Fundo roxo com bordas arredondadas superiores */}
-      <div className="relative z-10 bg-petloo-purple pt-32 md:pt-44 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem]">
+      {/* Segunda parte - Fundo roxo escuro (igual ao fundo da imagem) com bordas arredondadas superiores */}
+      <div className="relative z-10 bg-[#6B2654] pt-32 md:pt-44 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem]">
         <div className="container mx-auto px-4">
           {/* Content - Centralizado superiormente */}
           <div className="text-center mb-12 md:mb-16">
@@ -63,10 +63,10 @@ export default function FeaturesSectionV2() {
           <div className="flex justify-center">
             <div className="w-full max-w-lg">
               <Image
-                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_ns1uq1ns1uq1ns1u.png-USrboOfmkfnE2kXpVutRXpNiUK9lgN.jpeg"
+                src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_2kn9jl2kn9jl2kn9.png-bJUXVlZxVQCBgl37PBQ4tefRYGdlj1.jpeg"
                 alt="LooTag de Rastreamento - Coleira com design ergonomico, cobertura nacional, pequena e compacta para caes e gatos com mais de 2kg, 100% a prova d'agua"
                 width={600}
-                height={600}
+                height={800}
                 className="w-full h-auto"
               />
             </div>

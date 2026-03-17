@@ -1,5 +1,6 @@
 import { Check } from "lucide-react"
 import Link from "next/link"
+import Image from "next/image"
 
 export default function PricingSectionV2() {
   const features = [
@@ -138,17 +139,16 @@ export default function PricingSectionV2() {
           </div>
         </div>
 
-        {/* Product Image Placeholder */}
+        {/* Product Image - Kit Completo */}
         <div className="mt-16 max-w-2xl mx-auto">
-          <div className="aspect-video bg-petloo-beige rounded-3xl flex items-center justify-center">
-            <div className="text-muted-foreground/30 text-center p-8">
-              <div className="w-32 h-24 mx-auto mb-4 border-4 border-dashed border-muted-foreground/20 rounded-xl flex items-center justify-center">
-                <svg className="w-12 h-12" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                </svg>
-              </div>
-              <p className="text-sm">Imagem do kit completo placeholder</p>
-            </div>
+          <div className="overflow-hidden rounded-3xl">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_sp1jwfsp1jwfsp1j.png-mWfJvbDukdwhtbQveewIYC6X8CzGRW.jpeg"
+              alt="Kit Petloo Completo - Coleira com tag de rastreamento, smartphone com app, caixa de embalagem e acessórios"
+              width={1200}
+              height={600}
+              className="w-full h-auto object-cover object-center scale-125"
+            />
           </div>
         </div>
       </div>
