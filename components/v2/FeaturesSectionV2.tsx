@@ -40,7 +40,7 @@ export default function FeaturesSectionV2() {
       </div>
 
       {/* Segunda parte - Fundo roxo escuro (igual ao fundo da imagem) com bordas arredondadas superiores */}
-      <div className="relative z-10 bg-[#713055] pt-32 md:pt-44 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem]">
+      <div className="relative z-10 bg-[#6B2654] pt-32 md:pt-44 pb-16 md:pb-24 rounded-t-[2.5rem] md:rounded-t-[4rem]">
         <div className="container mx-auto px-4">
           {/* Content - Centralizado superiormente */}
           <div className="text-center mb-12 md:mb-16">
