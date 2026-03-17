@@ -29,6 +29,13 @@ export default function TestimonialsSectionV2() {
       petName: "Luna",
       image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_j52kij52kij52kij.png-BMZY8msaTPn7buFWp2EhotBMFlEWYO.jpeg",
     },
+    {
+      quote: "Minha gata tem liberdade total com a Lootag. Agora posso relaxar sabendo que ela esta segura onde quer que vaa.",
+      author: "Fernanda L.",
+      petType: "GATO",
+      petName: "Bella",
+      image: "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_oxva7voxva7voxva.png-lGYTV4xZu9pLTcLgzLFKOfgGONPe50.jpeg",
+    },
   ]
 
   const scroll = (direction: "left" | "right") => {
@@ -121,17 +128,6 @@ export default function TestimonialsSectionV2() {
               </div>
             </div>
           ))}
-
-          {/* Extra image placeholder at the end */}
-          <div className="flex-shrink-0 w-52 md:w-64 aspect-[3/4] bg-white rounded-2xl overflow-hidden flex items-center justify-center shadow-sm">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_oxva7voxva7voxva.png-lGYTV4xZu9pLTcLgzLFKOfgGONPe50.jpeg"
-              alt="Bella - GATO"
-              width={300}
-              height={400}
-              className="w-full h-full object-cover"
-            />
-          </div>
         </div>
 
         {/* Mobile Navigation */}
