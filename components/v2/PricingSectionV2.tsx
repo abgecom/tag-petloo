@@ -4,22 +4,10 @@ import Image from "next/image"
 
 export default function PricingSectionV2() {
   const kitItems = [
-    {
-      name: "Coleira Nato Exclusiva",
-      price: null,
-    },
-    {
-      name: "Case de proteção Petloo",
-      price: null,
-    },
-    {
-      name: "Tag de rastreamento 4.0",
-      price: null,
-    },
+    "Coleira Nato Exclusiva",
+    "Case de proteção Petloo",
+    "Tag de rastreamento 4.0",
   ]
-
-  const setupCost = "89,87"
-  const monthlyCost = "30,90"
 
   return (
     <section id="comprar" className="py-16 md:py-24 bg-gradient-to-b from-petloo-beige to-white">
@@ -49,33 +37,13 @@ export default function PricingSectionV2() {
 
             {/* Pricing Section */}
             <div className="p-6">
-              <div className="space-y-4">
-                {/* Setup Cost */}
-                <div className="flex items-center justify-between py-3 border-b border-border/30">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Custo de Setup</p>
-                    <p className="text-xs text-muted-foreground">(Hardware Físico)</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-petloo-purple">
-                      R$ <span>{setupCost}</span>
-                    </p>
-                  </div>
-                </div>
-
-                {/* Monthly Cost */}
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="text-sm font-medium text-foreground">Mensalidade</p>
-                    <p className="text-xs text-muted-foreground">(Assinatura do App)</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-2xl font-bold text-petloo-purple">
-                      R$ <span>{monthlyCost}</span>
-                    </p>
-                    <p className="text-xs text-muted-foreground">/mês</p>
-                  </div>
-                </div>
+              <div className="text-center space-y-2 mb-6">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Seu pet merece estar sempre protegido
+                </p>
+                <p className="text-3xl font-bold text-petloo-purple">
+                  Por menos de R$ 1,00 por dia
+                </p>
               </div>
 
               {/* Guarantees */}
@@ -116,7 +84,7 @@ export default function PricingSectionV2() {
                 <div className="flex-shrink-0 w-5 h-5 rounded-full bg-petloo-green/20 flex items-center justify-center mt-0.5">
                   <Check className="w-3 h-3 text-petloo-green" />
                 </div>
-                <span className="text-base text-muted-foreground leading-relaxed">{item.name}</span>
+                <span className="text-base text-muted-foreground leading-relaxed">{item}</span>
               </div>
             ))}
           </div>
