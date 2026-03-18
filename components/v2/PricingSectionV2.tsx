@@ -4,9 +4,9 @@ import Image from "next/image"
 
 export default function PricingSectionV2() {
   const kitItems = [
-    "Coleira Nato Exclusiva",
-    "Case de proteção Petloo",
-    "Tag de rastreamento 4.0",
+    { name: "Coleira Nato Exclusiva", originalPrice: "73,00", finalPrice: "0,00" },
+    { name: "Case de proteção Petloo", originalPrice: "30,00", finalPrice: "0,00" },
+    { name: "Tag de rastreamento 4.0", originalPrice: "189,00", finalPrice: "89,87" },
   ]
 
   return (
@@ -52,15 +52,25 @@ export default function PricingSectionV2() {
               {/* Kit Contents - O que está incluso */}
               <div className="mb-6">
                 <h4 className="font-semibold text-foreground mb-4 text-base">
-                  O que está incluso no seu kit de rastreamento:
+                  O que está incluso no seu kit Lootag:
                 </h4>
-                <div className="space-y-3">
+                <div className="space-y-4">
                   {kitItems.map((item, index) => (
-                    <div key={index} className="flex items-start gap-3">
-                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-petloo-green/20 flex items-center justify-center mt-0.5">
-                        <Check className="w-3 h-3 text-petloo-green" />
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-petloo-green/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-petloo-green" />
+                        </div>
+                        <span className="text-sm text-muted-foreground leading-relaxed">{item.name}</span>
                       </div>
-                      <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                      <div className="flex items-center gap-2 text-right">
+                        <span className="text-xs text-muted-foreground line-through">
+                          R${item.originalPrice}
+                        </span>
+                        <span className="font-bold text-sm text-petloo-purple">
+                          R${item.finalPrice}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
