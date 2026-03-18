@@ -7,6 +7,7 @@ export default function PricingSectionV2() {
     { name: "Coleira Nato Exclusiva", originalPrice: "73,00", finalPrice: "0,00" },
     { name: "Case de proteção Petloo", originalPrice: "30,00", finalPrice: "0,00" },
     { name: "Tag de rastreamento 4.0", originalPrice: "189,00", finalPrice: "89,87" },
+    { name: "LooApp Exclusivo de rastreamento", originalPrice: "30,90", finalPrice: "0,00", firstMonth: true },
   ]
 
   return (
@@ -37,7 +38,7 @@ export default function PricingSectionV2() {
               {/* Kit Contents - O que está incluso */}
               <div className="mb-6">
                 <h4 className="font-semibold text-foreground mb-4 text-base">
-                  O que está incluso no seu kit Lootag:
+                  O que está incluso no seu kit:
                 </h4>
                 <div className="space-y-4">
                   {kitItems.map((item, index) => (
@@ -48,13 +49,20 @@ export default function PricingSectionV2() {
                         </div>
                         <span className="text-sm text-muted-foreground leading-relaxed">{item.name}</span>
                       </div>
-                      <div className="flex items-center gap-2 text-right">
+                      <div className="flex items-end gap-2 text-right">
                         <span className="text-xs text-muted-foreground line-through">
                           R${item.originalPrice}
                         </span>
-                        <span className="font-bold text-sm text-petloo-purple">
-                          R${item.finalPrice}
-                        </span>
+                        <div className="flex flex-col items-end">
+                          <span className="font-bold text-sm text-petloo-purple">
+                            R${item.finalPrice}
+                          </span>
+                          {item.firstMonth && (
+                            <span className="text-xs text-muted-foreground">
+                              no primeiro mês
+                            </span>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
