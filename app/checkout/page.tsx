@@ -1,13 +1,14 @@
 import Checkout from "../../checkout"
 
-export default function CheckoutPage({ 
+export default async function CheckoutPage({ 
   searchParams 
 }: { 
-  searchParams: { 
+  searchParams: Promise<{ 
     product?: string
     price?: string
     items?: string
-  } 
+  }>
 }) {
-  return <Checkout searchParams={searchParams} />
+  const params = await searchParams
+  return <Checkout searchParams={params} />
 }
