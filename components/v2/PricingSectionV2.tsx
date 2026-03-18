@@ -37,12 +37,15 @@ export default function PricingSectionV2() {
 
             {/* Pricing Section */}
             <div className="p-6">
-              <div className="text-center space-y-2 mb-6">
+              <div className="text-center space-y-3 mb-6 bg-petloo-beige rounded-2xl py-6 px-4">
                 <p className="text-sm font-medium text-muted-foreground">
-                  Seu pet merece estar sempre protegido
+                  Apenas 3x sem juros de
                 </p>
-                <p className="text-3xl font-bold text-petloo-purple">
-                  Por menos de R$ 1,00 por dia
+                <p className="text-5xl font-bold text-petloo-purple">
+                  R$29,96
+                </p>
+                <p className="text-base text-muted-foreground">
+                  Total: R$89,87
                 </p>
               </div>
 
