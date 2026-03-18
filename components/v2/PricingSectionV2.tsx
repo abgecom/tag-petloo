@@ -3,39 +3,23 @@ import Link from "next/link"
 import Image from "next/image"
 
 export default function PricingSectionV2() {
-  const features = [
-    "Coleira Nato Exclusiva",
-    "Case Personalizada",
-    "Acesso completo ao App de Rastreamento",
-    "Rastreamento em tempo real",
-    "Alertas de zona segura",
-    "Suporte dedicado em PT/BR",
+  const kitItems = [
+    {
+      name: "Coleira Nato Exclusiva",
+      price: null,
+    },
+    {
+      name: "Case de proteção Petloo",
+      price: null,
+    },
+    {
+      name: "Tag de rastreamento 4.0",
+      price: null,
+    },
   ]
 
-  const plans = [
-    {
-      pets: 1,
-      title: "Protecao de 1 Pet",
-      price: "29,90",
-      priceInt: "29",
-      priceDec: "90",
-    },
-    {
-      pets: 2,
-      title: "Protecao de 2 Pets",
-      price: "59,80",
-      priceInt: "59",
-      priceDec: "80",
-      popular: true,
-    },
-    {
-      pets: 3,
-      title: "Protecao de 3 Pets",
-      price: "89,70",
-      priceInt: "89",
-      priceDec: "70",
-    },
-  ]
+  const setupCost = "89,87"
+  const monthlyCost = "30,90"
 
   return (
     <section id="comprar" className="py-16 md:py-24 bg-gradient-to-b from-petloo-beige to-white">
@@ -50,90 +34,89 @@ export default function PricingSectionV2() {
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
-          {plans.map((plan, index) => (
-            <div 
-              key={index} 
-              className={`bg-white rounded-3xl overflow-hidden border transition-all hover:-translate-y-1 ${
-                plan.popular 
-                  ? "border-petloo-purple ring-2 ring-petloo-purple shadow-2xl shadow-petloo-purple/20" 
-                  : "border-border shadow-xl shadow-black/10 hover:shadow-2xl hover:shadow-black/15"
-              }`}
-            >
-              {/* Plan Title as Headline */}
-              <div className={`py-4 px-6 text-center border-b border-border/30 ${plan.popular ? "bg-petloo-purple text-white" : "bg-petloo-beige"}`}>
-                <h3 className={`text-lg font-bold ${plan.popular ? "text-white" : "text-foreground"}`}>
-                  {plan.title}
-                </h3>
-              </div>
-              
-              {/* Card Header - Pricing */}
-              <div className={`p-6 text-center ${plan.popular ? "bg-petloo-purple/5" : ""}`}>
-                {/* Marketing pricing strategy */}
-                <div className="space-y-3">
+        {/* Single Pricing Card */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <div className="bg-white rounded-3xl overflow-hidden border border-petloo-purple ring-2 ring-petloo-purple shadow-2xl shadow-petloo-purple/20">
+            {/* Plan Title Header */}
+            <div className="py-4 px-6 text-center border-b border-border/30 bg-petloo-purple">
+              <h3 className="text-lg font-bold text-white">
+                Proteção completa para 1 pet
+              </h3>
+              <p className="text-sm text-white/90 mt-1">
+                Inclui LooTag + assinatura LooApp
+              </p>
+            </div>
+
+            {/* Pricing Section */}
+            <div className="p-6">
+              <div className="space-y-4">
+                {/* Setup Cost */}
+                <div className="flex items-center justify-between py-3 border-b border-border/30">
                   <div>
-                    <span className="text-3xl md:text-4xl font-bold text-petloo-purple">GRATIS</span>
-                    <span className="text-base md:text-lg font-medium text-petloo-purple/80 ml-1">por 30 dias</span>
+                    <p className="text-sm font-medium text-foreground">Custo de Setup</p>
+                    <p className="text-xs text-muted-foreground">(Hardware Físico)</p>
                   </div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider underline underline-offset-2">Pague apenas o frete</p>
-                  <div className="pt-3 border-t border-border/50">
-                    <p className="text-sm text-muted-foreground">
-                      Depois apenas <span className="font-bold text-foreground text-lg">R$ {plan.price}</span><span className="text-xs">/mes</span>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-petloo-purple">
+                      R$ <span>{setupCost}</span>
                     </p>
                   </div>
                 </div>
-              </div>
 
-              {/* Card Body */}
-              <div className="p-6 pt-0">
-                {/* Guarantees */}
-                <div className="flex flex-col gap-2 text-sm text-muted-foreground mb-6">
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-petloo-green" />
-                    Sem fidelidade
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-petloo-green" />
-                    Sem taxas de instalacao
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-petloo-green" />
-                    Sem surpresas
-                  </span>
+                {/* Monthly Cost */}
+                <div className="flex items-center justify-between py-3">
+                  <div>
+                    <p className="text-sm font-medium text-foreground">Mensalidade</p>
+                    <p className="text-xs text-muted-foreground">(Assinatura do App)</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-2xl font-bold text-petloo-purple">
+                      R$ <span>{monthlyCost}</span>
+                    </p>
+                    <p className="text-xs text-muted-foreground">/mês</p>
+                  </div>
                 </div>
-
-                {/* Security text */}
-                <p className="text-center text-sm text-muted-foreground mb-4">
-                  Apenas a certeza de que ele esta seguro.
-                </p>
-
-                {/* CTA */}
-                <Link 
-                  href="#"
-                  className={`block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 ${
-                    plan.popular 
-                      ? "bg-petloo-green text-white hover:bg-petloo-green/90" 
-                      : "bg-petloo-purple text-white hover:bg-petloo-purple/90"
-                  }`}
-                >
-                  GARANTIR MEU KIT
-                </Link>
               </div>
+
+              {/* Guarantees */}
+              <div className="flex flex-col gap-2 text-sm text-muted-foreground my-6 pt-6 border-t border-border/30">
+                <span className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-petloo-green" />
+                  Sem fidelidade
+                </span>
+                <span className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-petloo-green" />
+                  Sem surpresas
+                </span>
+                <span className="flex items-center gap-2">
+                  <Check className="w-4 h-4 text-petloo-green" />
+                  Suporte dedicado em PT/BR
+                </span>
+              </div>
+
+              {/* CTA */}
+              <Link 
+                href="#"
+                className="block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 bg-petloo-green text-white hover:bg-petloo-green/90"
+              >
+                GARANTIR MEU KIT
+              </Link>
             </div>
-          ))}
+          </div>
         </div>
 
-        {/* Unified Features - O kit inclui */}
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl p-8 shadow-lg border border-border">
-          <p className="font-semibold text-foreground mb-4 text-center">O kit inclui:</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div className="flex-shrink-0 w-5 h-5 bg-petloo-green/20 rounded-full flex items-center justify-center">
+        {/* Kit Contents - O que está incluso */}
+        <div className="max-w-2xl mx-auto bg-white rounded-2xl p-8 shadow-lg border border-border mb-8">
+          <h3 className="font-semibold text-foreground mb-6 text-center text-lg">
+            O que está incluso no seu kit de rastreamento:
+          </h3>
+          <div className="space-y-4">
+            {kitItems.map((item, index) => (
+              <div key={index} className="flex items-start gap-3 py-3 border-b border-border/20 last:border-b-0">
+                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-petloo-green/20 flex items-center justify-center mt-0.5">
                   <Check className="w-3 h-3 text-petloo-green" />
                 </div>
-                <span className="text-sm text-muted-foreground">{feature}</span>
+                <span className="text-base text-muted-foreground leading-relaxed">{item.name}</span>
               </div>
             ))}
           </div>
