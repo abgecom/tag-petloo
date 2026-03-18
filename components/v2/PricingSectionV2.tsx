@@ -37,18 +37,6 @@ export default function PricingSectionV2() {
 
             {/* Pricing Section */}
             <div className="p-6">
-              <div className="text-center space-y-3 mb-6 bg-petloo-beige rounded-2xl py-6 px-4">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Apenas 3x sem juros de
-                </p>
-                <p className="text-5xl font-bold text-petloo-purple">
-                  R$29,96
-                </p>
-                <p className="text-base text-muted-foreground">
-                  Total: R$89,87
-                </p>
-              </div>
-
               {/* Kit Contents - O que está incluso */}
               <div className="mb-6">
                 <h4 className="font-semibold text-foreground mb-4 text-base">
@@ -77,28 +65,17 @@ export default function PricingSectionV2() {
               </div>
 
               {/* Guarantees */}
-              <div className="flex flex-col gap-2 text-sm text-muted-foreground my-6 pt-6 border-t border-border/30">
-                <span className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-petloo-green" />
-                  Sem fidelidade
-                </span>
-                <span className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-petloo-green" />
-                  Sem surpresas
-                </span>
-                <span className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-petloo-green" />
-                  Suporte dedicado em PT/BR
-                </span>
+              <div className="text-center space-y-3 pt-6 border-t border-border/30">
+                <p className="text-sm font-medium text-muted-foreground">
+                  Apenas 3x sem juros de
+                </p>
+                <p className="text-5xl font-bold text-petloo-purple">
+                  R$29,96
+                </p>
+                <p className="text-base text-muted-foreground">
+                  Total: R$89,87
+                </p>
               </div>
-
-              {/* CTA */}
-              <Link 
-                href="#"
-                className="block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 bg-petloo-green text-white hover:bg-petloo-green/90"
-              >
-                GARANTIR MEU KIT
-              </Link>
             </div>
           </div>
         </div>
