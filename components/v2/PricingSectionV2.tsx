@@ -37,6 +37,19 @@ export default function PricingSectionV2() {
           </p>
         </div>
 
+        {/* Product Image - Kit Completo */}
+        <div className="mt-8 mb-12 max-w-2xl mx-auto">
+          <div className="overflow-hidden rounded-3xl">
+            <Image
+              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_sp1jwfsp1jwfsp1j.png-mWfJvbDukdwhtbQveewIYC6X8CzGRW.jpeg"
+              alt="Kit Petloo Completo - Coleira com tag de rastreamento, smartphone com app, caixa de embalagem e acessórios"
+              width={1200}
+              height={600}
+              className="w-full h-auto object-cover object-center scale-125"
+            />
+          </div>
+        </div>
+
         {/* Single Pricing Card */}
         <div className="max-w-2xl mx-auto mb-12">
           <div className="bg-white rounded-3xl overflow-hidden border border-petloo-purple ring-2 ring-petloo-purple shadow-2xl shadow-petloo-purple/20">
@@ -113,7 +126,7 @@ export default function PricingSectionV2() {
 
               {/* CTA Button */}
               <Link
-                href="#"
+                href="/checkout"
                 className="block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 bg-petloo-green text-white hover:bg-petloo-green/90 mb-3"
               >
                 Adquirir kit de proteção
@@ -170,19 +183,6 @@ export default function PricingSectionV2() {
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-
-        {/* Product Image - Kit Completo */}
-        <div className="mt-16 max-w-2xl mx-auto">
-          <div className="overflow-hidden rounded-3xl">
-            <Image
-              src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_sp1jwfsp1jwfsp1j.png-mWfJvbDukdwhtbQveewIYC6X8CzGRW.jpeg"
-              alt="Kit Petloo Completo - Coleira com tag de rastreamento, smartphone com app, caixa de embalagem e acessórios"
-              width={1200}
-              height={600}
-              className="w-full h-auto object-cover object-center scale-125"
-            />
           </div>
         </div>
       </div>
