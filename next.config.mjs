@@ -9,6 +9,11 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  // Force complete rebuild by busting webpack cache
+  onDemandEntries: {
+    maxInactiveAge: 1000,
+    pagesBufferLength: 1,
+  },
 }
 
 export default nextConfig

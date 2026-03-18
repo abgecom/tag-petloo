@@ -386,8 +386,20 @@ function OrderSummaryContent({
   )
 }
 
-function CheckoutForm() {
+function CheckoutForm({ 
+  searchParams 
+}: { 
+  searchParams?: { 
+    product?: string
+    price?: string
+    items?: string
+  } 
+}) {
   const router = useRouter()
+  
+  // Verificar se veio do /v2 via URL params
+  const fromV2 = searchParams?.product === "lootag-kit"
+  const v2Price = searchParams?.price ? parseFloat(searchParams.price) : null
 
   // All hooks must be called before any conditional returns
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(true)
@@ -1446,12 +1458,6 @@ function CheckoutForm() {
         {/* Initiate Checkout Tracker - Fires when checkout page loads */}
         <InitiateCheckoutTracker />
 
-        {/* Alert Banner - mesmo durante loading */}
-        <div className="bg-red-500 text-white text-center py-2 px-4 text-sm">
-          <strong>ATENÇÃO:</strong> O prazo de entrega dos produtos personalizados inclui o tempo de frete + o prazo de
-          produção (7 dias).
-        </div>
-
         <div className="min-h-screen bg-white flex items-center justify-center p-4">
           <div className="text-center max-w-md w-full">
             {/* Logo durante loading */}
@@ -1542,12 +1548,6 @@ function CheckoutForm() {
 
       {/* Lead Capture Tracker - Captures leads when user fills form */}
       <LeadCaptureTracker />
-
-      {/* Alert Banner */}
-      <div className="bg-red-500 text-white text-center py-2 px-4 text-sm">
-        <strong>ATENÇÃO:</strong> O prazo de entrega dos produtos personalizados inclui o tempo de frete + o prazo de
-        produção (7 dias).
-      </div>
 
       <div className="max-w-7xl mx-auto p-4 lg:p-8">
         <div className="lg:grid lg:grid-cols-2 lg:gap-12">
@@ -2356,6 +2356,14 @@ function CheckoutForm() {
   )
 }
 
-export default function CheckoutPage() {
-  return <CheckoutForm />
+export default function CheckoutPage({ 
+  searchParams 
+}: { 
+  searchParams?: { 
+    product?: string
+    price?: string
+    items?: string
+  } 
+}) {
+  return <CheckoutForm searchParams={searchParams} />
 }
