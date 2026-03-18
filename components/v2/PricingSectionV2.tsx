@@ -54,9 +54,16 @@ export default function PricingSectionV2() {
                           R${item.originalPrice}
                         </span>
                         <div className="flex flex-col items-end">
-                          <span className="font-bold text-sm text-petloo-purple">
-                            R${item.finalPrice}
-                          </span>
+                          <div className="flex items-center gap-1">
+                            {item.firstMonth && (
+                              <span className="text-xs text-muted-foreground line-through">
+                                R${item.originalPrice}
+                              </span>
+                            )}
+                            <span className="font-bold text-sm text-petloo-purple">
+                              R${item.finalPrice}
+                            </span>
+                          </div>
                           {item.firstMonth && (
                             <span className="text-xs text-muted-foreground">
                               no primeiro mês
@@ -74,7 +81,7 @@ export default function PricingSectionV2() {
                 <div className="flex-1">
                   <div className="bg-petloo-green/10 rounded-full px-4 py-2 w-fit">
                     <p className="text-sm font-bold text-petloo-green">
-                      Economize R$203
+                      Economize R$233
                     </p>
                   </div>
                   <div className="flex items-center gap-2 mt-2">
