@@ -62,26 +62,28 @@ export default function PricingSectionV2() {
               </div>
 
               {/* Guarantees */}
-              <div className="bg-petloo-beige rounded-2xl p-6 space-y-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm font-medium text-muted-foreground">
-                    Economize R$203
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm text-muted-foreground line-through">
+              <div className="bg-petloo-beige rounded-2xl p-5 flex items-center justify-between gap-4">
+                <div className="flex-1">
+                  <div className="bg-petloo-green/10 rounded-full px-4 py-2 w-fit">
+                    <p className="text-sm font-bold text-petloo-green">
+                      Economize R$203
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-xs text-muted-foreground line-through">
                       R$292,00
                     </span>
                   </div>
                 </div>
                 
-                <div className="border-t border-petloo-purple/20 pt-3">
-                  <p className="text-sm font-medium text-muted-foreground mb-2">
-                    Apenas 3x sem juros de
+                <div className="text-right">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    3x sem juros
                   </p>
-                  <p className="text-5xl font-bold text-petloo-purple mb-3">
+                  <p className="text-4xl font-bold text-petloo-purple mb-1">
                     R$29,96
                   </p>
-                  <p className="text-base text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     Total: R$89,87
                   </p>
                 </div>
