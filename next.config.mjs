@@ -9,10 +9,15 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
-  // Force complete rebuild by busting webpack cache
+  // Aggressive cache busting to force rebuild from correct directory
   onDemandEntries: {
     maxInactiveAge: 1000,
     pagesBufferLength: 1,
+  },
+  // Disable webpack cache completely
+  webpack: (config) => {
+    config.cache = false
+    return config
   },
 }
 

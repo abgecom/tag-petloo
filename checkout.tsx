@@ -387,9 +387,9 @@ function OrderSummaryContent({
 }
 
 function CheckoutForm({ 
-  searchParams 
+  productParams 
 }: { 
-  searchParams?: { 
+  productParams?: { 
     product?: string
     price?: string
     items?: string
@@ -398,8 +398,8 @@ function CheckoutForm({
   const router = useRouter()
   
   // Verificar se veio do /v2 via URL params
-  const fromV2 = searchParams?.product === "lootag-kit"
-  const v2Price = searchParams?.price ? parseFloat(searchParams.price) : null
+  const fromV2 = productParams?.product === "lootag-kit"
+  const v2Price = productParams?.price ? parseFloat(productParams.price) : null
 
   // All hooks must be called before any conditional returns
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(true)
@@ -2357,13 +2357,16 @@ function CheckoutForm({
 }
 
 export default function CheckoutPage({ 
-  searchParams 
+  productParams 
 }: { 
-  searchParams?: { 
+  productParams?: { 
     product?: string
     price?: string
     items?: string
   } 
+}) {
+  return <CheckoutForm productParams={productParams} />
+}
 }) {
   return <CheckoutForm searchParams={searchParams} />
 }

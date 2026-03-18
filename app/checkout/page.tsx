@@ -10,5 +10,10 @@ export default async function CheckoutPage({
   }>
 }) {
   const params = await searchParams
-  return <Checkout searchParams={params} />
+  
+  return <Checkout productParams={{
+    product: params.product,
+    price: params.price,
+    items: params.items
+  }} />
 }
