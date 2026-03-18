@@ -49,21 +49,14 @@ export default function PricingSectionV2() {
                         </div>
                         <span className="text-sm text-muted-foreground leading-relaxed">{item.name}</span>
                       </div>
-                      <div className="flex items-end gap-2 text-right">
+                      <div className="flex items-center gap-2 text-right">
                         <span className="text-xs text-muted-foreground line-through">
                           R${item.originalPrice}
                         </span>
                         <div className="flex flex-col items-end">
-                          <div className="flex items-center gap-1">
-                            {item.firstMonth && (
-                              <span className="text-xs text-muted-foreground line-through">
-                                R${item.originalPrice}
-                              </span>
-                            )}
-                            <span className="font-bold text-sm text-petloo-purple">
-                              R${item.finalPrice}
-                            </span>
-                          </div>
+                          <span className="font-bold text-sm text-petloo-purple">
+                            R${item.finalPrice}
+                          </span>
                           {item.firstMonth && (
                             <span className="text-xs text-muted-foreground">
                               no primeiro mês
@@ -77,7 +70,7 @@ export default function PricingSectionV2() {
               </div>
 
               {/* Guarantees */}
-              <div className="bg-petloo-beige rounded-2xl p-5 flex items-center justify-between gap-4">
+              <div className="bg-petloo-beige rounded-2xl p-5 flex items-center justify-between gap-4 mb-6">
                 <div className="flex-1">
                   <div className="bg-petloo-green/10 rounded-full px-4 py-2 w-fit">
                     <p className="text-sm font-bold text-petloo-green">
@@ -103,6 +96,26 @@ export default function PricingSectionV2() {
                   </p>
                 </div>
               </div>
+
+              {/* CTA Button */}
+              <Link
+                href="#"
+                className="block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 bg-petloo-green text-white hover:bg-petloo-green/90 mb-3"
+              >
+                Adquirir kit de proteção
+              </Link>
+
+              {/* Disclaimer */}
+              <p className="text-xs text-muted-foreground text-center">
+                <Link 
+                  href="/termos-de-uso-LooTag"
+                  target="_blank"
+                  className="underline hover:text-petloo-purple transition-colors"
+                >
+                  Mais informações
+                </Link>
+                {' '}sobre o plano
+              </p>
             </div>
           </div>
         </div>
