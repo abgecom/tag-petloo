@@ -1443,14 +1443,14 @@ function CheckoutForm() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center p-4">
-          <div className="text-center max-w-md w-full">
-            {/* Logo durante loading */}
-            <div className="mb-8">
-              <img
-                src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Petloosemfundo%202-wiHpYOGK6l8BekDtGwMXaJxrq0maQN.png"
-                alt="Petloo Logo"
-                className="h-12 mx-auto mb-4"
-              />
+        <div className="text-center max-w-md w-full">
+          {/* Logo durante loading */}
+          <div className="mb-8">
+            <img
+              src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Petloosemfundo%202-wiHpYOGK6l8BekDtGwMXaJxrq0maQN.png"
+              alt="Petloo Logo"
+              className="h-12 mx-auto mb-4"
+            />
             </div>
 
             {/* Animação de loading mais elaborada */}
