@@ -30,9 +30,6 @@ export default function PricingSectionV2() {
               <h3 className="text-lg font-bold text-white">
                 Proteção completa para 1 pet
               </h3>
-              <p className="text-sm text-white/90 mt-1">
-                Inclui LooTag + assinatura LooApp
-              </p>
             </div>
 
             {/* Pricing Section */}
@@ -65,16 +62,29 @@ export default function PricingSectionV2() {
               </div>
 
               {/* Guarantees */}
-              <div className="text-center space-y-3 pt-6 border-t border-border/30">
-                <p className="text-sm font-medium text-muted-foreground">
-                  Apenas 3x sem juros de
-                </p>
-                <p className="text-5xl font-bold text-petloo-purple">
-                  R$29,96
-                </p>
-                <p className="text-base text-muted-foreground">
-                  Total: R$89,87
-                </p>
+              <div className="bg-petloo-beige rounded-2xl p-6 space-y-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-medium text-muted-foreground">
+                    Economize R$203
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground line-through">
+                      R$292,00
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="border-t border-petloo-purple/20 pt-3">
+                  <p className="text-sm font-medium text-muted-foreground mb-2">
+                    Apenas 3x sem juros de
+                  </p>
+                  <p className="text-5xl font-bold text-petloo-purple mb-3">
+                    R$29,96
+                  </p>
+                  <p className="text-base text-muted-foreground">
+                    Total: R$89,87
+                  </p>
+                </div>
               </div>
             </div>
           </div>
