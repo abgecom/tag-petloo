@@ -17,8 +17,13 @@ const nextConfig = {
   // Disable webpack cache completely
   webpack: (config) => {
     config.cache = false
+    // Force complete rebuild with timestamp
+    config.name = `build-${Date.now()}`
     return config
   },
+  // Disable build caching
+  cacheHandler: null,
+  cacheMaxMemorySize: 0,
 }
 
 export default nextConfig
