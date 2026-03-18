@@ -1,40 +1,27 @@
-import { Check } from "lucide-react"
+"use client"
+
+import { Check, Clock, Truck, Shield } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { useState, useEffect } from "react"
 
 export default function PricingSectionV2() {
-  const features = [
-    "Coleira Nato Exclusiva",
-    "Case Personalizada",
-    "Acesso completo ao App de Rastreamento",
-    "Rastreamento em tempo real",
-    "Alertas de zona segura",
-    "Suporte dedicado em PT/BR",
-  ]
+  const [timeLeft, setTimeLeft] = useState(13 * 60)
 
-  const plans = [
-    {
-      pets: 1,
-      title: "Protecao de 1 Pet",
-      price: "29,90",
-      priceInt: "29",
-      priceDec: "90",
-    },
-    {
-      pets: 2,
-      title: "Protecao de 2 Pets",
-      price: "59,80",
-      priceInt: "59",
-      priceDec: "80",
-      popular: true,
-    },
-    {
-      pets: 3,
-      title: "Protecao de 3 Pets",
-      price: "89,70",
-      priceInt: "89",
-      priceDec: "70",
-    },
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const minutes = Math.floor(timeLeft / 60)
+  const seconds = timeLeft % 60
+  const kitItems = [
+    { name: "Coleira Nato Exclusiva", originalPrice: "73,00", finalPrice: "0,00" },
+    { name: "Case de proteção Petloo", originalPrice: "30,00", finalPrice: "0,00" },
+    { name: "Tag de rastreamento 4.0", originalPrice: "189,00", finalPrice: "89,87" },
+    { name: "LooApp Exclusivo de rastreamento", originalPrice: "30,90", finalPrice: "0,00", firstMonth: true },
   ]
 
   return (
@@ -50,97 +37,8 @@ export default function PricingSectionV2() {
           </p>
         </div>
 
-        {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
-          {plans.map((plan, index) => (
-            <div 
-              key={index} 
-              className={`bg-white rounded-3xl overflow-hidden border transition-all hover:-translate-y-1 ${
-                plan.popular 
-                  ? "border-petloo-purple ring-2 ring-petloo-purple shadow-2xl shadow-petloo-purple/20" 
-                  : "border-border shadow-xl shadow-black/10 hover:shadow-2xl hover:shadow-black/15"
-              }`}
-            >
-              {/* Plan Title as Headline */}
-              <div className={`py-4 px-6 text-center border-b border-border/30 ${plan.popular ? "bg-petloo-purple text-white" : "bg-petloo-beige"}`}>
-                <h3 className={`text-lg font-bold ${plan.popular ? "text-white" : "text-foreground"}`}>
-                  {plan.title}
-                </h3>
-              </div>
-              
-              {/* Card Header - Pricing */}
-              <div className={`p-6 text-center ${plan.popular ? "bg-petloo-purple/5" : ""}`}>
-                {/* Marketing pricing strategy */}
-                <div className="space-y-3">
-                  <div>
-                    <span className="text-3xl md:text-4xl font-bold text-petloo-purple">GRATIS</span>
-                    <span className="text-base md:text-lg font-medium text-petloo-purple/80 ml-1">por 30 dias</span>
-                  </div>
-                  <p className="text-xs text-muted-foreground uppercase tracking-wider underline underline-offset-2">Pague apenas o frete</p>
-                  <div className="pt-3 border-t border-border/50">
-                    <p className="text-sm text-muted-foreground">
-                      Depois apenas <span className="font-bold text-foreground text-lg">R$ {plan.price}</span><span className="text-xs">/mes</span>
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Card Body */}
-              <div className="p-6 pt-0">
-                {/* Guarantees */}
-                <div className="flex flex-col gap-2 text-sm text-muted-foreground mb-6">
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-petloo-green" />
-                    Sem fidelidade
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-petloo-green" />
-                    Sem taxas de instalacao
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Check className="w-4 h-4 text-petloo-green" />
-                    Sem surpresas
-                  </span>
-                </div>
-
-                {/* Security text */}
-                <p className="text-center text-sm text-muted-foreground mb-4">
-                  Apenas a certeza de que ele esta seguro.
-                </p>
-
-                {/* CTA */}
-                <Link 
-                  href="#"
-                  className={`block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 ${
-                    plan.popular 
-                      ? "bg-petloo-green text-white hover:bg-petloo-green/90" 
-                      : "bg-petloo-purple text-white hover:bg-petloo-purple/90"
-                  }`}
-                >
-                  GARANTIR MEU KIT
-                </Link>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Unified Features - O kit inclui */}
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl p-8 shadow-lg border border-border">
-          <p className="font-semibold text-foreground mb-4 text-center">O kit inclui:</p>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-center gap-2">
-                <div className="flex-shrink-0 w-5 h-5 bg-petloo-green/20 rounded-full flex items-center justify-center">
-                  <Check className="w-3 h-3 text-petloo-green" />
-                </div>
-                <span className="text-sm text-muted-foreground">{feature}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* Product Image - Kit Completo */}
-        <div className="mt-16 max-w-2xl mx-auto">
+        <div className="mt-8 mb-12 max-w-2xl mx-auto">
           <div className="overflow-hidden rounded-3xl">
             <Image
               src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Gemini_Generated_Image_sp1jwfsp1jwfsp1j.png-mWfJvbDukdwhtbQveewIYC6X8CzGRW.jpeg"
@@ -149,6 +47,142 @@ export default function PricingSectionV2() {
               height={600}
               className="w-full h-auto object-cover object-center scale-125"
             />
+          </div>
+        </div>
+
+        {/* Single Pricing Card */}
+        <div className="max-w-2xl mx-auto mb-12">
+          <div className="bg-white rounded-3xl overflow-hidden border border-petloo-purple ring-2 ring-petloo-purple shadow-2xl shadow-petloo-purple/20">
+            {/* Plan Title Header */}
+            <div className="py-4 px-6 text-center border-b border-border/30 bg-petloo-purple">
+              <h3 className="text-lg font-bold text-white">
+                Proteção completa para 1 pet
+              </h3>
+            </div>
+
+            {/* Pricing Section */}
+            <div className="p-6">
+              {/* Kit Contents - O que está incluso */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-foreground mb-4 text-base">
+                  O que está incluso no seu kit:
+                </h4>
+                <div className="space-y-4">
+                  {kitItems.map((item, index) => (
+                    <div key={index} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-shrink-0 w-5 h-5 rounded-full bg-petloo-green/20 flex items-center justify-center">
+                          <Check className="w-3 h-3 text-petloo-green" />
+                        </div>
+                        <span className="text-sm text-muted-foreground leading-relaxed">{item.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-right">
+                        <span className="text-xs text-muted-foreground line-through">
+                          R${item.originalPrice}
+                        </span>
+                        <div className="flex flex-col items-end">
+                          <span className="font-bold text-sm text-petloo-purple">
+                            R${item.finalPrice}
+                          </span>
+                          {item.firstMonth && (
+                            <span className="text-xs text-muted-foreground">
+                              no primeiro mês
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Guarantees */}
+              <div className="bg-petloo-beige rounded-2xl p-5 flex items-center justify-between gap-4 mb-6">
+                <div className="flex-1">
+                  <div className="bg-petloo-green/10 rounded-full px-4 py-2 w-fit">
+                    <p className="text-sm font-bold text-petloo-green">
+                      Economize R$233
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-xs text-muted-foreground line-through">
+                      R$292,00
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="text-right">
+                  <p className="text-xs font-medium text-muted-foreground mb-1">
+                    3x sem juros
+                  </p>
+                  <p className="text-4xl font-bold text-petloo-purple mb-1">
+                    R$29,96
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Total: R$89,87
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA Button */}
+              <Link
+                href="/checkout"
+                className="block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 bg-petloo-green text-white hover:bg-petloo-green/90 mb-3"
+              >
+                Adquirir kit de proteção
+              </Link>
+
+              {/* Disclaimer */}
+              <p className="text-xs text-muted-foreground text-center mb-6">
+                <Link 
+                  href="/termos-de-uso-LooTag"
+                  target="_blank"
+                  className="underline hover:text-petloo-purple transition-colors"
+                >
+                  Mais informações
+                </Link>
+                {' '}sobre o plano
+              </p>
+
+              {/* Stock Warning */}
+              <div className="flex items-start gap-3 mb-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                <Clock className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    Apenas 12 unidades em estoque
+                  </p>
+                  <p className="text-xs text-red-600 font-bold">
+                    Previsão de acabar nos próximos {minutes}:{seconds.toString().padStart(2, "0")} minutos
+                  </p>
+                </div>
+              </div>
+
+              {/* Free Shipping */}
+              <div className="flex items-start gap-3 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <Truck className="w-5 h-5 text-petloo-purple flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Frete Grátis para todo o Brasil
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Entrega em até 6 dias
+                  </p>
+                </div>
+              </div>
+
+              {/* Guarantee */}
+              <div className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <Shield className="w-5 h-5 text-petloo-green flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    7 Dias de garantia
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Não é para você? Entre em contato em até 7 dias e garantimos seu dinheiro de volta
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

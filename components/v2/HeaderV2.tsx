@@ -22,7 +22,7 @@ export default function HeaderV2() {
       {/* Tarja promocional superior */}
       <div className="fixed top-0 left-0 right-0 z-[60] bg-petloo-orange text-white py-1.5 md:py-2 px-4 text-center">
         <p className="text-[0.6875rem] md:text-sm font-medium leading-tight">
-          100% de desconto na primeira mensalidade, pague apenas o frete
+          100% de desconto na primeira mensalidade + Frete Grátis para todo o Brasil
         </p>
       </div>
 
@@ -95,7 +95,7 @@ export default function HeaderV2() {
           {/* Desktop CTA */}
           <div className="hidden md:flex items-center gap-4">
             <Link 
-              href="#comprar" 
+              href="/checkout" 
               className="px-6 py-2.5 bg-petloo-green text-white font-semibold rounded-full hover:bg-petloo-green/90 transition-all hover:scale-105"
             >
               Adquirir Lootag
@@ -147,7 +147,7 @@ export default function HeaderV2() {
                 Preco
               </Link>
               <Link 
-                href="#comprar" 
+                href="/checkout" 
                 className="mt-2 px-6 py-3 bg-petloo-green text-white font-semibold rounded-full text-center hover:bg-petloo-green/90 transition-colors"
                 onClick={() => setMobileMenuOpen(false)}
               >
