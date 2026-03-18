@@ -49,6 +49,23 @@ export default function PricingSectionV2() {
                 </p>
               </div>
 
+              {/* Kit Contents - O que está incluso */}
+              <div className="mb-6">
+                <h4 className="font-semibold text-foreground mb-4 text-base">
+                  O que está incluso no seu kit de rastreamento:
+                </h4>
+                <div className="space-y-3">
+                  {kitItems.map((item, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="flex-shrink-0 w-5 h-5 rounded-full bg-petloo-green/20 flex items-center justify-center mt-0.5">
+                        <Check className="w-3 h-3 text-petloo-green" />
+                      </div>
+                      <span className="text-sm text-muted-foreground leading-relaxed">{item}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
               {/* Guarantees */}
               <div className="flex flex-col gap-2 text-sm text-muted-foreground my-6 pt-6 border-t border-border/30">
                 <span className="flex items-center gap-2">
@@ -73,23 +90,6 @@ export default function PricingSectionV2() {
                 GARANTIR MEU KIT
               </Link>
             </div>
-          </div>
-        </div>
-
-        {/* Kit Contents - O que está incluso */}
-        <div className="max-w-2xl mx-auto bg-white rounded-2xl p-8 shadow-lg border border-border mb-8">
-          <h3 className="font-semibold text-foreground mb-6 text-center text-lg">
-            O que está incluso no seu kit de rastreamento:
-          </h3>
-          <div className="space-y-4">
-            {kitItems.map((item, index) => (
-              <div key={index} className="flex items-start gap-3 py-3 border-b border-border/20 last:border-b-0">
-                <div className="flex-shrink-0 w-5 h-5 rounded-full bg-petloo-green/20 flex items-center justify-center mt-0.5">
-                  <Check className="w-3 h-3 text-petloo-green" />
-                </div>
-                <span className="text-base text-muted-foreground leading-relaxed">{item}</span>
-              </div>
-            ))}
           </div>
         </div>
 
