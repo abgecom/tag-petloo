@@ -497,7 +497,17 @@ function CheckoutForm({
       petName: urlParams.get("petName"),
     })
 
-    if (isPersonalized) {
+    // Se veio de /v2, usar o preço da URL
+    if (fromV2 && v2Price) {
+      console.log("[v0] Preço de /v2 detectado:", v2Price)
+      setProductInfo({
+        type: "lootag-kit",
+        color: "default",
+        amount: v2Price,
+        sku: "lootag-kit-001",
+        petName: "",
+      })
+    } else if (isPersonalized) {
       const color = urlParams.get("color")
       const priceId = urlParams.get("priceId")
       const amount = urlParams.get("amount")

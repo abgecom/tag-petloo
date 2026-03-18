@@ -1,4 +1,4 @@
-import Checkout from "../../checkout"
+import Checkout from "../../CheckoutComponent"
 
 export default async function CheckoutPage({ 
   searchParams 
