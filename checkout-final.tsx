@@ -2367,6 +2367,3 @@ export default function CheckoutPage({
 }) {
   return <CheckoutForm productParams={productParams} />
 }
-}) {
-  return <CheckoutForm searchParams={searchParams} />
-}
