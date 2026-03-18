@@ -1442,7 +1442,7 @@ function CheckoutForm() {
   // Show loading state with better animation and messaging
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
           <div className="text-center max-w-md w-full">
             {/* Logo durante loading */}
             <div className="mb-8">
