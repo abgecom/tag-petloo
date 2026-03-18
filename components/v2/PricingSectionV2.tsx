@@ -1,8 +1,20 @@
-import { Check } from "lucide-react"
+import { Check, Clock, Truck, Shield } from "lucide-react"
 import Link from "next/link"
 import Image from "next/image"
+import { useState, useEffect } from "react"
 
 export default function PricingSectionV2() {
+  const [timeLeft, setTimeLeft] = useState(13 * 60)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => (prev > 0 ? prev - 1 : 0))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
+
+  const minutes = Math.floor(timeLeft / 60)
+  const seconds = timeLeft % 60
   const kitItems = [
     { name: "Coleira Nato Exclusiva", originalPrice: "73,00", finalPrice: "0,00" },
     { name: "Case de proteção Petloo", originalPrice: "30,00", finalPrice: "0,00" },
@@ -106,7 +118,7 @@ export default function PricingSectionV2() {
               </Link>
 
               {/* Disclaimer */}
-              <p className="text-xs text-muted-foreground text-center">
+              <p className="text-xs text-muted-foreground text-center mb-6">
                 <Link 
                   href="/termos-de-uso-LooTag"
                   target="_blank"
@@ -116,6 +128,45 @@ export default function PricingSectionV2() {
                 </Link>
                 {' '}sobre o plano
               </p>
+
+              {/* Stock Warning */}
+              <div className="flex items-start gap-3 mb-4 p-4 bg-red-50 rounded-lg border border-red-200">
+                <Clock className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-foreground">
+                    Apenas 12 unidades em estoque
+                  </p>
+                  <p className="text-xs text-red-600 font-bold">
+                    Previsão de acabar nos próximos {minutes}:{seconds.toString().padStart(2, "0")} minutos
+                  </p>
+                </div>
+              </div>
+
+              {/* Free Shipping */}
+              <div className="flex items-start gap-3 mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <Truck className="w-5 h-5 text-petloo-purple flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    Frete Grátis para todo o Brasil
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Entrega em até 6 dias
+                  </p>
+                </div>
+              </div>
+
+              {/* Guarantee */}
+              <div className="flex items-start gap-3 p-4 bg-yellow-50 rounded-lg border border-yellow-200">
+                <Shield className="w-5 h-5 text-petloo-green flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-semibold text-foreground">
+                    7 Dias de garantia
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Não é para você? Entre em contato em até 7 dias e garantimos seu dinheiro de volta
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
