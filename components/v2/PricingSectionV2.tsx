@@ -173,65 +173,6 @@ export default function PricingSectionV2() {
           </div>
         </div>
 
-        {/* Subscription and Total Cards */}
-        <div className="max-w-2xl mx-auto space-y-4 mb-12">
-          {/* Subscription Card */}
-          <div className="bg-white rounded-3xl overflow-hidden border border-petloo-purple shadow-lg hover:shadow-xl transition-all">
-            <div className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-lg font-bold text-foreground mb-1">Assinatura mensal</p>
-                <p className="text-sm text-muted-foreground">
-                  Minimo 3 meses de assinatura
-                </p>
-              </div>
-              <div className="text-right">
-                <p className="text-4xl font-bold text-petloo-purple">
-                  R$30,90<span className="text-lg text-muted-foreground font-normal">/mês</span>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Total and CTA Card */}
-          <div className="bg-white rounded-3xl overflow-hidden border border-petloo-purple shadow-lg hover:shadow-xl transition-all">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <p className="text-sm text-muted-foreground mb-1">Valor total:</p>
-                  <p className="text-2xl text-muted-foreground">Kit Lootag + Assinatura LooApp</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-4xl font-bold text-petloo-purple">
-                    R$120,77
-                  </p>
-                </div>
-              </div>
-
-              <Link
-                href="#"
-                className="block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 bg-petloo-green text-white hover:bg-petloo-green/90 mb-4"
-              >
-                Adicionar ao carrinho
-              </Link>
-
-              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground border-t border-border/30 pt-4">
-                <span className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-petloo-green" />
-                  Sem fidelidade
-                </span>
-                <span className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-petloo-green" />
-                  Sem surpresas
-                </span>
-                <span className="flex items-center gap-2">
-                  <Check className="w-4 h-4 text-petloo-green" />
-                  Suporte dedicado em PT/BR
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Product Image - Kit Completo */}
         <div className="mt-16 max-w-2xl mx-auto">
           <div className="overflow-hidden rounded-3xl">
