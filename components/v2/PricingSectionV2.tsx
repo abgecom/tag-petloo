@@ -133,7 +133,7 @@ export default function PricingSectionV2() {
                 Adicionar ao carrinho
               </Link>
 
-              <div className="flex flex-col gap-2 text-sm text-muted-foreground border-t border-border/30 pt-4">
+              <div className="flex flex-wrap gap-4 text-sm text-muted-foreground border-t border-border/30 pt-4">
                 <span className="flex items-center gap-2">
                   <Check className="w-4 h-4 text-petloo-green" />
                   Sem fidelidade
