@@ -1,0 +1,9 @@
+{
+  "buildCommand": "cd /vercel/share/v0-project && npm run build",
+  "devCommand": "cd /vercel/share/v0-project && npm run dev",
+  "installCommand": "cd /vercel/share/v0-project && npm install",
+  "framework": "nextjs",
+  "projectSettings": {
+    "rootDirectory": "/vercel/share/v0-project"
+  }
+}
