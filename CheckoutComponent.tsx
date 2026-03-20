@@ -420,7 +420,7 @@ function CheckoutForm({
     expiry: "",
     cvv: "",
   })
-  const [installments, setInstallments] = useState("1")
+  const [installments, setInstallments] = useState("3")
   const [installmentOptions, setInstallmentOptions] = useState<Array<{ value: string; label: string }>>([])
   const [cardErrors, setCardErrors] = useState({
     number: false,
@@ -567,10 +567,10 @@ function CheckoutForm({
 
       // Produto genérico - APENAS FRETE EXPRESSO
       setProductInfo({
-        type: "Tag Rastreamento Petloo",
+        type: "Kit de Proteção Lootag",
         color: "Padrão",
-        amount: 2939, // Valor do frete expresso
-        sku: "TAG-APP-2939",
+        amount: 8987, // R$ 89,87 em centavos (Kit de Proteção Lootag)
+        sku: "KIT-LOOTAG-8987",
         petName: "", // Produto genérico não tem nome do pet
       })
       // Forçar frete expresso para produtos genéricos
@@ -925,9 +925,9 @@ function CheckoutForm({
 
       // 🔧 CORREÇÃO CRÍTICA: Calcular valor correto em centavos
       let productInfo = {
-        amount: 2939, // Default: frete expresso
-        name: "Tag rastreamento Petloo + App",
-        sku: `TAG-APP-${quantity}x`,
+        amount: 8987, // R$ 89,87 em centavos (Kit de Proteção Lootag)
+        name: "Kit de Proteção Lootag",
+        sku: "KIT-LOOTAG-8987",
         type: "Tag Genérica",
         color: "Não se aplica",
         petName: "",
@@ -2234,7 +2234,7 @@ function CheckoutForm({
 
             {/* Finalize Button */}
             <Button
-              className="w-full bg-red-500 hover:bg-red-600 text-white py-4 text-lg font-semibold mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-lg font-semibold mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
               onClick={handleCheckout}
               disabled={isProcessing || showPixPayment}
             >
