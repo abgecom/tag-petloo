@@ -1,9 +1,0 @@
-.next
-dist
-node_modules
-.vercel
-.turbo
-*.log
-.git
-.env
-.env.*.local

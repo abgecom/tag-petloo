@@ -126,7 +126,7 @@ export default function PricingSectionV2() {
 
               {/* CTA Button */}
               <Link
-                href="/checkout?product=lootag-kit&price=89.87"
+                href="/checkout"
                 className="block w-full py-3 font-bold text-base rounded-full text-center transition-all hover:scale-105 bg-petloo-green text-white hover:bg-petloo-green/90 mb-3"
               >
                 Adquirir kit de proteção

@@ -31,7 +31,7 @@ export const PAGARME_CONFIG = {
      * ID do plano de assinatura na Pagar.me
      * Mesmo plano utilizado no projeto Looneca
      */
-    planId: "plan_L7MjQlXiNpSyaGA9",
+    planId: "plan_NdKx8ZmHqLfyRg7w",
 
     /**
      * Período de trial em dias
