@@ -1044,6 +1044,20 @@ function CheckoutForm({
             // Limpar sessionStorage corrompido
             sessionStorage.removeItem("personalizedProduct")
           }
+        } else if (fromV2 && v2Price) {
+          // 🎯 OFERTA DINÂMICA (ex: lootag-kit) - v2Price * quantity
+          const calculatedAmount = Math.round(v2Price * quantity * 100)
+
+          productInfo = {
+            amount: calculatedAmount,
+            name: ofertaAtual?.nome ?? "Kit de Proteção Lootag",
+            sku: `LOOTAG-KIT-${quantity}x`,
+            type: "Kit",
+            color: "Não se aplica",
+            petName: "",
+          }
+
+          console.log("💰 Oferta dinâmica - Valor final em centavos:", calculatedAmount)
         } else {
           // 🎯 PRODUTO GENÉRICO - CALCULAR VALOR CORRETO
           let calculatedAmount = 2939 // Base: frete expresso
