@@ -495,10 +495,11 @@ function CheckoutForm({
 
   // Calcular opcoes de parcelamento quando o valor total mudar
   useEffect(() => {
-    const total = getShippingCost()
+    const total = (fromV2 && v2Price) ? v2Price : getShippingCost()
     if (total > 0) {
+      const maxParcelas = ofertaAtual?.parcelas ?? 12
       const options: Array<{ value: string; label: string }> = []
-      for (let i = 1; i <= 12; i++) {
+      for (let i = 1; i <= maxParcelas; i++) {
         const calc = calculatePaymentAmount(total, "credit_card", i)
         if (i <= 3) {
           options.push({
@@ -1851,6 +1852,26 @@ function CheckoutForm({
                   // 🆕 TAMBÉM CONSIDERAR PERSONALIZADO SE TEMOS TAGS CONFIGURADAS
                   if (personalizedTags.length > 0) {
                     isPersonalized = true
+                  }
+
+                  // 🔧 OFERTA DINÂMICA: frete sempre grátis para fromV2
+                  if (fromV2 && ofertaAtual?.freteGratis) {
+                    return (
+                      <div className="border-2 rounded-lg p-4 border-green-300 bg-green-50/30">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div>
+                              <p className="font-medium">Frete Expresso</p>
+                              <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
+                              <p className="text-xs text-gray-500">
+                                <span className="line-through text-gray-400">R$ 29,39</span>
+                              </p>
+                            </div>
+                          </div>
+                          <span className="font-semibold text-green-600">Grátis</span>
+                        </div>
+                      </div>
+                    )
                   }
 
                   // 🆕 MENSAGEM ESPECÍFICA PARA PRODUTOS GENÉRICOS
