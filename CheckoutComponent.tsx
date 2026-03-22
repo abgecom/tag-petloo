@@ -98,6 +98,7 @@ function OrderSummaryContent({
   onEditTag,
   fromV2,
   v2Price,
+  ofertaAtual,
 }: {
   quantity: number
   setQuantity: (q: number) => void
@@ -107,6 +108,7 @@ function OrderSummaryContent({
   onEditTag: (index: number) => void
   fromV2?: boolean
   v2Price?: number | null
+  ofertaAtual?: { nome: string; parcelas: number; freteGratis: boolean } | null
 }) {
   // Calculate shipping cost based on shipping method and quantity
   const getShippingCost = () => {
@@ -1619,6 +1621,7 @@ function CheckoutForm({
                     onEditTag={handleEditTag}
                     fromV2={fromV2}
                     v2Price={v2Price}
+                    ofertaAtual={ofertaAtual}
                   />
                 </div>
               )}
@@ -2311,6 +2314,7 @@ function CheckoutForm({
                 onEditTag={handleEditTag}
                 fromV2={fromV2}
                 v2Price={v2Price}
+                ofertaAtual={ofertaAtual}
               />
             </div>
           </div>
