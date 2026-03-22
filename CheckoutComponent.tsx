@@ -162,6 +162,8 @@ function OrderSummaryContent({
     }
 
     // 🔧 CORREÇÃO: Lógica para produtos genéricos (NÃO personalizados)
+    // Oferta com frete grátis fixo: retorna preço completo sem precisar de CEP
+    if (fromV2 && v2Price && ofertaAtual?.freteGratis) return v2Price
     if (!addressFound) return 0
 
     // Para produtos genéricos com 6+ unidades: frete grátis
@@ -313,7 +315,7 @@ function OrderSummaryContent({
                 ? "Grátis"
                 : `R$ ${productPrice.toFixed(2).replace(".", ",")}`}
           </p>
-          {quantity === 1 && !isPersonalized && <p className="text-xs text-gray-500">1ª grátis</p>}
+          {quantity === 1 && !isPersonalized && <p className="text-xs text-gray-500">1º mês grátis</p>}
         </div>
       </div>
 
@@ -390,7 +392,7 @@ function OrderSummaryContent({
           <span>Total</span>
           <span>R$ {total.toFixed(2).replace(".", ",")}</span>
         </div>
-        <p className="text-sm text-gray-600">Em até 12x no cartão de crédito</p>
+        <p className="text-sm text-gray-600">{ofertaAtual ? `Em até ${ofertaAtual.parcelas}x sem juros` : "Em até 12x no cartão de crédito"}</p>
       </div>
     </div>
   )
@@ -408,8 +410,24 @@ function CheckoutForm({
   const router = useRouter()
   
   // Verificar se veio do /v2 via URL params
+  // ================================================
+  // 🎯 SISTEMA DINÂMICO DE OFERTAS
+  // Para adicionar uma nova oferta, basta registrar aqui.
+  // A página anterior passa ?product=SLUG&price=VALOR via URL.
+  // ================================================
+  const OFERTAS: Record<string, { nome: string; parcelas: number; freteGratis: boolean }> = {
+    "lootag-kit": {
+      nome: "Kit de Proteção Lootag",
+      parcelas: 3,
+      freteGratis: true,
+    },
+    // Adicione futuras ofertas aqui:
+    // "outro-kit": { nome: "Outro Produto", parcelas: 1, freteGratis: false },
+  }
+
   const fromV2 = productParams?.product === "lootag-kit"
   const v2Price = productParams?.price ? parseFloat(productParams.price) : null
+  const ofertaAtual = productParams?.product ? OFERTAS[productParams.product] ?? null : null
 
   // All hooks must be called before any conditional returns
   const [isOrderSummaryOpen, setIsOrderSummaryOpen] = useState(true)
