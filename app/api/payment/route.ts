@@ -330,7 +330,7 @@ async function createCreditCardOrder(
         credit_card: {
           card_id: cardId,
           installments: installments,
-          statement_descriptor: "PETLOO",
+          statement_descriptor: PAGARME_CONFIG.subscription.statementDescriptor,
         },
         amount: finalAmountCents, // Valor com juros aplicados
       },
