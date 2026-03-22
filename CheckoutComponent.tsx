@@ -163,9 +163,6 @@ function OrderSummaryContent({
       return totalProductPrice // Frete grátis padrão
     }
 
-    // 🔧 CORREÇÃO: Lógica para produtos genéricos (NÃO personalizados)
-    // Oferta com frete grátis fixo: retorna preço completo sem precisar de CEP
-    if (fromV2 && v2Price && ofertaAtual?.freteGratis) return v2Price
     if (!addressFound) return 0
 
     // Para produtos genéricos com 6+ unidades: frete grátis
@@ -233,7 +230,11 @@ function OrderSummaryContent({
 
   // 🆕 NOVA LÓGICA PARA PRODUTO GENÉRICO
   if (!isPersonalized) {
-    if (addressFound) {
+    // 🔧 OFERTA DINÂMICA: preço fixo sem precisar de CEP
+    if (fromV2 && v2Price && ofertaAtual?.freteGratis) {
+      productPrice = v2Price
+      shippingPrice = 0
+    } else if (addressFound) {
       // Produto: primeira unidade grátis, demais R$ 9,90
       productPrice = (quantity - 1) * 9.9
 
