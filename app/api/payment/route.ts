@@ -263,7 +263,6 @@ async function createPagarmeSubscription(
     customer_id: customerId,
     card_id: cardId,
     payment_method: "credit_card",
-    billing_type: "prepaid",
     metadata: {
       source: "petloo-checkout",
       trial_days: PAGARME_CONFIG.subscription.trialDays.toString(),
@@ -318,6 +317,7 @@ async function createCreditCardOrder(
 
   const orderData = {
     customer_id: customerId,
+    amount: finalAmountCents, // Total do pedido com juros em centavos
     items: body.items.map((item) => ({
       amount: item.price,
       description: item.name,
@@ -327,12 +327,12 @@ async function createCreditCardOrder(
     payments: [
       {
         payment_method: "credit_card",
+        amount: finalAmountCents, // Valor com juros aplicados
         credit_card: {
           card_id: cardId,
           installments: installments,
           statement_descriptor: PAGARME_CONFIG.subscription.statementDescriptor,
         },
-        amount: finalAmountCents, // Valor com juros aplicados
       },
     ],
     shipping: {
@@ -394,6 +394,7 @@ async function createPixOrder(body: PaymentRequestBody): Promise<PagarmeOrderRes
       },
       address,
     },
+    amount: body.amount, // Total do pedido em centavos
     items: body.items.map((item) => ({
       amount: item.price,
       description: item.name,
@@ -403,11 +404,11 @@ async function createPixOrder(body: PaymentRequestBody): Promise<PagarmeOrderRes
     payments: [
       {
         payment_method: "pix",
+        amount: body.amount,
         pix: {
           expires_in: PAGARME_CONFIG.pix.expirationInSeconds,
           additional_information: PAGARME_CONFIG.pix.additionalInformation,
         },
-        amount: body.amount,
       },
     ],
     shipping: {
