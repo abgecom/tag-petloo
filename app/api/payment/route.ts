@@ -674,7 +674,9 @@ export async function POST(request: NextRequest) {
     // ============================================
     console.log("=== FLUXO CARTÃO DE CRÉDITO ===")
 
-    // REGRA DE NEGÓCIO CRÍTICA: Criar assinatura é OBRIGATÓRIO para cartão
+    // REGRA DE NEGÓCIO CRÍTICA:
+    // A assinatura só é criada se o pedido (cobrança única) for APROVADO.
+    // Isso evita assinaturas duplicadas/orfãs em caso de recusa do cartão.
 
     // 1. Criar Customer na Pagar.me
     const customer = await createPagarmeCustomer(body.customer, body.shipping)
@@ -682,19 +684,10 @@ export async function POST(request: NextRequest) {
     // 2. Criar Cartão no Customer
     const card = await createPagarmeCard(customer.id, body.card!, body.shipping)
 
-    // 3. Criar Assinatura (OBRIGATÓRIO)
-    let subscription: PagarmeSubscriptionResponse
-    try {
-      subscription = await createPagarmeSubscription(customer.id, card.id)
-    } catch (error) {
-      console.error("Erro ao criar assinatura:", error)
-      throw new Error("Falha ao criar assinatura. Pagamento cancelado.")
-    }
-
-    // 4. Criar Pedido com pagamento
+    // 3. Criar Pedido (cobrança única) ANTES da assinatura
     const order = await createCreditCardOrder(body, customer.id, card.id)
 
-    // Verificar status do pagamento
+    // 4. Verificar se o pagamento foi aprovado — só prosseguir se sim
     const chargeStatus = order.charges?.[0]?.status
     if (chargeStatus !== "paid" && chargeStatus !== "pending") {
       console.error("Pagamento não aprovado. Status:", chargeStatus)
@@ -707,7 +700,16 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 5. Salvar no Supabase
+    // 5. Criar Assinatura — somente após pedido aprovado (evita duplicatas)
+    let subscription: PagarmeSubscriptionResponse
+    try {
+      subscription = await createPagarmeSubscription(customer.id, card.id)
+    } catch (error) {
+      console.error("Erro ao criar assinatura:", error)
+      throw new Error("Falha ao criar assinatura após pagamento aprovado.")
+    }
+
+    // 6. Salvar no Supabase
     await saveOrderToSupabase(
       body,
       order.id,
@@ -715,7 +717,7 @@ export async function POST(request: NextRequest) {
       chargeStatus === "paid" ? "paid" : "pending"
     )
 
-    // 6. Enviar para webhooks
+    // 7. Enviar para webhooks
     await sendToWebhooks(body, order.id, customer.id, subscription.id)
 
     console.log("=== CHECKOUT CARTÃO CONCLUÍDO COM SUCESSO ===")
