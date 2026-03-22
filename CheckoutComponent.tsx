@@ -96,6 +96,8 @@ function OrderSummaryContent({
   addressFound,
   personalizedTags,
   onEditTag,
+  fromV2,
+  v2Price,
 }: {
   quantity: number
   setQuantity: (q: number) => void
@@ -103,6 +105,8 @@ function OrderSummaryContent({
   addressFound: boolean
   personalizedTags: PersonalizedTag[]
   onEditTag: (index: number) => void
+  fromV2?: boolean
+  v2Price?: number | null
 }) {
   // Calculate shipping cost based on shipping method and quantity
   const getShippingCost = () => {
@@ -239,6 +243,12 @@ function OrderSummaryContent({
 
   // Definir nome e imagem do produto baseado no tipo
   let productName = "Tag rastreamento Petloo + App"
+
+  // Se veio de /v2 com lootag-kit, usar preço e nome da URL
+  if (fromV2 && v2Price) {
+    productPrice = v2Price
+    productName = "Kit de Proteção Lootag"
+  }
   let productImage =
     "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/image%20594-rIMxV2I0SZADJI938HxomgyWIUjTGg.png"
 
@@ -1589,6 +1599,8 @@ function CheckoutForm({
                     addressFound={addressFound}
                     personalizedTags={personalizedTags}
                     onEditTag={handleEditTag}
+                    fromV2={fromV2}
+                    v2Price={v2Price}
                   />
                 </div>
               )}
@@ -2279,6 +2291,8 @@ function CheckoutForm({
                 addressFound={addressFound}
                 personalizedTags={personalizedTags}
                 onEditTag={handleEditTag}
+                fromV2={fromV2}
+                v2Price={v2Price}
               />
             </div>
           </div>
