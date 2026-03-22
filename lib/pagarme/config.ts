@@ -52,6 +52,17 @@ export const PAGARME_CONFIG = {
      * Moeda
      */
     currency: "BRL",
+
+    /**
+     * Valor mensal da assinatura em centavos (R$ 30,90)
+     * Cobrado após o trial de 30 dias
+     */
+    monthlyPrice: 3090,
+
+    /**
+     * Descrição que aparece na fatura do cartão do cliente
+     */
+    statementDescriptor: "LOOAPP",
   },
 
   /**
