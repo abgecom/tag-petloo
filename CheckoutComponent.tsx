@@ -232,7 +232,7 @@ function OrderSummaryContent({
   if (!isPersonalized) {
     // 🔧 OFERTA DINÂMICA: preço fixo sem precisar de CEP
     if (fromV2 && v2Price && ofertaAtual?.freteGratis) {
-      productPrice = v2Price
+      productPrice = v2Price * quantity
       shippingPrice = 0
     } else if (addressFound) {
       // Produto: primeira unidade grátis, demais R$ 9,90
@@ -249,9 +249,9 @@ function OrderSummaryContent({
   // Definir nome e imagem do produto baseado no tipo
   let productName = "Tag rastreamento Petloo + App"
 
-  // Se veio de /v2 com lootag-kit, usar preço e nome da URL
+  // Se veio de /v2 com lootag-kit, usar preço total (v2Price * quantity)
   if (fromV2 && v2Price) {
-    productPrice = v2Price
+    productPrice = v2Price * quantity
     productName = "Kit de Proteção Lootag"
   }
   let productImage =
@@ -306,7 +306,9 @@ function OrderSummaryContent({
             <p className="text-xs text-gray-600 mt-1">
               {isPersonalized
                 ? `1ª unidade + ${quantity - 1} adicional${quantity > 2 ? "is" : ""} (R$ 9,90 cada)`
-                : `1ª unidade grátis + ${quantity - 1} adicional${quantity > 2 ? "is" : ""} (R$ 9,90 cada)`}
+                : fromV2 && v2Price
+                  ? `${quantity}x R$ ${v2Price.toFixed(2).replace(".", ",")}`
+                  : `1ª unidade grátis + ${quantity - 1} adicional${quantity > 2 ? "is" : ""} (R$ 9,90 cada)`}
             </p>
           )}
         </div>
