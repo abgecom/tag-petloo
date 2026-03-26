@@ -40,4 +40,17 @@ export default function TermosDeUso() {
 
       <p style={{ marginTop: "1rem" }}><strong>Condições para Desistência ou Troca:</strong> Você tem o prazo de 7 (sete) dias corridos, a partir do recebimento do produto, para desistir da compra. O produto deve estar na embalagem original, sem sinais de uso e sem violação do lacre original do fabricante.</p>
 
-      <p style={{ marginTop: "1rem" }}><strong>
+      <p style={{ marginTop: "1rem" }}><strong>Troca de produto não personalizado:</strong> Após o recebimento do produto em nossa central, o prazo para análise é de 7 dias úteis. Após a análise, o reenvio será efetuado em até 5 dias úteis.</p>
+
+      <p style={{ marginTop: "1rem" }}><strong>Produto não personalizado com Defeito:</strong> Se o produto recebido apresentar algum defeito, comunique imediatamente a Central de Atendimento enviando fotos e informações detalhadas sobre o defeito. Após a confirmação do defeito de fabricação, procederemos com a troca.</p>
+
+      <p style={{ marginTop: "1rem" }}><strong>Política de Reembolso para produtos não personalizados:</strong> Após a conclusão do processo de devolução, realizaremos a restituição dos valores pagos pelo produto, utilizando o mesmo meio de pagamento escolhido na compra. O estorno será efetuado em até 15 dias úteis. Para compras com Cartão de Crédito, o estorno ocorrerá na fatura seguinte ou na subsequente. Para compras pagas com Boleto Bancário, a restituição será realizada por depósito bancário em até 10 dias úteis, exclusivamente na conta corrente do comprador.</p>
+
+      <p style={{ marginTop: "1rem" }}>Não efetuamos trocas de produtos abertos. Ao receber o pedido, verifique a encomenda. Se estiver violada ou danificada, recuse imediatamente a entrega e entre em contato com nossa Central de Atendimento.</p>
+
+      <p style={{ marginTop: "3rem", paddingTop: "1rem", borderTop: "1px solid #ddd", fontSize: "0.85rem", color: "#888" }}>
+        Última atualização: 25/03/2026
+      </p>
+    </main>
+  )
+}
