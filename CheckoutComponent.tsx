@@ -1617,7 +1617,7 @@ function CheckoutForm({
               <span className="font-bold">Resumo do pedido</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="font-bold text-[#b02600]">R$ {total.toFixed(2).replace('.', ',')}</span>
+              <span className="font-bold text-[#b02600]">R$ {(((ofertaAtual?.price || v2Price || 89.87) * quantity) + getShippingCost()).toFixed(2).replace('.', ',')}</span>
               <span className="material-symbols-outlined text-slate-400">{isOrderSummaryOpen ? 'expand_less' : 'expand_more'}</span>
             </div>
           </div>
@@ -1654,7 +1654,7 @@ function CheckoutForm({
                 </div>
                 <div className="flex justify-between text-xl pt-2">
                   <span className="font-black">Total</span>
-                  <span className="font-black">R$ {total.toFixed(2).replace('.', ',')}</span>
+                  <span className="font-black">R$ {(((ofertaAtual?.price || v2Price || 89.87) * quantity) + getShippingCost()).toFixed(2).replace('.', ',')}</span>
                 </div>
                 <p className="text-xs text-slate-400">Em até 3x sem juros</p>
               </div>
