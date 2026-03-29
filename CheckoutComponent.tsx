@@ -1594,854 +1594,289 @@ function CheckoutForm({
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      {/* Initiate Checkout Tracker - Fires when checkout page loads */}
+    <div className="bg-[#f9f9ff] pb-40 min-h-screen" style={{fontFamily: 'Manrope, sans-serif'}}>
       <InitiateCheckoutTracker />
-
-      {/* Abandoned Cart Tracker - Monitors cart abandonment */}
-      <AbandonedCartTracker
-        abandonmentTimeSeconds={300} // 5 minutos
-        trackPageExit={true}
-      />
-
-      {/* Lead Capture Tracker - Captures leads when user fills form */}
+      <AbandonedCartTracker abandonmentTimeSeconds={300} trackPageExit={true} />
       <LeadCaptureTracker />
 
-      <div className="max-w-7xl mx-auto p-4 lg:p-8">
-        <div className="lg:grid lg:grid-cols-2 lg:gap-12">
-          {/* Left Column - Forms (Desktop) / Main Content (Mobile) */}
-          <div className="lg:order-1">
-            {/* Mobile Order Summary Toggle */}
-            <div className="lg:hidden mb-6">
-              <button
-                onClick={() => setIsOrderSummaryOpen(!isOrderSummaryOpen)}
-                className="w-full flex items-center justify-between p-4 bg-white border rounded-lg"
-              >
-                <span className="font-medium">Resumo do pedido</span>
-                {isOrderSummaryOpen ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
-              </button>
-
-              {/* Mensagem sutil para orientar o usuário */}
-              {!isOrderSummaryOpen && (
-                <p className="text-xs text-gray-500 text-center mt-2 px-2">
-                  💡 Toque no resumo acima para alterar a quantidade ou configurar suas tags
-                </p>
-              )}
-
-              {isOrderSummaryOpen && (
-                <div className="mt-4 p-4 bg-white border rounded-lg">
-                  <OrderSummaryContent
-                    quantity={quantity}
-                    setQuantity={handleQuantityChange}
-                    shippingMethod={shippingMethod}
-                    addressFound={addressFound}
-                    personalizedTags={personalizedTags}
-                    onEditTag={handleEditTag}
-                    fromV2={fromV2}
-                    v2Price={v2Price}
-                    ofertaAtual={ofertaAtual}
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Petloo Logo */}
-            <div className="mb-8 text-center lg:text-left">
-              <img
-                src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Petloosemfundo%202-wiHpYOGK6l8BekDtGwMXaJxrq0maQN.png"
-                alt="Petloo Logo"
-                className="h-12 mx-auto lg:mx-0"
-              />
-            </div>
-
-            {/* Personal Information */}
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-2">Informações Pessoais</h2>
-              <p className="text-sm text-gray-600 mb-4">Para quem devemos entregar o pedido?</p>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email" className="text-sm font-medium">
-                    E-mail
-                  </Label>
-                  <Input id="email" type="email" placeholder="Digite seu e-mail" className="mt-1" />
-                </div>
-
-                <div>
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Nome completo
-                  </Label>
-                  <Input id="name" placeholder="Digite seu nome completo" className="mt-1" />
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Label htmlFor="phone" className="text-sm font-medium">
-                      Celular
-                    </Label>
-                    <Input
-                      id="phone"
-                      placeholder="(00) 00000-0000"
-                      className="mt-1"
-                      onChange={(e) => {
-                        e.target.value = formatPhone(e.target.value)
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="cpf" className="text-sm font-medium">
-                      CPF
-                    </Label>
-                    <Input
-                      id="cpf"
-                      placeholder="000.000.000-00"
-                      className="mt-1"
-                      onChange={(e) => {
-                        e.target.value = formatCPF(e.target.value)
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Delivery Information */}
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-2">Informações de Entrega</h2>
-              <p className="text-sm text-gray-600 mb-4">Para onde devemos entregar o pedido?</p>
-
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="cep" className="text-sm font-medium">
-                    CEP
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      id="cep"
-                      placeholder="99999-999"
-                      className={`mt-1 ${
-                        addressFound
-                          ? "border-green-500 bg-green-50"
-                          : isCepLoading
-                            ? "border-blue-500 bg-blue-50"
-                            : "bg-blue-50"
-                      }`}
-                      value={addressData.cep}
-                      onChange={(e) => {
-                        const formatted = formatCEP(e.target.value)
-                        setAddressData((prev) => ({ ...prev, cep: formatted }))
-
-                        // Se o CEP tem 9 caracteres (formato completo), buscar endereço
-                        if (formatted.length === 9) {
-                          setIsCepLoading(true)
-                          setAddressFound(false)
-
-                          fetchAddressByCEP(formatted)
-                            .then((address) => {
-                              if (address) {
-                                setAddressData(address)
-                                setAddressFound(true)
-                                // 🎯 DISPARAR EVENTOS QUANDO ENDEREÇO FOR ENCONTRADO
-                                setTimeout(() => {
-                                  handleAddressFound()
-                                }, 500) // Pequeno delay para garantir que os campos estejam preenchidos
-                              } else {
-                                setAddressFound(false)
-                              }
-                              setIsCepLoading(false)
-                            })
-                            .catch(() => {
-                              setAddressFound(false)
-                              setIsCepLoading(false)
-                            })
-                        } else {
-                          setAddressFound(false)
-                          setIsCepLoading(false)
-                        }
-                      }}
-                    />
-                    <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                      {isCepLoading && (
-                        <div className="animate-spin rounded-full h-4 w-4 border-2 border-blue-500 border-t-transparent"></div>
-                      )}
-                      {addressFound && !isCepLoading && <span className="text-green-500">✅</span>}
-                    </div>
-                  </div>
-                  {isCepLoading && (
-                    <div className="text-blue-600 text-sm mt-1 flex items-center gap-2">
-                      <div className="animate-spin rounded-full h-3 w-3 border-2 border-blue-500 border-t-transparent"></div>
-                      Validando CEP...
-                    </div>
-                  )}
-                  {addressFound && !isCepLoading && (
-                    <p className="text-green-600 text-sm mt-1">Endereço encontrado com sucesso</p>
-                  )}
-                </div>
-
-                {addressFound && (
-                  <>
-                    <div>
-                      <Label htmlFor="street" className="text-sm font-medium">
-                        Endereço
-                      </Label>
-                      <Input
-                        id="street"
-                        value={addressData.street}
-                        className="mt-1 border-green-500 bg-green-50"
-                        readOnly
-                      />
-                    </div>
-                    <div>
-                      <Label htmlFor="neighborhood" className="text-sm font-medium">
-                        Bairro
-                      </Label>
-                      <Input
-                        id="neighborhood"
-                        value={addressData.neighborhood}
-                        className="mt-1 border-green-500 bg-green-50"
-                        readOnly
-                      />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="city" className="text-sm font-medium">
-                          Cidade
-                        </Label>
-                        <Input
-                          id="city"
-                          value={addressData.city}
-                          className="mt-1 border-green-500 bg-green-50"
-                          readOnly
-                        />
-                      </div>
-                      <div>
-                        <Label htmlFor="state" className="text-sm font-medium">
-                          Estado
-                        </Label>
-                        <Input
-                          id="state"
-                          value={addressData.state}
-                          className="mt-1 border-green-500 bg-green-50"
-                          readOnly
-                        />
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="number" className="text-sm font-medium">
-                          Número
-                        </Label>
-                        <Input id="number" placeholder="Nº" className="mt-1" />
-                      </div>
-                      <div>
-                        <Label htmlFor="complement" className="text-sm font-medium">
-                          Complemento
-                        </Label>
-                        <Input id="complement" placeholder="Apto, bloco..." className="mt-1" />
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-
-            {/* Shipping Method - Atualizar para mostrar frete grátis a partir de 4 unidades */}
-            {addressFound && (
-              <div className="mb-8">
-                <h2 className="text-lg font-semibold mb-2">Método de envio</h2>
-
-                {(() => {
-                  const personalizedData = sessionStorage.getItem("personalizedProduct")
-                  let isPersonalized = false
-
-                  if (personalizedData) {
-                    try {
-                      const data = JSON.parse(personalizedData)
-                      // Verificar se realmente tem os dados de personalização
-                      isPersonalized = !!(data.color && data.amount && data.petName)
-                    } catch (error) {
-                      console.error("Erro ao parsear produto personalizado:", error)
-                      isPersonalized = false
-                    }
-                  }
-
-                  // 🆕 TAMBÉM CONSIDERAR PERSONALIZADO SE TEMOS TAGS CONFIGURADAS
-                  if (personalizedTags.length > 0) {
-                    isPersonalized = true
-                  }
-
-                  // 🔧 OFERTA DINÂMICA: frete sempre grátis para fromV2
-                  if (fromV2 && ofertaAtual?.freteGratis) {
-                    return (
-                      <div className="border-2 rounded-lg p-4 border-green-300 bg-green-50/30">
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center gap-3">
-                            <div>
-                              <p className="font-medium">Frete Expresso</p>
-                              <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
-                              <p className="text-xs text-gray-500">
-                                <span className="line-through text-gray-400">R$ 29,39</span>
-                              </p>
-                            </div>
-                          </div>
-                          <span className="font-semibold text-green-600">Grátis</span>
-                        </div>
-                      </div>
-                    )
-                  }
-
-                  // 🆕 MENSAGEM ESPECÍFICA PARA PRODUTOS GENÉRICOS
-                  if (!isPersonalized && quantity < 6) {
-                    return (
-                      <>
-                        {/* Aviso sobre frete grátis para produtos genéricos */}
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
-                          <p className="text-blue-800 text-sm">
-                            💡 <strong>Dica:</strong> Pedidos com 6 tags ou mais ganham <strong>frete grátis</strong>!
-                            Você está a {6 - quantity} tag{6 - quantity > 1 ? "s" : ""} de conseguir o frete grátis.
-                          </p>
-                        </div>
-
-                        {/* Para produto genérico com frete fixo */}
-                        <div className="border-2 rounded-lg p-4 border-orange-300 bg-orange-50/30">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                id="express"
-                                name="shipping"
-                                value="express"
-                                checked={true}
-                                readOnly
-                                className="pointer-events-none"
-                              />
-                              <div>
-                                <label htmlFor="express" className="font-medium">
-                                  Frete Expresso
-                                </label>
-                                <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
-                                <p className="text-xs text-gray-500">Valor fixo independente da quantidade</p>
-                              </div>
-                            </div>
-                            <span className="font-semibold">R$ 29,39</span>
-                          </div>
-                        </div>
-                      </>
-                    )
-                  }
-
-                  // Aviso sobre frete grátis quando já tem 6+ unidades (genérico)
-                  if (!isPersonalized && quantity >= 6) {
-                    return (
-                      <>
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-                          <p className="text-green-800 font-medium">
-                            🎉 <strong>Parabéns!</strong> Com {quantity} unidades, seu frete é <strong>GRÁTIS</strong>!
-                          </p>
-                        </div>
-
-                        <div className="border-2 rounded-lg p-4 border-green-300 bg-green-50/30">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                id="free-shipping"
-                                name="shipping"
-                                value="free"
-                                checked={true}
-                                readOnly
-                                className="pointer-events-none"
-                              />
-                              <div>
-                                <label htmlFor="free-shipping" className="font-medium">
-                                  Frete Grátis
-                                </label>
-                                <p className="text-sm text-gray-600">1 a 7 dias (Entrega)</p>
-                              </div>
-                            </div>
-                            <span className="font-semibold text-green-600">Grátis</span>
-                          </div>
-                        </div>
-                      </>
-                    )
-                  }
-
-                  // Para produtos personalizados (mantém a lógica existente)
-                  if (isPersonalized) {
-                    return (
-                      <>
-                        {/* Frete Grátis para produto personalizado */}
-                        <div
-                          className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                            shippingMethod === "standard"
-                              ? "border-green-300 bg-green-50/30"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                          onClick={() => setShippingMethod("standard")}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                id="standard"
-                                name="shipping"
-                                value="standard"
-                                checked={shippingMethod === "standard"}
-                                onChange={(e) => setShippingMethod(e.target.value)}
-                                className="pointer-events-none"
-                              />
-                              <div>
-                                <label htmlFor="standard" className="font-medium cursor-pointer">
-                                  Frete Grátis
-                                </label>
-                                <p className="text-sm text-gray-600">15 a 20 dias (Produção) + 4 a 12 dias (Entrega)</p>
-                              </div>
-                            </div>
-                            <span className="font-semibold text-green-600">Grátis</span>
-                          </div>
-                        </div>
-
-                        {/* Frete Expresso para produto personalizado - sempre disponível */}
-                        <div
-                          className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                            shippingMethod === "express"
-                              ? "border-orange-300 bg-orange-50/30"
-                              : "border-gray-200 hover:border-gray-300"
-                          }`}
-                          onClick={() => setShippingMethod("express")}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <input
-                                type="radio"
-                                id="express"
-                                name="shipping"
-                                value="express"
-                                checked={shippingMethod === "express"}
-                                onChange={(e) => setShippingMethod(e.target.value)}
-                                className="pointer-events-none"
-                              />
-                              <div>
-                                <label htmlFor="express" className="font-medium cursor-pointer">
-                                  Frete Expresso
-                                </label>
-                                <p className="text-sm text-gray-600">15 a 20 dias (Produção) + 1 a 3 dias (Entrega)</p>
-                              </div>
-                            </div>
-                            <span className="font-semibold">R$ 10,52</span>
-                          </div>
-                        </div>
-                      </>
-                    )
-                  }
-
-                  return null
-                })()}
-              </div>
-            )}
-
-            {/* Payment Method */}
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-2">Método de pagamento</h2>
-              <p className="text-sm text-gray-600 mb-4">Escolha o seu método de pagamento abaixo</p>
-
-              <div className="space-y-4">
-                {/* Credit Card Option */}
-                <div
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                    paymentMethod === "credit"
-                      ? "border-orange-300 bg-orange-50/30"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                  onClick={() => setPaymentMethod("credit")}
-                >
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        id="credit"
-                        name="payment"
-                        value="credit"
-                        checked={paymentMethod === "credit"}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="text-orange-500 pointer-events-none"
-                      />
-                      <label htmlFor="credit" className="font-medium cursor-pointer">
-                        Cartão de Crédito
-                      </label>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <img
-                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-visa%20%281%29.svg"
-                        alt="Visa"
-                        className={`h-5 transition-all duration-200 ${
-                          getCardType(cardData.number) === "visa"
-                            ? "opacity-100"
-                            : cardData.number.length > 0
-                              ? "opacity-30 grayscale"
-                              : "opacity-100"
-                        }`}
-                      />
-                      <img
-                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-mastercard%20%281%29.svg"
-                        alt="Mastercard"
-                        className={`h-5 transition-all duration-200 ${
-                          getCardType(cardData.number) === "mastercard"
-                            ? "opacity-100"
-                            : cardData.number.length > 0
-                              ? "opacity-30 grayscale"
-                              : "opacity-100"
-                        }`}
-                      />
-                      <img
-                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/amex.Csr7hRoy%20%281%29.svg"
-                        alt="Amex"
-                        className={`h-5 transition-all duration-200 ${
-                          getCardType(cardData.number) === "amex"
-                            ? "opacity-100"
-                            : cardData.number.length > 0
-                              ? "opacity-30 grayscale"
-                              : "opacity-100"
-                        }`}
-                      />
-                      <img
-                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/Comum/card-discover%20%281%29.svg"
-                        alt="Discover"
-                        className={`h-5 transition-all duration-200 ${
-                          getCardType(cardData.number) === "discover"
-                            ? "opacity-100"
-                            : cardData.number.length > 0
-                              ? "opacity-30 grayscale"
-                              : "opacity-100"
-                        }`}
-                      />
-                      <span className="text-xs text-gray-500 ml-1">E muito mais...</span>
-                    </div>
-                  </div>
-
-                  {/* Campos de cartão nativos - Layout Looneca */}
-                  {paymentMethod === "credit" && (
-                    <div className="space-y-4 mt-4">
-                      {/* Número do Cartão */}
-                      <div>
-                        <Label htmlFor="cardNumber" className="text-sm font-medium">
-                          Número do Cartão
-                        </Label>
-                        <input
-                          id="cardNumber"
-                          type="text"
-                          placeholder="0000 0000 0000 0000"
-                          value={cardData.number}
-                          onChange={(e) => {
-                            const formatted = formatCardNumber(e.target.value)
-                            setCardData((prev) => ({ ...prev, number: formatted }))
-                            setCardErrors((prev) => ({ ...prev, number: false }))
-                          }}
-                          maxLength={19}
-                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] ${
-                            cardErrors.number ? "border-red-500" : "border-gray-300"
-                          }`}
-                        />
-                      </div>
-
-                      {/* Nome no Cartão */}
-                      <div>
-                        <Label htmlFor="cardName" className="text-sm font-medium">
-                          Nome no Cartão
-                        </Label>
-                        <input
-                          id="cardName"
-                          type="text"
-                          placeholder="Nome como está no cartão"
-                          value={cardData.name}
-                          onChange={(e) => {
-                            setCardData((prev) => ({ ...prev, name: e.target.value.toUpperCase() }))
-                            setCardErrors((prev) => ({ ...prev, name: false }))
-                          }}
-                          className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] ${
-                            cardErrors.name ? "border-red-500" : "border-gray-300"
-                          }`}
-                        />
-                      </div>
-
-                      {/* Grid para Validade e CVV */}
-                      <div className="grid grid-cols-2 gap-4">
-                        <div>
-                          <Label htmlFor="cardExpiry" className="text-sm font-medium">
-                            Validade
-                          </Label>
-                          <input
-                            id="cardExpiry"
-                            type="text"
-                            placeholder="MM/AA"
-                            value={cardData.expiry}
-                            onChange={(e) => {
-                              const formatted = formatExpiryDate(e.target.value)
-                              setCardData((prev) => ({ ...prev, expiry: formatted }))
-                              setCardErrors((prev) => ({ ...prev, expiry: false }))
-                            }}
-                            maxLength={5}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] ${
-                              cardErrors.expiry ? "border-red-500" : "border-gray-300"
-                            }`}
-                          />
-                        </div>
-                        <div>
-                          <Label htmlFor="cardCvv" className="text-sm font-medium">
-                            CVV
-                          </Label>
-                          <input
-                            id="cardCvv"
-                            type="text"
-                            placeholder="123"
-                            value={cardData.cvv}
-                            onChange={(e) => {
-                              const formatted = formatCVV(e.target.value)
-                              setCardData((prev) => ({ ...prev, cvv: formatted }))
-                              setCardErrors((prev) => ({ ...prev, cvv: false }))
-                            }}
-                            maxLength={4}
-                            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] ${
-                              cardErrors.cvv ? "border-red-500" : "border-gray-300"
-                            }`}
-                          />
-                        </div>
-                      </div>
-
-                      {/* Select para Parcelas */}
-                      <div>
-                        <Label htmlFor="installments" className="text-sm font-medium">
-                          Parcelas
-                        </Label>
-                        <select
-                          id="installments"
-                          value={installments}
-                          onChange={(e) => setInstallments(e.target.value)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-[#F1542E] focus:border-[#F1542E] bg-white"
-                        >
-                          {installmentOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                        <p className="text-xs text-green-600 font-medium mt-1">Ate 3x sem juros</p>
-                      </div>
-
-
-                    </div>
-                  )}
-                </div>
-
-                {/* PIX temporariamente oculto — não remover */}
-                <div className="hidden">
-                {/* PIX temporariamente oculto — não remover */}
-                <div className="hidden">
-                {/* PIX Option */}
-                <div
-                  className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
-                    paymentMethod === "pix"
-                      ? "border-orange-300 bg-orange-50/30"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                  onClick={() => setPaymentMethod("pix")}
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="radio"
-                        id="pix"
-                        name="payment"
-                        value="pix"
-                        checked={paymentMethod === "pix"}
-                        onChange={(e) => setPaymentMethod(e.target.value)}
-                        className="pointer-events-none"
-                      />
-                      <label htmlFor="pix" className="font-medium cursor-pointer">
-                        PIX
-                      </label>
-                    </div>
-                    <img
-                      src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pix-pQeEaHw1QkFcUBY4A45g43gFx34OWl.svg"
-                      alt="PIX"
-                      className="h-5"
-                    />
-                  </div>
-
-                  {/* PIX Details - Show when selected */}
-                  {paymentMethod === "pix" && (
-                    <div className="mt-4 pt-4 border-t border-orange-200">
-                      <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-gray-800">PIX</h3>
-                        <img
-                          src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pix-pQeEaHw1QkFcUBY4A45g43gFx34OWl.svg"
-                          alt="PIX"
-                          className="h-5"
-                        />
-                      </div>
-
-                      <p className="text-sm text-gray-700 mb-4">Clique em "Finalizar Compra" para gerar o PIX.</p>
-
-                      <div className="bg-gray-50 p-3 rounded-lg">
-                        <h4 className="font-medium text-gray-800 mb-2">Informações sobre o pagamento via PIX:</h4>
-                        <ul className="text-sm text-gray-700 space-y-1">
-                          <li>• Valor à vista R$ {getShippingCost().toFixed(2).replace(".", ",")};</li>
-                          <li>
-                            • <strong>Não pode ser parcelado!</strong> Use cartão de crédito para parcelar sua compra;
-                          </li>
-                          <li>
-                            • Prazo de até <strong>30 minutos</strong> para compensar.
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 mt-4">
-                <Checkbox id="save-info" defaultChecked />
-                <label htmlFor="save-info" className="text-sm text-gray-600">
-                  Salvar minhas informações com segurança para compras futuras.
-                </label>
-              </div>
-            </div>
-
-            {/* Finalize Button */}
-            <Button
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-4 text-lg font-semibold mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
-              onClick={handleCheckout}
-              disabled={isProcessing || showPixPayment}
-            >
-              {isProcessing ? (paymentMethod === "pix" ? "Gerando PIX..." : "Processando...") : "Finalizar compra"}
-            </Button>
-
-            {checkoutMessage && (
-              <div
-                className={`p-4 rounded-lg mb-4 text-center ${
-                  checkoutMessage.type === "success"
-                    ? "bg-green-100 text-green-800 border border-green-200"
-                    : "bg-red-100 text-red-800 border border-red-200"
-                }`}
-              >
-                {checkoutMessage.text}
-              </div>
-            )}
-
-            {/* Terms and Security */}
-            <div className="text-center text-sm text-gray-600 space-y-2">
-              <p>
-                Ao prosseguir, você concorda com os <span className="text-orange-500 underline">Termos de Serviço</span>
-              </p>
-              <p>Petloo - Todos os direitos reservados</p>
-              <div className="flex justify-center mt-4">
-                <img
-                  src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-KSAVnVrLk1AvbhF07h55u42sGHYCX4.png"
-                  alt="Site Seguro"
-                  className="h-10"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column - Order Summary (Desktop Only) */}
-          <div className="hidden lg:block lg:order-2">
-            <div className="bg-white p-6 rounded-lg border sticky top-8">
-              <OrderSummaryContent
-                quantity={quantity}
-                setQuantity={handleQuantityChange}
-                shippingMethod={shippingMethod}
-                addressFound={addressFound}
-                personalizedTags={personalizedTags}
-                onEditTag={handleEditTag}
-                fromV2={fromV2}
-                v2Price={v2Price}
-                ofertaAtual={ofertaAtual}
-              />
-            </div>
-          </div>
+      {/* Top Navigation */}
+      <header className="fixed top-0 w-full z-50 bg-white/60 backdrop-blur-md flex items-center justify-between px-4 h-16">
+        <div>
+          <img alt="Petloo Logo" className="h-8 mx-auto" src="https://lh3.googleusercontent.com/aida/ADBb0uii_X6MTPokxaWskI04YdQINniANzfIcar5TFVKh7EQqzUPtXH4ydJOdD6gVByNfEVHCmdSHxwoP01Qh8h-EMSwVxakiKtQhPwyyKPxnTRjFldSZ5yLadfdGd8AIkMANq7emzE1H3rOP7lW-ReqxAu5smyDH-WIpLiBoid6CTp1Z7TGI3mqJphdv4wuL7Jafwalo6hAx16ePyZFTogsLyN_DZbpUkDO5EwZQqj8ZcQbTVnG080IYl80k1Dpl31iiV83jMlornuHoA" />
         </div>
+        <span className="material-symbols-outlined text-slate-500">lock</span>
+      </header>
 
-        {/* 🆕 POPUP PARA CONFIGURAR TAGS PERSONALIZADAS */}
-        <PersonalizedTagManager
-          isOpen={showTagManager}
-          onClose={() => {
-            setShowTagManager(false)
-            setEditingTagIndex(-1)
-          }}
-          tagIndex={editingTagIndex}
-          existingTag={
-            editingTagIndex >= 0 && editingTagIndex < personalizedTags.length
-              ? personalizedTags[editingTagIndex]
-              : undefined
-          }
-          onSaveTag={handleSaveTag}
-        />
+      <main className="mt-16 px-4 space-y-6 max-w-lg mx-auto">
 
-        {/* PIX Payment Interface */}
-        {showPixPayment && pixPaymentData && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
-              <div className="text-center space-y-6">
-                <h2 className="text-2xl font-bold text-gray-800">Pagamento via PIX</h2>
-
-                <div className="space-y-4">
-                  <p className="text-gray-600">Escaneie o QR Code abaixo com seu banco ou copie o código manual</p>
-
-                  {/* QR Code */}
-                  <div className="flex justify-center">
-                    <img
-                      src={`data:image/png;base64,${pixPaymentData.qr_code}`}
-                      alt="QR Code PIX"
-                      className="max-w-[300px] w-full h-auto border rounded-lg"
-                    />
-                  </div>
-
-                  {/* PIX Code */}
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700 block">Código PIX Copia e Cola:</label>
-                    <div className="relative">
-                      <Input
-                        type="text"
-                        value={pixPaymentData.qr_code_url}
-                        readOnly
-                        className="w-full p-3 border rounded-lg bg-gray-50"
-                      />
-                      <Button
-                        className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-md text-sm"
-                        onClick={() => copyToClipboard(pixPaymentData.qr_code_url)}
-                      >
-                        Copiar
-                      </Button>
+        {/* Order Summary */}
+        <section className="mt-4">
+          <div className="bg-[#f0f3ff] rounded-xl p-4 flex items-center justify-between border border-[rgba(143,112,105,0.15)] cursor-pointer" onClick={() => setIsOrderSummaryOpen(!isOrderSummaryOpen)}>
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-[#844981]">shopping_cart</span>
+              <span className="font-bold">Resumo do pedido</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-[#b02600]">R$ {total.toFixed(2).replace('.', ',')}</span>
+              <span className="material-symbols-outlined text-slate-400">{isOrderSummaryOpen ? 'expand_less' : 'expand_more'}</span>
+            </div>
+          </div>
+          {isOrderSummaryOpen && (
+            <div className="bg-white rounded-xl p-4 mt-2 border border-slate-100 space-y-6">
+              <div className="flex gap-4">
+                <img alt="Product" className="w-24 h-24 rounded-xl object-cover" src={productInfo?.image || "https://lh3.googleusercontent.com/aida/ADBb0uhrqbVYpQXAthxhCcxEXtqN0t9TI-tXui7he8xjYQVzDHonVEIc11BgWbuVJ_blEVqcQtneSy_DbdwA9LWSo0syJ5icUFLSFXoxn4JfJpIZY9xswvc_zoUbKqw-kOVU4se-WLOXSx0QX7Z5N0w2KHJ-RU6BynZxqHy8frxqFi2TGO5HWPFYYsIZB3sj8F0bcsO-29jqYHNJK86Cio4VbFfjkV3U2nAdNprDcrGjE9IMF7IydoVQNW7TbtD1_yhGY-MgLTkdPqiKMw"} />
+                <div className="flex-1">
+                  <div className="flex justify-between items-start">
+                    <h3 className="font-bold text-sm">{productInfo?.name || 'Kit de Proteção Lootag'}</h3>
+                    <div className="text-right">
+                      <p className="font-bold">R$ {(productInfo?.price || 89.87).toFixed(2).replace('.', ',')}</p>
+                      <p className="text-[10px] text-slate-400">1º mês grátis</p>
                     </div>
-                    {copyFeedback && <p className="text-green-600 text-sm">{copyFeedback}</p>}
+                  </div>
+                  <div className="flex items-center gap-3 mt-2">
+                    <div className="flex items-center border border-slate-200 rounded-full px-2 py-1 gap-4">
+                      <button className="text-slate-400 font-bold" onClick={(e) => { e.stopPropagation(); handleQuantityChange(quantity - 1); }}>-</button>
+                      <span className="font-bold text-sm">{quantity}</span>
+                      <button className="text-slate-400 font-bold" onClick={(e) => { e.stopPropagation(); handleQuantityChange(quantity + 1); }}>+</button>
+                    </div>
+                    <a className="text-[10px] text-slate-400 leading-tight underline" href="#" onClick={(e) => e.stopPropagation()}>Clique aqui para adicionar mais uma tag</a>
                   </div>
                 </div>
-
-                <p className="text-gray-600">
-                  O pagamento expira em:{" "}
-                  {new Date(pixPaymentData.expires_at).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "2-digit",
-                    year: "numeric",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
-                </p>
-
-                <Button
-                  className="w-full bg-gray-300 hover:bg-gray-400 text-gray-700 py-3 rounded-md"
-                  onClick={() => setShowPixPayment(false)}
-                >
-                  Fechar
-                </Button>
+              </div>
+              <div className="space-y-2 pt-4 border-t border-slate-100">
+                <div className="flex justify-between text-sm">
+                  <span className="font-bold">Produto ({quantity}x)</span>
+                  <span className="font-bold">R$ {((productInfo?.price || 89.87) * quantity).toFixed(2).replace('.', ',')}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="font-bold">Frete</span>
+                  <span className="font-bold text-emerald-600">{getShippingCost() === 0 ? 'Grátis' : `R$ ${getShippingCost().toFixed(2).replace('.', ',')}`}</span>
+                </div>
+                <div className="flex justify-between text-xl pt-2">
+                  <span className="font-black">Total</span>
+                  <span className="font-black">R$ {total.toFixed(2).replace('.', ',')}</span>
+                </div>
+                <p className="text-xs text-slate-400">Em até 3x sem juros</p>
               </div>
             </div>
+          )}
+        </section>
+
+        {/* Banner */}
+        <section className="w-full h-32 rounded-2xl overflow-hidden shadow-sm">
+          <img className="w-full h-full object-cover" alt="Pet Petloo" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1FKdcNwFYJH9mKUb0PnkjGP1zGNwCCOZ9f3umAQw-iF72ZUkwgA5J3dYrwAooB0xpwps11Vf6V2iJzwXqFnjs-FQpY5BkbbV-Ds17w4kT5i5h-4u9DUhm7mg2XE9N6xhrURTn6dkGixwh-ZadG76Qzs63Fub5emeDAgePDgBmzk7W-uwu0h6c_rylNfywH3x5MAISN-ZDB6MXaPUfUMG4p9WmzulryFLqeOjJuU4P0NingGOcPu5n9cBwNvJ28NwDnDURQBne3aI" />
+        </section>
+
+        {/* Personal Info */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-[#844981]/10 p-1.5 rounded-lg">
+              <span className="material-symbols-outlined text-[#844981] text-lg">person</span>
+            </span>
+            <h2 className="text-lg font-bold tracking-tight">Informações Pessoais</h2>
+          </div>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">E-mail</label>
+              <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4 focus:ring-2 focus:ring-[#b02600]/20" placeholder="seu@email.com" type="email" value={addressData.email || ''} onChange={(e) => setAddressData({ ...addressData, email: e.target.value })} />
+            </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Nome completo</label>
+              <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4 focus:ring-2 focus:ring-[#b02600]/20" placeholder="Como no documento" type="text" value={addressData.name || ''} onChange={(e) => setAddressData({ ...addressData, name: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Celular</label>
+                <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4 focus:ring-2 focus:ring-[#b02600]/20" placeholder="(00) 00000-0000" type="tel" value={addressData.phone || ''} onChange={(e) => setAddressData({ ...addressData, phone: formatPhone(e.target.value) })} />
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">CPF</label>
+                <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4 focus:ring-2 focus:ring-[#b02600]/20" placeholder="000.000.000-00" type="text" value={addressData.cpf || ''} onChange={(e) => setAddressData({ ...addressData, cpf: formatCPF(e.target.value) })} />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Delivery Info */}
+        <section className="space-y-4">
+          <div className="flex items-center gap-2 mb-2">
+            <span className="bg-[#844981]/10 p-1.5 rounded-lg">
+              <span className="material-symbols-outlined text-[#844981] text-lg">local_shipping</span>
+            </span>
+            <h2 className="text-lg font-bold tracking-tight">Informações de Entrega</h2>
+          </div>
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">CEP</label>
+              <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4 focus:ring-2 focus:ring-[#b02600]/20" placeholder="00000-000" type="text" value={addressData.cep || ''} onChange={(e) => setAddressData({ ...addressData, cep: formatCEP(e.target.value) })} onBlur={(e) => handleAddressFound(e.target.value)} />
+            </div>
+            {addressFound && (
+              <div className="space-y-3">
+                <div className="space-y-1">
+                  <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Endereço</label>
+                  <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4" value={addressData.street || ''} onChange={(e) => setAddressData({ ...addressData, street: e.target.value })} placeholder="Rua, Avenida..." />
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Número</label>
+                    <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4" value={addressData.number || ''} onChange={(e) => setAddressData({ ...addressData, number: e.target.value })} placeholder="Nº" />
+                  </div>
+                  <div className="col-span-2 space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Complemento</label>
+                    <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4" value={addressData.complement || ''} onChange={(e) => setAddressData({ ...addressData, complement: e.target.value })} placeholder="Apto, bloco..." />
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Cidade</label>
+                    <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4" value={addressData.city || ''} onChange={(e) => setAddressData({ ...addressData, city: e.target.value })} placeholder="Cidade" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-500 uppercase tracking-wider ml-1">Estado</label>
+                    <Input className="w-full h-14 bg-[#f0f3ff] border-none rounded-xl px-4" value={addressData.state || ''} onChange={(e) => setAddressData({ ...addressData, state: e.target.value })} placeholder="UF" />
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* Payment */}
+        <section className="space-y-4">
+          <div className="space-y-1 mb-4">
+            <h2 className="text-2xl font-bold tracking-tight">Método de pagamento</h2>
+            <p className="text-sm text-slate-500">Escolha o seu método de pagamento abaixo</p>
+          </div>
+          <div className="rounded-2xl border-2 border-[#FADBB2] p-5 space-y-5 bg-white">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full border-4 border-[#b02600] flex items-center justify-center">
+                  <div className="w-2 h-2 rounded-full bg-[#b02600]"></div>
+                </div>
+                <span className="font-bold text-lg">Cartão de Crédito</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <img alt="Visa" className="h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCEgPZ4VkmlDAGLP7hPfluJncDRZugcpiQQvxsJAmtZkZ86WHWP0xapCVk9bFRmZL9HjkZv5HVcBGgEOK_2lRl-Ui5-kK_5YiqDuOjextq5y8AHdxtis14G3WM0RToA-7WWsTwekkmWmKoLEQfjEhHpcVc7DWdSu6iZGM1B4wC14pSdn7NWWFw0YaIOwpe0uOfJ3N91pai-XYVRb2uS7miT-kQsw_etCfG1wO67JgkN1mPmg7mdid_A2iXyTL1GsOKSnZPZ4icJ_c" />
+                <img alt="Mastercard" className="h-4" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAKEvvUViVaaNvOaNBFTLm9U_siOzIjF2cP_-Py9K2mbtdOCJ6bx4aGyavrl65ciXCYrb2B4dHuqz1MXnYCBOZ5sXePvWBm_VGXaEWES_L1R8I-XMRR3OjHSizBiugWvxYNYxT35gW0k7nLKGSxBGde6N31TsBZtTwiyF6fuOC0mCbgUzxtcE6ZA89_Y9Rl-2ywRHoYtgSjlZc-1ZZnjZJIf9pheCoaSGgGtLxKqWitaw1UHX_PlFe6eN7aiqbGzD6HTjCAhZhDoM4" />
+                <div className="bg-[#0170ad] text-white text-[8px] font-bold px-1 rounded-sm flex items-center h-4">AMEX</div>
+                <div className="bg-[#f48221] text-white text-[8px] font-bold px-1 rounded-sm flex items-center h-4">Discover</div>
+                <span className="text-[10px] text-slate-400 ml-1">E muito mais...</span>
+              </div>
+            </div>
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold ml-1">Número do Cartão</label>
+                <Input className="w-full h-14 bg-white border border-slate-200 rounded-xl px-4 placeholder-slate-300 focus:ring-2 focus:ring-[#b02600]/20" placeholder="0000 0000 0000 0000" type="text" value={cardData.number || ''} onChange={(e) => setCardData({ ...cardData, number: formatCardNumber(e.target.value) })} maxLength={19} />
+                {cardErrors.number && <p className="text-xs text-red-500 ml-1">{cardErrors.number}</p>}
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold ml-1">Nome no Cartão</label>
+                <Input className="w-full h-14 bg-white border border-slate-200 rounded-xl px-4 placeholder-slate-300 focus:ring-2 focus:ring-[#b02600]/20" placeholder="Nome como está no cartão" type="text" value={cardData.name || ''} onChange={(e) => setCardData({ ...cardData, name: e.target.value })} />
+                {cardErrors.name && <p className="text-xs text-red-500 ml-1">{cardErrors.name}</p>}
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold ml-1">Validade</label>
+                  <Input className="w-full h-14 bg-white border border-slate-200 rounded-xl px-4 placeholder-slate-300 focus:ring-2 focus:ring-[#b02600]/20" placeholder="MM/AA" type="text" value={cardData.expiry || ''} onChange={(e) => setCardData({ ...cardData, expiry: formatExpiryDate(e.target.value) })} maxLength={5} />
+                  {cardErrors.expiry && <p className="text-xs text-red-500 ml-1">{cardErrors.expiry}</p>}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-bold ml-1">CVV</label>
+                  <Input className="w-full h-14 bg-white border border-slate-200 rounded-xl px-4 placeholder-slate-300 focus:ring-2 focus:ring-[#b02600]/20" placeholder="123" type="text" value={cardData.cvv || ''} onChange={(e) => setCardData({ ...cardData, cvv: formatCVV(e.target.value) })} maxLength={4} />
+                  {cardErrors.cvv && <p className="text-xs text-red-500 ml-1">{cardErrors.cvv}</p>}
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-sm font-bold ml-1">Parcelas</label>
+                <div className="relative">
+                  <select className="w-full h-14 bg-white border border-slate-200 rounded-xl px-4 appearance-none focus:ring-2 focus:ring-[#b02600]/20" value={installments} onChange={(e) => setInstallments(Number(e.target.value))}>
+                    {installmentOptions.map((opt: { value: number; label: string }) => (
+                      <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    ))}
+                  </select>
+                  <span className="absolute right-4 top-4 material-symbols-outlined text-slate-500 pointer-events-none">expand_more</span>
+                </div>
+                <p className="text-xs font-bold text-emerald-600 ml-1">Até 3x sem juros</p>
+              </div>
+            </div>
+          </div>
+          {/* PIX temporariamente oculto — não remover */}
+          <div className="hidden">
+            <div className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${paymentMethod === "pix" ? "border-orange-300 bg-orange-50/30" : "border-gray-200 hover:border-gray-300"}`} onClick={() => setPaymentMethod("pix")}>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <input type="radio" id="pix" name="payment" value="pix" checked={paymentMethod === "pix"} onChange={(e) => setPaymentMethod(e.target.value)} className="pointer-events-none" />
+                  <label htmlFor="pix" className="font-medium cursor-pointer">PIX</label>
+                </div>
+                <img src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/pix-pQeEaHw1QkFcUBY4A45g43gFx34OWl.svg" alt="PIX" className="h-5" />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Testimonials */}
+        <section className="space-y-4 pt-4">
+          <h3 className="text-center font-bold text-sm uppercase tracking-widest text-slate-400">O que dizem os tutores</h3>
+          <div className="space-y-3">
+            {[
+              { name: 'Mariana Costa', text: 'O Petloo mudou a rotina do meu cachorro, agora ele se sente muito mais seguro!', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCPIdGD_mli54QvgHMRyzFAPbAjULDdIv85RhUhsaNOe0_utq1D_ru7E5410ope1i7WCvkZ2aGh7wzwAX3sZj6VTIl5JFqB8z59ro2KZdzhXqdJSPPmiHfTaNbfj3T4YMaPjyR7W3VBfiD2e-zmjsg1XS6NAhbuRfm1U9FRV4nqi1VFqpc28D7Okxazhi3RAGeyFSQUSnFHgcSjmYnzFj3Z2Rm8QnsuGUCnt-55JfBWlix9XHb3rG1zwYbX1azooPpKo26xqDfEFK8' },
+              { name: 'Ricardo Alves', text: 'Entrega super rápida e o material é de altíssima qualidade. Recomendo demais.', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCmOgO3-TfarsmxNICcsymR6UVIVUK9qbWSgp_LBum5rWcAJzgRFGvNyh4E9kkRqVlAjewWZJGLgsvS6wC8oHwz1Qsrmz4GMbn9Pro1tJKm_Dt7544zQ6lhXc6BQ_PWyoXmZJGkF_23QG5Zg7dHGp8gIIq5KSKyKuar2x-Aeh1MWWcCaltoguQms9txmrrntSvyImiOXJ0ezGtNsEtf7m_sWg43sp1Zz2kSh5TQut119Da32LZUJDVp4a7T_R5bakmzlrLxc2unVoQ' },
+              { name: 'Julia Mendes', text: 'Meu gatinho amou o novo cantinho. Finalmente um produto que pensa no bem-estar!', img: 'https://lh3.googleusercontent.com/aida-public/AB6AXuA4Kh0FSb7L6PmvUYdL5kkkwFOqxOHDN4BEg1NBRyVE1df3QpSR1lF3hOG096xdinaYNZ--Xue4raEjsJ8b5Ufh08ipL1VlKGJ477g2abDo095JmWVMSciKxtHxgADUrZHXtLQfVwQNjEE_0_EBDKkGwHW5mViim-AXAxbmW13vaxV_bpA0_36dHMkykN5BugCuWC_dpnKriNPBqPygyJutBsWhPIVGSsa7QlT0RBmGZO548OEgtCglkDVxnmT3pcapQV9TKf2Y2ws' }
+            ].map((t) => (
+              <div key={t.name} className="bg-white p-4 rounded-2xl shadow-sm border border-[rgba(143,112,105,0.15)] flex gap-4">
+                <div className="w-12 h-12 rounded-full overflow-hidden shrink-0 border-2 border-[#b02600]/10">
+                  <img className="w-full h-full object-cover" src={t.img} alt={t.name} />
+                </div>
+                <div>
+                  <div className="flex text-amber-400 text-xs mb-1">{'★★★★★'.split('').map((_, i) => <span key={i} className="text-amber-400">★</span>)}</div>
+                  <p className="text-xs italic leading-relaxed">"{t.text}"</p>
+                  <p className="text-[10px] font-bold text-[#844981] mt-1">— {t.name}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Guarantee */}
+        <section className="bg-[#b02600]/5 rounded-3xl p-6 border-2 border-dashed border-[#b02600]/20 text-center space-y-3">
+          <div className="w-16 h-16 bg-[#b02600]/10 rounded-full flex items-center justify-center mx-auto">
+            <span className="material-symbols-outlined text-[#b02600] text-3xl">verified_user</span>
+          </div>
+          <h4 className="font-black text-[#b02600] text-lg">30 Dias de Garantia</h4>
+          <p className="text-sm text-slate-500 leading-relaxed">Se você não estiver satisfeito com o produto, devolvemos seu dinheiro integralmente em até 30 dias. Risco zero para você!</p>
+        </section>
+
+        {checkoutMessage && (
+          <div className={`p-4 rounded-xl text-sm font-medium ${checkoutMessage.type === 'error' ? 'bg-red-50 text-red-600 border border-red-200' : 'bg-emerald-50 text-emerald-600 border border-emerald-200'}`}>
+            {checkoutMessage.text}
           </div>
         )}
-      </div>
+      </main>
+
+      {/* Fixed Footer CTA */}
+      <footer className="fixed bottom-0 left-0 w-full z-50 bg-white/95 backdrop-blur-md px-4 pt-4 pb-8 shadow-[0_-8px_30px_rgb(0,0,0,0.06)] border-t border-slate-100">
+        <div className="max-w-lg mx-auto space-y-3">
+          <Button
+            className="w-full h-16 text-white font-black text-lg rounded-2xl shadow-lg flex items-center justify-center gap-2 active:scale-95 transition-transform"
+            style={{background: 'linear-gradient(to right, #b02600, #d43f1b)'}}
+            onClick={handleCheckout}
+            disabled={isProcessing}
+          >
+            {isProcessing ? 'Processando...' : 'Finalizar Compra'}
+            {!isProcessing && <span className="material-symbols-outlined">chevron_right</span>}
+          </Button>
+          <div className="flex flex-col items-center gap-1">
+            <div className="flex items-center gap-1.5 text-emerald-600">
+              <span className="material-symbols-outlined text-sm">shield</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest">Site Seguro</span>
+            </div>
+            <p className="text-[10px] text-slate-400 text-center px-6 leading-tight">Ao finalizar, você concorda com nossos Termos de Serviço e Política de Privacidade.</p>
+          </div>
+        </div>
+      </footer>
+
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&display=swap" />
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" />
     </div>
   )
 }
