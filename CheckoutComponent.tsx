@@ -2233,6 +2233,8 @@ function CheckoutForm({
                   )}
                 </div>
 
+                {/* PIX temporariamente oculto — não remover */}
+                <div className="hidden">
                 {/* PIX Option */}
                 <div
                   className={`border-2 rounded-lg p-4 cursor-pointer transition-colors ${
@@ -2292,6 +2294,7 @@ function CheckoutForm({
                       </div>
                     </div>
                   )}
+                </div>
                 </div>
               </div>
 
