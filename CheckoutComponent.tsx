@@ -1,4 +1,4 @@
-"use lient"
+"use client"
 
 // Declaração de tipos para variáveis globais (Facebook Pixel e GTM)
 declare global {
