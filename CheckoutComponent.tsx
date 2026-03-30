@@ -2349,6 +2349,53 @@ function CheckoutForm({
                 />
               </div>
             </div>
+
+              {/* Depoimentos - Provas Sociais */}
+              <div className="mt-6 space-y-4">
+                <h3 className="text-center text-sm font-semibold text-gray-500 uppercase tracking-widest">O que dizem os tutores</h3>
+
+                {/* Depoimento 1 */}
+                <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                      <img src="/placeholder.svg" alt="Mariana Costa" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
+                    <p className="text-gray-700 text-sm italic leading-snug">"O Petloo mudou a rotina do meu cachorro, agora ele se sente muito mais seguro!"</p>
+                    <p className="text-orange-500 text-sm font-semibold mt-1">— Mariana Costa</p>
+                  </div>
+                </div>
+
+                {/* Depoimento 2 */}
+                <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                      <img src="/placeholder.svg" alt="Ricardo Alves" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
+                    <p className="text-gray-700 text-sm italic leading-snug">"Entrega super rápida e o material é de altíssima qualidade. Recomendo demais."</p>
+                    <p className="text-orange-500 text-sm font-semibold mt-1">— Ricardo Alves</p>
+                  </div>
+                </div>
+
+                {/* Depoimento 3 */}
+                <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                      <img src="/placeholder.svg" alt="Julia Mendes" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
+                    <p className="text-gray-700 text-sm italic leading-snug">"Meu gatinho amou o novo cantinho. Finalmente um produto que pensa no bem-estar!"</p>
+                    <p className="text-orange-500 text-sm font-semibold mt-1">— Julia Mendes</p>
+                  </div>
+                </div>
+              </div>
           </div>
 
           {/* Right Column - Order Summary (Desktop Only) */}
@@ -2365,7 +2412,54 @@ function CheckoutForm({
                 v2Price={v2Price}
                 ofertaAtual={ofertaAtual}
               />
-            </div>
+            
+
+              {/* Depoimentos - Provas Sociais */}
+              <div className="mt-6 space-y-4">
+                <h3 className="text-center text-sm font-semibold text-gray-500 uppercase tracking-widest">O que dizem os tutores</h3>
+
+                {/* Depoimento 1 */}
+                <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                      <img src="/placeholder.svg" alt="Mariana Costa" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
+                    <p className="text-gray-700 text-sm italic leading-snug">"O Petloo mudou a rotina do meu cachorro, agora ele se sente muito mais seguro!"</p>
+                    <p className="text-orange-500 text-sm font-semibold mt-1">— Mariana Costa</p>
+                  </div>
+                </div>
+
+                {/* Depoimento 2 */}
+                <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                      <img src="/placeholder.svg" alt="Ricardo Alves" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
+                    <p className="text-gray-700 text-sm italic leading-snug">"Entrega super rápida e o material é de altíssima qualidade. Recomendo demais."</p>
+                    <p className="text-orange-500 text-sm font-semibold mt-1">— Ricardo Alves</p>
+                  </div>
+                </div>
+
+                {/* Depoimento 3 */}
+                <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
+                  <div className="flex-shrink-0">
+                    <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
+                      <img src="/placeholder.svg" alt="Julia Mendes" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; e.currentTarget.parentElement.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
+                    <p className="text-gray-700 text-sm italic leading-snug">"Meu gatinho amou o novo cantinho. Finalmente um produto que pensa no bem-estar!"</p>
+                    <p className="text-orange-500 text-sm font-semibold mt-1">— Julia Mendes</p>
+                  </div>
+                </div>
+              </div></div>
           </div>
         </div>
 
