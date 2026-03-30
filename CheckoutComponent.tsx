@@ -1,4 +1,4 @@
-"use client"
+"use lient"
 
 // Declaração de tipos para variáveis globais (Facebook Pixel e GTM)
 declare global {
@@ -7,7 +7,7 @@ declare global {
       action: string,
       event: string,
       params?: Record<string, unknown>,
-      userData?: Record<string, unknown>
+      userData?: Record<string, unknown
     ) => void
     dataLayer: Array<Record<string, unknown>>
   }
@@ -2333,7 +2333,7 @@ function CheckoutForm({
             {/* Terms and Security */}
             <div className="text-center text-sm text-gray-600 space-y-2">
               <p>
-                Ao prosseguir, você concorda com os <span className="text-orange-500 underline">Termos de Serviço</span>
+                Ao prosseguir, você concorda com os <a href="https://tag.petloo.com.br/termos-de-uso-LooTag" target="_blank" rel="noopener noreferrer" className="text-orange-500 underline">Termos de Serviço</a>
               </p>
               <p>Petloo - Todos os direitos reservados</p>
               <div className="flex justify-center mt-4">
