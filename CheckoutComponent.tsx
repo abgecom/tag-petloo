@@ -7,7 +7,7 @@ declare global {
       action: string,
       event: string,
       params?: Record<string, unknown>,
-      userData?: Record<string, unknown
+      userData?: Record<string, unknown>,
     ) => void
     dataLayer: Array<Record<string, unknown>>
   }
