@@ -1607,6 +1607,15 @@ function CheckoutForm({
       {/* Lead Capture Tracker - Captures leads when user fills form */}
       <LeadCaptureTracker />
 
+      {/* Petloo Logo - Topo */}
+      <div className="w-full py-4 flex justify-center bg-white">
+        <img
+          src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Petloosemfundo%202-wiHpYOGK6l8BekDtGwMXaJxrq0maQN.png"
+          alt="Petloo Logo"
+          className="h-12"
+        />
+      </div>
+
       <div className="max-w-7xl mx-auto p-4 lg:p-8">
         <div className="lg:grid lg:grid-cols-2 lg:gap-12">
           {/* Left Column - Forms (Desktop) / Main Content (Mobile) */}
@@ -1645,13 +1654,9 @@ function CheckoutForm({
               )}
             </div>
 
-            {/* Petloo Logo */}
-            <div className="mb-8 text-center lg:text-left">
-              <img
-                src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Petloosemfundo%202-wiHpYOGK6l8BekDtGwMXaJxrq0maQN.png"
-                alt="Petloo Logo"
-                className="h-12 mx-auto lg:mx-0"
-              />
+            {/* Mini Banner */}
+            <div className="mb-8 w-full rounded-lg overflow-hidden bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center" style={{minHeight: '80px'}}>
+              <span className="text-gray-400 text-sm font-medium">[ Mini Banner ]</span>
             </div>
 
             {/* Personal Information */}
