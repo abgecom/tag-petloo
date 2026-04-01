@@ -2364,13 +2364,13 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-mariana.jpg" alt="Mariana Costa" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-mariana.jpg" alt="Rodrigo T." className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
-                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;O Petloo mudou a rotina do meu cachorro, agora ele se sente muito mais seguro!&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— Mariana Costa</p>
+                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;O sistema me avisou na hora que a Luna saiu do quintal. Encontrei ela a três quarteirões de casa, graças a Deus!! (e a tag, rs)&rdquo;</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— Rodrigo T., tutor do Luna 🐶</p>
                     </div>
                   </div>
 
@@ -2378,13 +2378,13 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="/placeholder.svg" alt="Ricardo Alves" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="/placeholder.svg" alt="Camila F." className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
-                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;Entrega super rápida e o material é de altíssima qualidade. Recomendo demais.&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— Ricardo Alves</p>
+                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;Meu gato sai pra passear todo dia. Com a tag, abro o app e já sei onde ele está em segundos. Paz total!&rdquo;</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— Camila F., tutora do Bento 🐱</p>
                     </div>
                   </div>
 
@@ -2392,13 +2392,13 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-julia.jpg%20.png" alt="Julia Mendes" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-julia.jpg%20.png" alt="André M." className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
-                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;Meu gatinho amou o novo cantinho. Finalmente um produto que pensa no bem-estar!&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— Julia Mendes</p>
+                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;É muito bom ter meu cachorro rastreado em tempo real. Melhor investimento que fiz por ele.&rdquo;</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— André M., tutor do Rex 🐶</p>
                     </div>
                   </div>
                 </div>
@@ -2430,13 +2430,13 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-mariana.jpg" alt="Mariana Costa" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-mariana.jpg" alt="Rodrigo T." className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
-                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;O Petloo mudou a rotina do meu cachorro, agora ele se sente muito mais seguro!&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— Mariana Costa</p>
+                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;O sistema me avisou na hora que a Luna saiu do quintal. Encontrei ela a três quarteirões de casa, graças a Deus!! (e a tag, rs)&rdquo;</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— Rodrigo T., tutor do Luna 🐶</p>
                     </div>
                   </div>
 
@@ -2444,13 +2444,13 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="/placeholder.svg" alt="Ricardo Alves" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="/placeholder.svg" alt="Camila F." className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
-                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;Entrega super rápida e o material é de altíssima qualidade. Recomendo demais.&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— Ricardo Alves</p>
+                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;Meu gato sai pra passear todo dia. Com a tag, abro o app e já sei onde ele está em segundos. Paz total!&rdquo;</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— Camila F., tutora do Bento 🐱</p>
                     </div>
                   </div>
 
@@ -2458,13 +2458,13 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-julia.jpg%20.png" alt="Julia Mendes" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-julia.jpg%20.png" alt="André M." className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
-                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;Meu gatinho amou o novo cantinho. Finalmente um produto que pensa no bem-estar!&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— Julia Mendes</p>
+                      <p className="text-gray-700 text-sm italic leading-snug">&ldquo;É muito bom ter meu cachorro rastreado em tempo real. Melhor investimento que fiz por ele.&rdquo;</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— André M., tutor do Rex 🐶</p>
                     </div>
                   </div>
                 </div>
