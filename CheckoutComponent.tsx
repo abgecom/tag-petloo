@@ -1655,8 +1655,13 @@ function CheckoutForm({
             </div>
 
             {/* Mini Banner */}
-            <div className="mb-8 w-full rounded-lg overflow-hidden bg-gray-100 border border-dashed border-gray-300 flex items-center justify-center" style={{minHeight: '80px'}}>
-              <span className="text-gray-400 text-sm font-medium">[ Mini Banner ]</span>
+            <div className="mb-8 w-full rounded-lg overflow-hidden" style={{minHeight: '80px'}}>
+              <img
+                src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/checkout-banner.jpg"
+                alt="Petloo - A liberdade que seu pet ama"
+                className="w-full h-full object-cover"
+                style={{minHeight: '80px'}}
+              />
             </div>
 
             {/* Personal Information */}
@@ -2359,7 +2364,7 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="/placeholder.svg" alt="Mariana Costa" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-mariana.jpg" alt="Mariana Costa" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -2387,7 +2392,7 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="/placeholder.svg" alt="Julia Mendes" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-julia.jpg%20.png" alt="Julia Mendes" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -2425,7 +2430,7 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="/placeholder.svg" alt="Mariana Costa" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-mariana.jpg" alt="Mariana Costa" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
@@ -2453,7 +2458,7 @@ function CheckoutForm({
                   <div className="bg-white border border-gray-100 rounded-xl p-4 flex gap-3 shadow-sm">
                     <div className="flex-shrink-0">
                       <div className="w-12 h-12 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center">
-                        <img src="/placeholder.svg" alt="Julia Mendes" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
+                        <img src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/depoimento-julia.jpg%20.png" alt="Julia Mendes" className="w-full h-full object-cover" onError={(e) => { e.currentTarget.style.display='none'; const p = e.currentTarget.parentElement; if(p) p.innerHTML='<span class=\"text-gray-400 text-xl\">👤</span>'; }} />
                       </div>
                     </div>
                     <div className="flex-1 min-w-0">
