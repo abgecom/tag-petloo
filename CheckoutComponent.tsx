@@ -2370,7 +2370,7 @@ function CheckoutForm({
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
                       <p className="text-gray-700 text-sm italic leading-snug">&ldquo;O sistema me avisou na hora que a Luna saiu do quintal. Encontrei ela a três quarteirões de casa, graças a Deus!! (e a tag, rs)&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— Rodrigo T., tutor do Luna 🐶</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— Mariana T., tutora da Luna 🐶</p>
                     </div>
                   </div>
 
@@ -2398,7 +2398,7 @@ function CheckoutForm({
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
                       <p className="text-gray-700 text-sm italic leading-snug">&ldquo;É muito bom ter meu cachorro rastreado em tempo real. Melhor investimento que fiz por ele.&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— André M., tutor do Rex 🐶</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— Julia M., tutora do Rex 🐶</p>
                     </div>
                   </div>
                 </div>
@@ -2436,7 +2436,7 @@ function CheckoutForm({
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
                       <p className="text-gray-700 text-sm italic leading-snug">&ldquo;O sistema me avisou na hora que a Luna saiu do quintal. Encontrei ela a três quarteirões de casa, graças a Deus!! (e a tag, rs)&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— Rodrigo T., tutor do Luna 🐶</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— Mariana T., tutora da Luna 🐶</p>
                     </div>
                   </div>
 
@@ -2464,7 +2464,7 @@ function CheckoutForm({
                     <div className="flex-1 min-w-0">
                       <div className="flex text-orange-500 text-sm mb-1">★★★★★</div>
                       <p className="text-gray-700 text-sm italic leading-snug">&ldquo;É muito bom ter meu cachorro rastreado em tempo real. Melhor investimento que fiz por ele.&rdquo;</p>
-                      <p className="text-orange-500 text-sm font-semibold mt-1">— André M., tutor do Rex 🐶</p>
+                      <p className="text-orange-500 text-sm font-semibold mt-1">— Julia M., tutora do Rex 🐶</p>
                     </div>
                   </div>
                 </div>
