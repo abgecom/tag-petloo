@@ -13,7 +13,7 @@ declare global {
 }
 
 import { useState, useEffect } from "react"
-import { ChevronUp, ChevronDown, Minus, Plus, Edit2 } from "lucide-react"
+import { ChevronUp, ChevronDown, Minus, Plus, Edit2, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -95,6 +95,7 @@ function OrderSummaryContent({
   addressFound,
   personalizedTags,
   onEditTag,
+  onRemoveTag,
   fromV2,
   v2Price,
   ofertaAtual,
@@ -106,6 +107,7 @@ function OrderSummaryContent({
   addressFound: boolean
   personalizedTags: PersonalizedTag[]
   onEditTag: (index: number) => void
+  onRemoveTag: (index: number) => void
   fromV2?: boolean
   v2Price?: number | null
   ofertaAtual?: { nome: string; parcelas: number; freteGratis: boolean } | null
@@ -115,19 +117,17 @@ function OrderSummaryContent({
   const getShippingCost = () => {
     // Calcular frete baseado no método selecionado
     const getShippingPrice = () => {
+      if (shippingMethod === "standard") return 0 // Frete grátis só no método standard
       if (shippingMethod === "standard" && quantity >= 2) return 0 // Frete Grátis
       if (shippingMethod === "loggi") return 15.83
       if (shippingMethod === "sedex") return 28.75
-      // Fallback: se for 1 unidade e tentou standard, cobrar loggi
       return 15.83
     }
 
-    // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas
-    if (personalizedTags.length > 0) {
-      const firstTagPrice = personalizedTags[0].price / 100
-      const additionalTagsPrice = (personalizedTags.length - 1) * 9.9
-      const totalProductPrice = firstTagPrice + additionalTagsPrice
-
+    // Tags personalizadas reais (excluir orderbumps)
+    const realTagsForCost = personalizedTags.filter(t => t.id !== "tag-upgrade" && t.id !== "tag-bump")
+    if (realTagsForCost.length > 0) {
+      const totalProductPrice = realTagsForCost.reduce((sum, tag) => sum + tag.price, 0) / 100
       if (!addressFound) return totalProductPrice
       return totalProductPrice + getShippingPrice()
     }
@@ -149,7 +149,7 @@ function OrderSummaryContent({
     if (isPersonalized) {
       const data = JSON.parse(personalizedData)
       const basePrice = data.amount / 100
-      const additionalPrice = (quantity - 1) * 9.9
+      const additionalPrice = (quantity - 1) * (basePrice / 2) // Adicionais = metade do plano
       const totalProductPrice = basePrice + additionalPrice
 
       if (!addressFound) return totalProductPrice
@@ -158,8 +158,9 @@ function OrderSummaryContent({
 
     if (!addressFound) return 0
 
-    // Para produtos genéricos
-    const productPrice = (quantity - 1) * 9.9
+    // Para produtos genéricos (legacy)
+    const basePriceFallback = v2Price || 89.87
+    const productPrice = (quantity - 1) * (basePriceFallback / 2)
     return productPrice + getShippingPrice()
   }
 
@@ -173,35 +174,42 @@ function OrderSummaryContent({
 
   // Calcular frete baseado no método selecionado
   const getDisplayShippingPrice = () => {
+    if (shippingMethod === "standard") return 0 // Frete grátis só no método standard
     if (shippingMethod === "standard" && quantity >= 2) return 0
     if (shippingMethod === "loggi") return 15.83
     if (shippingMethod === "sedex") return 28.75
     return 15.83 // Fallback
   }
 
-  // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas
-  if (personalizedTags.length > 0) {
-    isPersonalized = true
-    productPrice = personalizedTags.reduce((sum, tag) => sum + tag.price, 0) / 100 // Converter centavos para reais
+  // Separar tags reais (do fluxo Premium) de tags de orderbump
+  const realTags = personalizedTags.filter(t => t.id !== "tag-upgrade" && t.id !== "tag-bump")
 
-    // Calcular frete separadamente
-    if (addressFound) {
-      shippingPrice = getDisplayShippingPrice()
+  // Calcular preço do PRODUTO (sem orderbumps)
+  if (fromV2 && v2Price) {
+    // Ofertas v2/v3: preço do plano × quantidade de tags reais
+    const realQty = Math.max(quantity, 1)
+    if (realTags.length > 0) {
+      // Premium com tags personalizadas: somar preços das tags reais
+      productPrice = realTags.reduce((sum, tag) => sum + tag.price, 0) / 100
+      isPersonalized = true
+    } else {
+      // Essencial/Completo/Kit: preço fixo do plano
+      productPrice = v2Price * realQty
     }
+    shippingPrice = addressFound ? getDisplayShippingPrice() : 0
+  } else if (personalizedTags.length > 0 && realTags.length > 0) {
+    isPersonalized = true
+    productPrice = realTags.reduce((sum, tag) => sum + tag.price, 0) / 100
+    if (addressFound) shippingPrice = getDisplayShippingPrice()
   } else if (personalizedProductData) {
     try {
       const data = JSON.parse(personalizedProductData)
       isPersonalized = !!(data.color && data.amount && data.petName)
-
       if (isPersonalized) {
         const basePrice = data.amount / 100
-        const additionalPrice = (quantity - 1) * 9.9
+        const additionalPrice = (quantity - 1) * (basePrice / 2)
         productPrice = basePrice + additionalPrice
-
-        // Calcular frete separadamente
-        if (addressFound) {
-          shippingPrice = getDisplayShippingPrice()
-        }
+        if (addressFound) shippingPrice = getDisplayShippingPrice()
       }
     } catch (error) {
       console.error("Erro ao parsear produto personalizado:", error)
@@ -209,14 +217,11 @@ function OrderSummaryContent({
     }
   }
 
-  // 🆕 NOVA LÓGICA PARA PRODUTO GENÉRICO
-  if (!isPersonalized) {
-    if (fromV2 && v2Price) {
-      productPrice = v2Price * quantity
-      shippingPrice = addressFound ? getDisplayShippingPrice() : 0
-    } else if (addressFound) {
-      // Produto: primeira unidade grátis, demais R$ 9,90
-      productPrice = (quantity - 1) * 9.9
+  // Fallback para produto genérico (sem v2, sem personalização)
+  if (productPrice === 0 && !fromV2 && !isPersonalized) {
+    if (addressFound) {
+      const basePriceFallback = 89.87
+      productPrice = (quantity - 1) * (basePriceFallback / 2)
       shippingPrice = getDisplayShippingPrice()
     }
   }
@@ -233,10 +238,8 @@ function OrderSummaryContent({
   // Definir nome e imagem do produto baseado no tipo
   let productName = "Tag rastreamento Petloo + App"
 
-  // Se veio de /v2 com lootag-kit, usar preço total (v2Price * quantity)
   if (fromV2 && v2Price) {
-    productPrice = v2Price * quantity
-    productName = "Kit de Proteção Lootag"
+    productName = ofertaAtual?.nome || "Kit de Proteção Lootag"
   }
   let productImage =
     "https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/image%20978.png"
@@ -316,9 +319,7 @@ function OrderSummaryContent({
             {personalizedTags.map((tag, index) => (
               <div key={tag.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg">
                 <div className="flex items-center gap-3">
-                  <div
-                    className={`w-4 h-4 rounded-full ${tag.color === "orange" ? "bg-orange-500" : "bg-purple-500"}`}
-                  ></div>
+                  <div className="w-4 h-4 rounded-full bg-purple-500"></div>
                   <div>
                     <p className="font-medium text-sm">{tag.petName}</p>
                     <p className="text-xs text-gray-600">Lootag - Personalizada</p>
@@ -329,6 +330,11 @@ function OrderSummaryContent({
                   <button onClick={() => onEditTag(index)} className="p-1 hover:bg-gray-200 rounded" title="Editar tag">
                     <Edit2 className="w-3 h-3 text-gray-600" />
                   </button>
+                  {personalizedTags.length > 1 && (
+                    <button onClick={() => onRemoveTag(index)} className="p-1 hover:bg-red-100 rounded" title="Remover tag">
+                      <X className="w-3 h-3 text-red-500" />
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -381,6 +387,25 @@ function OrderSummaryContent({
                 : `R$ ${shippingPrice.toFixed(2).replace(".", ",")}`}
           </span>
         </div>
+        {/* Linhas dos Order Bumps */}
+        {orderBumps.extraTag && v2Price && (
+          <div className="flex justify-between text-sm">
+            <span>Tag extra (50% OFF)</span>
+            <span className="font-semibold">R$ {(v2Price / 2).toFixed(2).replace(".", ",")}</span>
+          </div>
+        )}
+        {orderBumps.looapp && (
+          <div className="flex justify-between text-sm">
+            <span>Looapp Completo</span>
+            <span className="font-semibold">R$ 19,90</span>
+          </div>
+        )}
+        {orderBumps.personalization && (
+          <div className="flex justify-between text-sm">
+            <span>Personalização</span>
+            <span className="font-semibold">R$ 39,90</span>
+          </div>
+        )}
         <div className="flex justify-between text-lg font-bold">
           <span>Total</span>
           <span>R$ {total.toFixed(2).replace(".", ",")}</span>
@@ -738,14 +763,29 @@ function CheckoutForm({
     setShowTagManager(true)
   }
 
+  const handleRemoveTag = (index: number) => {
+    const basePrice = v2Price ? Math.round(v2Price * 100) : 8987
+    setPersonalizedTags(prev => {
+      const newTags = prev.filter((_, i) => i !== index)
+      // Recalcular preços: primeira = cheio, demais = metade
+      return newTags.map((tag, i) => ({
+        ...tag,
+        id: `tag-${i}`,
+        price: i === 0 ? basePrice : Math.round(basePrice / 2),
+      }))
+    })
+    setQuantity(prev => Math.max(1, prev - 1))
+    setPetSizes(prev => prev.filter((_, i) => i !== index))
+  }
+
   // 🔧 FUNÇÃO CORRIGIDA PARA CALCULAR VALOR TOTAL EM REAIS
   const getShippingCost = () => {
     // Calcular frete baseado no método selecionado
     const getShippingPrice = () => {
-      if (shippingMethod === "standard" && quantity >= 2) return 0 // Frete Grátis
+      if (shippingMethod === "standard") return 0 // Frete grátis só no método standard
+      if (shippingMethod === "standard" && quantity >= 2) return 0
       if (shippingMethod === "loggi") return 15.83
       if (shippingMethod === "sedex") return 28.75
-      // Fallback: se for 1 unidade e tentou standard, cobrar loggi
       return 15.83
     }
 
@@ -756,12 +796,10 @@ function CheckoutForm({
       return productTotal + getShippingPrice()
     }
 
-    // 🆕 NOVA LÓGICA: Se temos tags personalizadas configuradas
-    if (personalizedTags.length > 0) {
-      const firstTagPrice = personalizedTags[0].price / 100
-      const additionalTagsPrice = (personalizedTags.length - 1) * 9.9
-      const totalProductPrice = firstTagPrice + additionalTagsPrice
-
+    // Tags personalizadas reais (excluir orderbumps)
+    const realTagsForCost = personalizedTags.filter(t => t.id !== "tag-upgrade" && t.id !== "tag-bump")
+    if (realTagsForCost.length > 0) {
+      const totalProductPrice = realTagsForCost.reduce((sum, tag) => sum + tag.price, 0) / 100
       if (!addressFound) return totalProductPrice
       return totalProductPrice + getShippingPrice()
     }
@@ -783,7 +821,7 @@ function CheckoutForm({
     if (isPersonalized) {
       const data = JSON.parse(personalizedData)
       const basePrice = data.amount / 100
-      const additionalPrice = (quantity - 1) * 9.9
+      const additionalPrice = (quantity - 1) * (basePrice / 2) // Adicionais = metade
       const totalProductPrice = basePrice + additionalPrice
 
       if (!addressFound) return totalProductPrice
@@ -792,7 +830,8 @@ function CheckoutForm({
 
     // Produtos genéricos
     if (!addressFound) return 0
-    const productPrice = (quantity - 1) * 9.9
+    const basePriceFallback = v2Price || 89.87
+    const productPrice = (quantity - 1) * (basePriceFallback / 2)
     return productPrice + getShippingPrice()
   }
 
@@ -978,23 +1017,21 @@ function CheckoutForm({
         petName: "",
       }
 
-      // 🆕 USAR DADOS DAS TAGS PERSONALIZADAS SE DISPONÍVEIS
-      if (personalizedTags.length > 0) {
-        // Primeira tag usa o preço registrado, demais R$ 9,90
-        const firstTagPrice = personalizedTags[0].price // Preço da primeira tag em centavos
-        const additionalTagsPrice = (personalizedTags.length - 1) * 990 // R$ 9,90 cada em centavos
-        const totalProductPrice = firstTagPrice + additionalTagsPrice
+      // 🆕 USAR DADOS DAS TAGS PERSONALIZADAS SE DISPONÍVEIS (excluir tags de orderbump)
+      const realPersonalizedTags = personalizedTags.filter(t => t.id !== "tag-upgrade" && t.id !== "tag-bump")
+      if (realPersonalizedTags.length > 0) {
+        // Somar preço de cada tag real (primeira = cheio, adicionais = metade)
+        const totalProductPrice = realPersonalizedTags.reduce((sum, tag) => sum + tag.price, 0)
 
         let finalAmount = totalProductPrice
 
-        // Adicionar frete se necessário
-        if (addressFound) {
+        // Adicionar frete se necessário (standard = grátis)
+        if (addressFound && shippingMethod !== "standard") {
           if (shippingMethod === "loggi") {
             finalAmount += 1583
           } else if (shippingMethod === "sedex") {
             finalAmount += 2875
           }
-          // "standard" = grátis (só disponível para 2+)
         }
 
         // 🎯 USAR VALOR CALCULADO DIRETAMENTE (sem mapeamento incorreto)
@@ -1026,8 +1063,8 @@ function CheckoutForm({
             })
 
             if (isReallyPersonalized) {
-              const baseAmount = data.amount // R$ 49,90 = 4990 centavos primeira unidade
-              const additionalAmount = (quantity - 1) * 990 // R$ 9,90 = 990 centavos por unidade adicional
+              const baseAmount = data.amount // Preço do plano em centavos
+              const additionalAmount = (quantity - 1) * Math.round(baseAmount / 2) // Adicionais = metade
               const totalProductAmount = baseAmount + additionalAmount
 
               let finalAmount = totalProductAmount
@@ -1066,13 +1103,11 @@ function CheckoutForm({
           // 🎯 OFERTA DINÂMICA (ex: lootag-kit) - v2Price * quantity
           let calculatedAmount = Math.round(v2Price * quantity * 100)
 
-          // Adicionar frete
-          if (shippingMethod === "loggi") {
-            calculatedAmount += 1583 // R$ 15,83
-          } else if (shippingMethod === "sedex") {
-            calculatedAmount += 2875 // R$ 28,75
+          // Adicionar frete (standard = grátis)
+          if (addressFound && shippingMethod !== "standard") {
+            if (shippingMethod === "loggi") calculatedAmount += 1583
+            else if (shippingMethod === "sedex") calculatedAmount += 2875
           }
-          // "standard" = grátis, não adiciona nada
 
           productInfo = {
             amount: calculatedAmount,
@@ -1085,23 +1120,18 @@ function CheckoutForm({
 
           console.log("💰 Oferta dinâmica - Valor final em centavos:", calculatedAmount)
         } else {
-          // 🎯 PRODUTO GENÉRICO - CALCULAR VALOR CORRETO
-          let calculatedAmount = 0
+          // ⚠️ PRODUTO GENÉRICO — fallback (nenhuma oferta v2/v3 detectada)
+          console.warn("⚠️ Checkout sem produto definido! Usando preço base R$ 89,87 como fallback.")
 
-          if (quantity >= 2) {
-            // 2+ unidades: produto + frete selecionado
-            calculatedAmount = (quantity - 1) * 990 // Unidades adicionais
-            if (shippingMethod === "loggi") calculatedAmount += 1583
-            else if (shippingMethod === "sedex") calculatedAmount += 2875
-            // "standard" = grátis
-          } else {
-            // 1 unidade: produto + frete obrigatório
-            if (shippingMethod === "sedex") calculatedAmount = 2875
-            else calculatedAmount = 1583 // Loggi como padrão
-          }
+          // Preço base de R$ 89,87 por unidade como fallback seguro
+          let calculatedAmount = Math.round(89.87 * quantity * 100)
+
+          // Adicionar frete se não for grátis
+          if (shippingMethod === "loggi") calculatedAmount += 1583
+          else if (shippingMethod === "sedex") calculatedAmount += 2875
 
           productInfo = {
-            amount: calculatedAmount, // Usar valor calculado diretamente
+            amount: calculatedAmount,
             name: "Tag rastreamento Petloo + App",
             sku: `TAG-APP-${quantity}x`,
             type: "Tag Genérica",
@@ -1126,11 +1156,24 @@ function CheckoutForm({
       console.log("🎯 Produto final para checkout:", productInfo)
 
       if (paymentMethod === "pix") {
-        // Salvar dados do pedido para a página PIX
+        // Salvar dados completos para a página PIX
         const orderDataForPix = {
           personalizedTags: personalizedTags,
           quantity: quantity,
           isPersonalized: personalizedTags.length > 0 || !!sessionStorage.getItem("personalizedProduct"),
+          productName: ofertaAtual?.nome || productInfo.name || "Kit de Proteção Lootag",
+          productPrice: fromV2 && v2Price ? v2Price * quantity : (productInfo.amount - bumpTotal) / 100,
+          shippingPrice: 0,
+          orderBumps: {
+            extraTag: orderBumps.extraTag,
+            looapp: orderBumps.looapp,
+            personalization: orderBumps.personalization,
+          },
+          bumpValues: {
+            extraTag: orderBumps.extraTag && v2Price ? v2Price / 2 : 0,
+            looapp: orderBumps.looapp ? 19.90 : 0,
+            personalization: orderBumps.personalization ? 39.90 : 0,
+          },
         }
         sessionStorage.setItem("orderDataForPixPage", JSON.stringify(orderDataForPix))
 
@@ -1629,6 +1672,7 @@ function CheckoutForm({
                     addressFound={addressFound}
                     personalizedTags={personalizedTags}
                     onEditTag={handleEditTag}
+                    onRemoveTag={handleRemoveTag}
                     fromV2={fromV2}
                     v2Price={v2Price}
                     ofertaAtual={ofertaAtual}
@@ -2658,9 +2702,11 @@ function CheckoutForm({
                 addressFound={addressFound}
                 personalizedTags={personalizedTags}
                 onEditTag={handleEditTag}
+                onRemoveTag={handleRemoveTag}
                 fromV2={fromV2}
                 v2Price={v2Price}
                 ofertaAtual={ofertaAtual}
+                orderBumps={orderBumps}
               />
             </div>
           </div>
@@ -2749,6 +2795,7 @@ function CheckoutForm({
               : undefined
           }
           onSaveTag={handleSaveTag}
+          basePrice={v2Price ? Math.round(v2Price * 100) : 8987}
         />
 
         {/* Modal de Tamanho para tags adicionais no Checkout */}

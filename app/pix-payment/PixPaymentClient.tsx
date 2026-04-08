@@ -397,30 +397,53 @@ export default function PixPaymentClient({ orderId, amount }: { orderId: string;
             <div className="mb-4">
               <span className="font-medium text-gray-700 block mb-2">Itens do pedido:</span>
               <div className="space-y-2">
-                {orderData?.isPersonalized && orderData.personalizedTags.length > 0 ? (
-                  orderData.personalizedTags.map((tag, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border"
-                    >
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={`w-3 h-3 rounded-full ${
-                            tag.color === "orange" ? "bg-orange-500" : "bg-purple-500"
-                          }`}
-                        ></div>
-                        <span>
-                          Tag {tag.color === "orange" ? "Laranja" : "Roxa"} - "{tag.petName}"
-                        </span>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
-                    <span>Tag rastreamento Petloo + App</span>
+                {/* Produto principal */}
+                <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
+                  <span>{orderData?.productName || "Kit de Proteção Lootag"} ({orderData?.quantity || 1}x)</span>
+                  {orderData?.productPrice ? (
+                    <span className="font-semibold">R$ {orderData.productPrice.toFixed(2).replace(".", ",")}</span>
+                  ) : (
                     <span>{orderData?.quantity || 1}x</span>
+                  )}
+                </div>
+
+                {/* Tags personalizadas */}
+                {orderData?.isPersonalized && orderData.personalizedTags?.length > 0 && (
+                  <div className="ml-4 space-y-1">
+                    {orderData.personalizedTags.map((tag: { petName: string }, index: number) => (
+                      <div key={index} className="flex items-center gap-2 text-xs text-gray-500">
+                        <div className="w-2 h-2 rounded-full bg-purple-500"></div>
+                        <span>Lootag - Personalizada: &quot;{tag.petName}&quot;</span>
+                      </div>
+                    ))}
                   </div>
                 )}
+
+                {/* Orderbumps */}
+                {orderData?.orderBumps?.extraTag && (
+                  <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
+                    <span>Tag extra (50% OFF)</span>
+                    <span className="font-semibold">R$ {(orderData.bumpValues?.extraTag || 0).toFixed(2).replace(".", ",")}</span>
+                  </div>
+                )}
+                {orderData?.orderBumps?.looapp && (
+                  <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
+                    <span>Looapp Completo</span>
+                    <span className="font-semibold">R$ 19,90</span>
+                  </div>
+                )}
+                {orderData?.orderBumps?.personalization && (
+                  <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
+                    <span>Personalização</span>
+                    <span className="font-semibold">R$ 39,90</span>
+                  </div>
+                )}
+
+                {/* Frete */}
+                <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
+                  <span>Frete</span>
+                  <span className="font-semibold text-green-600">Grátis</span>
+                </div>
               </div>
             </div>
 

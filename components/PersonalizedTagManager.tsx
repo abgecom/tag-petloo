@@ -19,6 +19,7 @@ interface PersonalizedTagManagerProps {
   tagIndex: number
   existingTag?: PersonalizedTag
   onSaveTag: (tag: PersonalizedTag) => void
+  basePrice: number // Preço base da oferta em centavos (ex: 8987, 9987, 14987)
 }
 
 export default function PersonalizedTagManager({
@@ -27,35 +28,26 @@ export default function PersonalizedTagManager({
   tagIndex,
   existingTag,
   onSaveTag,
+  basePrice,
 }: PersonalizedTagManagerProps) {
-  const [selectedColor, setSelectedColor] = useState<"orange" | "purple">("orange")
   const [petName, setPetName] = useState("")
 
   // Reset form when opening
   useEffect(() => {
     if (isOpen) {
-      if (existingTag) {
-        setSelectedColor(existingTag.color)
-        setPetName(existingTag.petName)
-      } else {
-        setSelectedColor("orange")
-        setPetName("")
-      }
+      setPetName(existingTag?.petName || "")
     }
   }, [isOpen, existingTag])
 
   const handleSave = () => {
-    if (!petName.trim()) {
-      alert("Por favor, digite o nome do seu pet")
-      return
-    }
+    if (!petName.trim()) return
 
-    // 🚨 CORREÇÃO: Primeira tag R$ 49,90, demais R$ 9,90
-    const price = tagIndex === 0 ? 4990 : 990 // Primeira tag 4990 centavos, demais 990 centavos
+    // Primeira tag = preço cheio do plano, tags adicionais = METADE
+    const price = tagIndex === 0 ? basePrice : Math.round(basePrice / 2)
 
     const tag: PersonalizedTag = {
       id: existingTag?.id || `tag-${tagIndex}`,
-      color: selectedColor,
+      color: "purple",
       petName: petName.trim(),
       price: price,
     }
@@ -90,72 +82,20 @@ export default function PersonalizedTagManager({
         <div className="space-y-6">
           {/* Title */}
           <div className="text-center pr-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-black leading-tight">Escolha a cor da sua tag</h2>
-          </div>
-
-          {/* Color Options */}
-          <div className="space-y-4">
-            {/* Orange Tag */}
-            <div
-              className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                selectedColor === "orange"
-                  ? "border-orange-500 bg-orange-50 shadow-md"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => setSelectedColor("orange")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-4 h-4 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                  {selectedColor === "orange" && <div className="w-2 h-2 rounded-full bg-orange-500" />}
-                </div>
-                <div className="flex-1">
-                  <img
-                    src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_16.png"
-                    alt="Tag laranja personalizada"
-                    className="w-full h-20 object-contain rounded-lg"
-                  />
-                  <p className="text-center mt-2 font-medium text-gray-800">Lootag - Personalizada</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Purple Tag */}
-            <div
-              className={`border-2 rounded-xl p-4 cursor-pointer transition-all ${
-                selectedColor === "purple"
-                  ? "border-purple-500 bg-purple-50 shadow-md"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-              onClick={() => setSelectedColor("purple")}
-            >
-              <div className="flex items-center gap-4">
-                <div className="w-4 h-4 rounded-full border-2 border-gray-300 flex items-center justify-center">
-                  {selectedColor === "purple" && <div className="w-2 h-2 rounded-full bg-purple-500" />}
-                </div>
-                <div className="flex-1">
-                  <img
-                    src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/ChatGPT%20Image%2010%20de%20jul.%20de%202025%2C%2019_05_18.png"
-                    alt="Tag roxa personalizada"
-                    className="w-full h-20 object-contain rounded-lg"
-                  />
-                  <p className="text-center mt-2 font-medium text-gray-800">Lootag - Personalizada</p>
-                </div>
-              </div>
-            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-black leading-tight">Qual o nome do seu pet?</h2>
+            <p className="text-sm text-gray-600 mt-2">Vamos gravar na sua tag com muito carinho</p>
           </div>
 
           {/* Pet Name Input */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">
-              Diga-nos o nome do seu pet para personalização
-            </label>
             <input
               type="text"
               value={petName}
               onChange={(e) => setPetName(e.target.value)}
               placeholder="Digite aqui o nome do pet"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 placeholder-gray-400 shadow-sm"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 placeholder-gray-400 shadow-sm"
               maxLength={20}
+              autoFocus
             />
             {petName.length > 15 && (
               <p className="text-sm text-amber-600">⚠️ Nomes muito longos podem não caber na tag</p>
@@ -165,11 +105,11 @@ export default function PersonalizedTagManager({
           {/* Finalize Button */}
           <Button
             onClick={handleSave}
-            disabled={!selectedColor || !petName.trim()}
+            disabled={!petName.trim()}
             className="w-full rounded-xl px-6 py-3 text-white font-semibold hover:opacity-90 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ backgroundColor: "#F1542E" }}
           >
-            {!selectedColor ? "Escolha uma cor" : !petName.trim() ? "Digite o nome do pet" : "Finalizar compra"}
+            {!petName.trim() ? "Digite o nome do pet" : "Confirmar"}
           </Button>
         </div>
       </div>
