@@ -8,8 +8,8 @@ export default function FAQSectionV2() {
 
   const faqs = [
     {
-      question: "Como funciona a assinatura?",
-      answer: "E um valor fixo mensal que garante a conexao via satelite e as atualizacoes do app. Voce pode cancelar a qualquer momento, sem multas ou taxas adicionais.",
+      question: "Como funciona a assinatura do app?",
+      answer: "A mensalidade de R$30,90 mantém a proteção do seu pet ativa 24 horas por dia via satélite em tempo real, 7 dias por semana. Por menos de R$1 por dia — menos do que um estacionamento — você tem: localização em tempo real via satélite, alerta instantâneo se o pet sair de uma zona segura, RG Digital, carteira de vacinas com lembretes e uma coleira exclusiva. Toda tranquilidade que você merece, no seu bolso. Você testa grátis por 30 dias e cancela quando quiser, se não gostar você fica com a coleira estilosa Petloo.",
     },
     {
       question: "A coleira e resistente a agua?",

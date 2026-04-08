@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react"
 import { useRouter } from "next/navigation"
-import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
+import { fbEvents } from "@/lib/fb-events"
 
 interface AbandonedCartTrackerProps {
   abandonmentTimeSeconds?: number
@@ -91,87 +91,24 @@ export default function AbandonedCartTracker({
       hasUserData: userData.hasUserData,
     })
 
-    // Determinar nível de engajamento
-    let engagementLevel = "low"
-    if (userData.hasUserData) {
-      engagementLevel = "high"
-    } else if (userData.email || userData.name) {
-      engagementLevel = "medium"
-    }
-
     if (typeof window !== "undefined") {
-      // 📊 GA4 via GTM - Abandoned Cart
-      window.dataLayer = window.dataLayer || []
-      window.dataLayer.push({
-        event: "abandoned_cart",
-        ecommerce: {
-          currency: cartData.currency,
-          value: cartData.value,
-          items: cartData.items,
-        },
-        abandonment_reason: reason,
-        time_on_checkout_page: timeOnPage,
-        engagement_level: engagementLevel,
-        user_data: userData.hasUserData
-          ? {
-              email: userData.email,
-              first_name: userData.firstName,
-              last_name: userData.lastName,
-              phone: userData.phone,
-            }
-          : {},
-        page_location: window.location.href,
-        timestamp: new Date().toISOString(),
-      })
-
-      console.log("📊 GTM Abandoned Cart Event:", {
-        event: "abandoned_cart",
+      // 📱 Meta Pixel + CAPI - AddToCart (para remarketing) via fbEvents com deduplicação
+      await fbEvents("AddToCart", {
         value: cartData.value,
         currency: cartData.currency,
-        reason,
-        engagement_level: engagementLevel,
-      })
+        content_type: "product",
+        content_ids: [cartData.items[0].item_id],
+        content_name: cartData.items[0].item_name,
+        content_category: "Pet Tracking",
+        num_items: 1,
+      }, userData.hasUserData ? {
+        email: userData.email,
+        phone: userData.phone,
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+      } : undefined)
 
-      // 📱 Meta Pixel - AddToCart (para remarketing) com Advanced Matching
-      if (typeof window.fbq !== "undefined") {
-        // Preparar dados do usuário com hash e formatação correta (se disponível)
-        let metaUserData = {}
-        if (userData.hasUserData) {
-          metaUserData = await prepareMetaPixelUserData({
-            email: userData.email,
-            firstName: userData.firstName,
-            lastName: userData.lastName,
-            phone: userData.phone,
-          })
-        }
-
-        window.fbq("track", "AddToCart", {
-          value: cartData.value,
-          currency: cartData.currency,
-          content_type: "product",
-          content_ids: [cartData.items[0].item_id],
-          content_name: cartData.items[0].item_name,
-          content_category: "Pet Tracking",
-          num_items: 1,
-          custom_data: {
-            abandonment_reason: reason,
-            checkout_step: engagementLevel,
-            time_on_page: timeOnPage,
-          },
-          // Advanced Matching se tiver dados do usuário
-          ...metaUserData,
-        })
-
-        logMetaPixelEvent("AddToCart (Abandoned)", {
-          value: cartData.value,
-          currency: cartData.currency,
-          reason,
-          engagement_level: engagementLevel,
-          ...metaUserData,
-        })
-      } else {
-        console.warn("⚠️ Meta Pixel (fbq) not found - Abandoned cart event not sent")
-      }
+      console.log("📱 Meta Pixel AddToCart (Abandoned) enviado via fbEvents")
     }
 
     setHasTriggered(true)

@@ -2,12 +2,11 @@
 
 import { useEffect } from "react"
 import { useSearchParams } from "next/navigation"
-import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
+import { fbEvents } from "@/lib/fb-events"
 
-// Extend Window interface to include dataLayer and fbq
+// Extend Window interface to include fbq
 declare global {
   interface Window {
-    dataLayer: any[]
     fbq: (action: string, event: string, params?: any) => void
   }
 }
@@ -68,6 +67,15 @@ export default function PurchaseTracker() {
       // Gerar transaction_id único se não existir
       const transactionId = purchaseData.transactionId || purchaseData.orderId || `CARD-PETLOO-${new Date().getTime()}`
 
+      // Verificar se este transactionId já foi rastreado
+      const alreadyTracked = sessionStorage.getItem(`purchase_tracked_${transactionId}`)
+      if (alreadyTracked) {
+        console.log("🚫 Purchase já rastreado para este pedido:", transactionId)
+        return
+      }
+      // Marcar como rastreado ANTES de disparar
+      sessionStorage.setItem(`purchase_tracked_${transactionId}`, "true")
+
       const value = (purchaseData.amount || 1887) / 100 // Sempre converter centavos para reais aqui
       const items = [
         {
@@ -96,90 +104,28 @@ export default function PurchaseTracker() {
       const lastName = getCookieValue("ploo_last_name") || ""
       const phone = getCookieValue("ploo_phone") || ""
 
-      if (typeof window !== "undefined") {
-        // 📊 GA4 via GTM - Purchase Event (Cartão)
-        window.dataLayer = window.dataLayer || []
-        window.dataLayer.push({
-          event: "purchase",
-          ecommerce: {
-            transaction_id: transactionId,
-            value: value,
-            currency: "BRL",
-            items: items,
-          },
-          // Dados adicionais para Enhanced Ecommerce
-          customer_data: {
-            email: userEmail,
-            first_name: firstName,
-            last_name: lastName,
-            phone: phone,
-          },
-          payment_method: purchaseData.paymentMethod || "Cartão de Crédito",
-          payment_status: "completed", // Cartão já foi processado
-          page_location: window.location.href,
-          page_title: document.title,
-          timestamp: new Date().toISOString(),
-        })
+      // 📱 Meta Pixel + CAPI - Purchase Event (Cartão) via fbEvents com deduplicação
+      await fbEvents("Purchase", {
+        value: value,
+        currency: "BRL",
+        transaction_id: transactionId,
+        content_type: "product",
+        content_ids: ["tag-petloo"],
+        content_name: "Tag rastreamento Petloo + App",
+        content_category: "Pet Tracking",
+        num_items: 1,
+        payment_method: "credit_card",
+      }, {
+        email: userEmail,
+        phone: phone,
+        firstName: firstName,
+        lastName: lastName,
+      })
 
-        console.log("📊 GTM Card Purchase Event:", {
-          event: "purchase",
-          transaction_id: transactionId,
-          value: value,
-          currency: "BRL",
-          items: items,
-          payment_method: purchaseData.paymentMethod,
-        })
-
-        // 📱 Meta Pixel - Purchase Event (Cartão) com Advanced Matching
-        if (typeof window.fbq !== "undefined") {
-          // Preparar dados do usuário com hash e formatação correta
-          const metaUserData = await prepareMetaPixelUserData({
-            email: userEmail,
-            firstName: firstName,
-            lastName: lastName,
-            phone: phone,
-          })
-
-          window.fbq("track", "Purchase", {
-            value: value,
-            currency: "BRL",
-            transaction_id: transactionId,
-            content_type: "product",
-            content_ids: ["tag-petloo"],
-            content_name: "Tag rastreamento Petloo + App",
-            content_category: "Pet Tracking",
-            num_items: 1,
-            // Advanced Matching com dados formatados e hash
-            ...metaUserData,
-            // Card specific data
-            payment_method: "credit_card",
-          })
-
-          logMetaPixelEvent("Card Purchase", {
-            value: value,
-            currency: "BRL",
-            transaction_id: transactionId,
-            payment_method: "card",
-            ...metaUserData,
-          })
-        } else {
-          console.warn("⚠️ Meta Pixel (fbq) not found - Card Purchase event not sent")
-        }
-
-        // 🎯 Evento personalizado para remarketing
-        window.dataLayer.push({
-          event: "petloo_purchase_complete",
-          customer_lifetime_value: value,
-          product_category: "Pet Tracking",
-          purchase_timestamp: new Date().toISOString(),
-          payment_method: "card",
-        })
-
-        console.log("✅ Card Purchase tracking completed successfully!")
-        console.log("Transaction ID:", transactionId)
-        console.log("Value:", `R$ ${value.toFixed(2)}`)
-        console.log("Payment Method:", purchaseData.paymentMethod)
-      }
+      console.log("✅ Card Purchase tracking completed successfully!")
+      console.log("Transaction ID:", transactionId)
+      console.log("Value:", `R$ ${value.toFixed(2)}`)
+      console.log("Payment Method:", purchaseData.paymentMethod)
     }
 
     // Executar o rastreamento após um pequeno delay para garantir que a página carregou

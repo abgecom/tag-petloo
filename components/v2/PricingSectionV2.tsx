@@ -169,7 +169,7 @@ export default function PricingSectionV2() {
                 <Truck className="w-5 h-5 text-petloo-purple flex-shrink-0 mt-0.5" />
                 <div>
                   <p className="text-sm font-semibold text-foreground">
-                    Frete Grátis para todo o Brasil
+                    Frete Grátis a partir de 2 unidades
                   </p>
                   <p className="text-xs text-muted-foreground">
                     Entrega em até 6 dias

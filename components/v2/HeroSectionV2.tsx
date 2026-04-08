@@ -26,12 +26,12 @@ export default function HeroSectionV2() {
         <div className="max-w-2xl space-y-4 md:space-y-6 lg:space-y-8">
           {/* Headline */}
           <h1 className="text-xl leading-[1.3] sm:text-2xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white md:leading-[1.15] text-balance">
-            A liberdade que seu pet ama. A seguranca que voce precisa.
+            Saiba onde seu pet está. A qualquer hora, em qualquer lugar.
           </h1>
           
           {/* Sub-headline */}
           <p className="text-sm leading-[1.5] sm:text-base md:text-lg lg:text-xl text-white/90 md:text-white md:leading-relaxed max-w-md md:max-w-lg text-pretty">
-            O primeiro ecossistema de protecao via rastreamento em tempo real desenhado para o estilo de vida urbano. Seu melhor amigo a um clique de distancia.
+            A Lootag vem com chip de rastreamento por satélite que cabe na coleira e mostra a localização exata no seu celular em tempo real. Sem bateria pra carregar, sem complicação. Teste grátis por 30 dias, se não gostar cancele a hora que quiser.
           </p>
 
           {/* CTA Button */}

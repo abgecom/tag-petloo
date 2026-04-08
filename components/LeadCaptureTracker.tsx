@@ -1,12 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { prepareMetaPixelUserData, logMetaPixelEvent } from "@/utils/metaPixelUtils"
+import { fbEvents } from "@/lib/fb-events"
 
-// Extend Window interface to include dataLayer and fbq
+// Extend Window interface to include fbq
 declare global {
   interface Window {
-    dataLayer: any[]
     fbq: (action: string, event: string, params?: any) => void
   }
 }
@@ -163,52 +162,20 @@ export default function LeadCaptureTracker() {
           // Não bloquear o tracking mesmo se o webhook falhar
         }
 
-        // 📊 GA4 via GTM - Lead Event
-        window.dataLayer = window.dataLayer || []
-        window.dataLayer.push({
-          event: "lead_captured",
-          lead_email: email,
-          lead_name: name,
-          lead_phone: phone,
-          lead_source: "checkout_form",
-          product_type: productType,
-          cart_value: cartValue,
-          page_location: window.location.href,
-          timestamp: new Date().toISOString(),
+        // 📱 Meta Pixel + CAPI - Lead Event via fbEvents com deduplicação
+        await fbEvents("Lead", {
+          content_name: productType,
+          content_category: "Pet Tracking",
+          value: cartValue,
+          currency: "BRL",
+        }, {
+          email: email,
+          phone: phone,
+          firstName: name.split(" ")[0],
+          lastName: name.split(" ").slice(1).join(" "),
         })
 
-        console.log("📊 GTM Lead Captured Event enviado")
-
-        // 📱 Meta Pixel - Lead Event com Advanced Matching
-        if (typeof window.fbq !== "undefined") {
-          try {
-            const metaUserData = await prepareMetaPixelUserData({
-              email: email,
-              firstName: name.split(" ")[0],
-              lastName: name.split(" ").slice(1).join(" "),
-              phone: phone,
-            })
-
-            window.fbq("track", "Lead", {
-              content_name: productType,
-              content_category: "Pet Tracking",
-              value: cartValue,
-              currency: "BRL",
-              ...metaUserData,
-            })
-
-            logMetaPixelEvent("Lead Captured", {
-              content_name: productType,
-              value: cartValue,
-              currency: "BRL",
-              ...metaUserData,
-            })
-
-            console.log("📱 Meta Pixel Lead Event enviado")
-          } catch (error) {
-            console.error("❌ Erro no Meta Pixel Lead Event:", error)
-          }
-        }
+        console.log("📱 Meta Pixel Lead Event enviado via fbEvents")
       } catch (error) {
         console.error("❌ Erro no LeadCaptureTracker:", error)
       }

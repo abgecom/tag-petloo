@@ -114,7 +114,7 @@ export default function PersonalizedTagManager({
                     alt="Tag laranja personalizada"
                     className="w-full h-20 object-contain rounded-lg"
                   />
-                  <p className="text-center mt-2 font-medium text-gray-800">Tag Laranja</p>
+                  <p className="text-center mt-2 font-medium text-gray-800">Lootag - Personalizada</p>
                 </div>
               </div>
             </div>
@@ -138,7 +138,7 @@ export default function PersonalizedTagManager({
                     alt="Tag roxa personalizada"
                     className="w-full h-20 object-contain rounded-lg"
                   />
-                  <p className="text-center mt-2 font-medium text-gray-800">Tag Roxa</p>
+                  <p className="text-center mt-2 font-medium text-gray-800">Lootag - Personalizada</p>
                 </div>
               </div>
             </div>

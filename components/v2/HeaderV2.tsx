@@ -22,7 +22,7 @@ export default function HeaderV2() {
       {/* Tarja promocional superior */}
       <div className="fixed top-0 left-0 right-0 z-[60] bg-petloo-orange text-white py-1.5 md:py-2 px-4 text-center">
         <p className="text-[0.6875rem] md:text-sm font-medium leading-tight">
-          100% de desconto na primeira mensalidade + Frete Grátis para todo o Brasil
+          100% de desconto na primeira mensalidade + Frete Grátis a partir de 2 unidades
         </p>
       </div>
 

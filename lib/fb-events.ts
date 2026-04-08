@@ -12,6 +12,10 @@ export async function fbEvents(
     phone?: string
     firstName?: string
     lastName?: string
+    city?: string
+    state?: string
+    zipCode?: string
+    country?: string
   },
 ) {
   const eventId = `${eventName}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
@@ -29,7 +33,7 @@ export async function fbEvents(
         eventId,
         eventData,
         url: typeof window !== "undefined" ? window.location.href : "",
-        userData,
+        userData: userData || {},
       }),
     })
   } catch (error) {

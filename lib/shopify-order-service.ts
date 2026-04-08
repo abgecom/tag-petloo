@@ -55,6 +55,9 @@ export interface CheckoutInput {
   paymentStatus: string
   petName?: string
   hasSubscription?: boolean
+  hasLooapp?: boolean
+  hasPersonalizationUpgrade?: boolean
+  extraTagBump?: boolean
 }
 
 interface ShopifyCustomer {
@@ -307,6 +310,15 @@ function buildOrderPayload(
 
   if (input.petName) {
     noteAttributes.push({ name: "Nome do Pet", value: input.petName })
+  }
+  if (input.hasLooapp) {
+    noteAttributes.push({ name: "Looapp Completo", value: "Sim" })
+  }
+  if (input.hasPersonalizationUpgrade) {
+    noteAttributes.push({ name: "Upgrade Personalização", value: "Sim" })
+  }
+  if (input.extraTagBump) {
+    noteAttributes.push({ name: "Tag Extra (bump)", value: "Sim" })
   }
 
   // Tags do pedido
