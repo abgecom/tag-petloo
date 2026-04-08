@@ -1,12 +1,12 @@
 "use client"
 
-import { useEffect } from "react"
+import { Suspense, useEffect } from "react"
 import { useSearchParams } from "next/navigation"
 import { useQuiz } from "./hooks/useQuiz"
 import { saveQuizStart } from "./utils/save-quiz-result"
 import QuizEngine from "./components/QuizEngine"
 
-export default function QuizPage() {
+function QuizContent() {
   const searchParams = useSearchParams()
   const { quizData, updateQuizData } = useQuiz()
 
@@ -95,5 +95,13 @@ export default function QuizPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function QuizPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#F8F7F4]" />}>
+      <QuizContent />
+    </Suspense>
   )
 }
