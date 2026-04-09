@@ -1155,6 +1155,10 @@ function CheckoutForm({
 
       console.log("🎯 Produto final para checkout:", productInfo)
 
+      // ── Shopify: calcular valor do produto SEM frete (para não duplicar) ──
+      const shippingCentavos = shippingMethod === "standard" ? 0 : shippingMethod === "loggi" ? 1583 : shippingMethod === "sedex" ? 2875 : 0
+      const productOnlyAmount = productInfo.amount - shippingCentavos - bumpTotal
+
       if (paymentMethod === "pix") {
         // Salvar dados completos para a página PIX
         const orderDataForPix = {
@@ -1296,12 +1300,12 @@ function CheckoutForm({
                 city: addressData.city,
                 state: addressData.state,
                 method: shippingMethod === "standard" ? "Frete Grátis" : shippingMethod === "sedex" ? "Sedex" : "Loggi",
-                price: shippingMethod === "standard" ? 0 : shippingMethod === "loggi" ? 1583 : 2875,
+                price: shippingCentavos,
               },
               items: [
                 {
                   quantity: quantity,
-                  price: Math.round(productInfo.amount / quantity),
+                  price: Math.round(productOnlyAmount / quantity),
                   type: productInfo.type,
                   color: productInfo.color,
                   petName: productInfo.petName,
@@ -1471,12 +1475,12 @@ function CheckoutForm({
               city: addressData.city,
               state: addressData.state,
               method: shippingMethod === "standard" ? "Frete Grátis" : shippingMethod === "sedex" ? "Sedex" : "Loggi",
-              price: shippingMethod === "standard" ? 0 : shippingMethod === "loggi" ? 1583 : 2875,
+              price: shippingCentavos,
             },
             items: [
               {
                 quantity: quantity,
-                price: Math.round(productInfo.amount / quantity),
+                price: Math.round(productOnlyAmount / quantity),
                 type: productInfo.type,
                 color: productInfo.color,
                 petName: productInfo.petName,
