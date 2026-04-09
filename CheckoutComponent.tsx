@@ -538,7 +538,12 @@ function CheckoutForm({
 
   // Calcular opcoes de parcelamento quando o valor total mudar
   useEffect(() => {
-    const total = (fromV2 && v2Price) ? v2Price : getShippingCost()
+    // Usar o mesmo total do resumo do pedido (produto + frete + bumps)
+    let total = getShippingCost()
+    if (orderBumps.extraTag && v2Price) total += v2Price / 2
+    if (orderBumps.looapp) total += 19.90
+    if (orderBumps.personalization) total += 39.90
+
     if (total > 0) {
       const maxParcelas = ofertaAtual?.parcelas ?? 12
       const options: Array<{ value: string; label: string }> = []
@@ -558,7 +563,7 @@ function CheckoutForm({
       }
       setInstallmentOptions(options)
     }
-  }, [quantity, shippingMethod, addressFound, personalizedTags, productInfo])
+  }, [quantity, shippingMethod, addressFound, personalizedTags, productInfo, orderBumps])
 
   // Handle URL params and personalized product data
   useEffect(() => {
