@@ -789,19 +789,19 @@ function CheckoutForm({
       return 15.83
     }
 
-    // Oferta dinâmica de /v2 (ex: lootag-kit)
-    if (fromV2 && v2Price) {
-      const productTotal = v2Price * quantity
-      if (!addressFound) return productTotal
-      return productTotal + getShippingPrice()
-    }
-
-    // Tags personalizadas reais (excluir orderbumps)
+    // Tags personalizadas reais (excluir orderbumps) — checar ANTES de v2Price*qty
     const realTagsForCost = personalizedTags.filter(t => t.id !== "tag-upgrade" && t.id !== "tag-bump")
     if (realTagsForCost.length > 0) {
       const totalProductPrice = realTagsForCost.reduce((sum, tag) => sum + tag.price, 0) / 100
       if (!addressFound) return totalProductPrice
       return totalProductPrice + getShippingPrice()
+    }
+
+    // Oferta dinâmica de /v2 ou /v3 (sem tags personalizadas)
+    if (fromV2 && v2Price) {
+      const productTotal = v2Price * quantity
+      if (!addressFound) return productTotal
+      return productTotal + getShippingPrice()
     }
 
     // Verificar se é produto personalizado de forma mais rigorosa
@@ -834,6 +834,15 @@ function CheckoutForm({
     const productPrice = (quantity - 1) * (basePriceFallback / 2)
     return productPrice + getShippingPrice()
   }
+
+  // Valor total para exibição no card do PIX (mesmo cálculo do OrderSummaryContent)
+  const pixTotalDisplay = (() => {
+    let total = getShippingCost()
+    if (orderBumps.extraTag && v2Price) total += v2Price / 2
+    if (orderBumps.looapp) total += 19.90
+    if (orderBumps.personalization) total += 39.90
+    return total
+  })()
 
   // Função para salvar cookies para GTM
   const saveCookiesForGTM = (email: string, name: string, phone: string) => {
@@ -2507,7 +2516,7 @@ function CheckoutForm({
                       <div className="bg-gray-50 p-3 rounded-lg">
                         <h4 className="font-medium text-gray-800 mb-2">Informações sobre o pagamento via PIX:</h4>
                         <ul className="text-sm text-gray-700 space-y-1">
-                          <li>• Valor à vista R$ {getShippingCost().toFixed(2).replace(".", ",")};</li>
+                          <li>• Valor à vista R$ {pixTotalDisplay.toFixed(2).replace(".", ",")};</li>
                           <li>
                             • <strong>Não pode ser parcelado!</strong> Use cartão de crédito para parcelar sua compra;
                           </li>
