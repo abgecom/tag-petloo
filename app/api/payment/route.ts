@@ -10,6 +10,7 @@ import {
 } from "@/lib/pagarme/api"
 import { PAGARME_CONFIG, getPlanIdByQuantity } from "@/lib/pagarme/config"
 import { calculatePaymentAmount } from "@/lib/payment-constants"
+import { dispatchSellflux } from "@/lib/sellflux"
 
 // ============================================
 // TIPOS
@@ -662,6 +663,22 @@ export async function POST(request: NextRequest) {
         expirationDate: pixExpiresAt,
       })
 
+      // 4. Disparar Sellflux — cadastro do lead (PIX pendente)
+      dispatchSellflux({
+        name: body.customer.name,
+        email: body.customer.email,
+        phone: body.customer.phone,
+        ID: order.id,
+        produtos_lista: body.items[0]?.name || "Tag Petloo",
+        valor_total: (body.amount / 100).toFixed(2),
+        quantidade_itens: body.items.reduce((acc, item) => acc + item.quantity, 0),
+        tamanho_pet: body.petSizes || "",
+        sistema_operacional: body.deviceType || "",
+        payment_method: "pix",
+        payment_status: "pending",
+        data_pedido: new Date().toISOString(),
+      }).catch(() => {})
+
       console.log("=== PIX CONCLUÍDO COM SUCESSO ===")
 
       return NextResponse.json({
@@ -728,6 +745,24 @@ export async function POST(request: NextRequest) {
 
     // 7. Enviar para webhooks
     await sendToWebhooks(body, order.id, customer.id, subscription.id)
+
+    // 8. Disparar Sellflux — cadastro confirmado (cartão aprovado)
+    dispatchSellflux({
+      name: body.customer.name,
+      email: body.customer.email,
+      phone: body.customer.phone,
+      ID: order.id,
+      produtos_lista: body.items[0]?.name || "Tag Petloo",
+      valor_total: (body.amount / 100).toFixed(2),
+      quantidade_itens: body.items.reduce((acc, item) => acc + item.quantity, 0),
+      tamanho_pet: body.petSizes || "",
+      sistema_operacional: body.deviceType || "",
+      payment_method: "credit_card",
+      payment_status: "paid",
+      subscription_id: subscription.id,
+      subscription_status: subscription.status,
+      data_pedido: new Date().toISOString(),
+    }).catch(() => {})
 
     console.log("=== CHECKOUT CARTÃO CONCLUÍDO COM SUCESSO ===")
 

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { pagarmeRequest, PagarmeError } from "@/lib/pagarme/api"
 import { PAGARME_CONFIG, getPlanIdByQuantity } from "@/lib/pagarme/config"
 import { supabase } from "@/lib/supabase"
+import { dispatchSellflux } from "@/lib/sellflux"
  
 // ============================================
 // ROTA UPSELL SUBSCRIPTION
@@ -224,6 +225,38 @@ export async function POST(request: NextRequest) {
       console.error("[Upsell] Erro geral no Supabase (não bloqueante):", dbError)
     }
  
+    // ============================================
+    // DISPARAR SELLFLUX — mudança PIX → cartão
+    // ============================================
+    try {
+      const { data: orderData } = await supabase
+        .from("orders")
+        .select("customer_name, customer_email, customer_phone, order_amount, product_type, product_quantity, pet_sizes, device_type")
+        .eq("order_id", orderId)
+        .single()
+
+      if (orderData) {
+        dispatchSellflux({
+          name: customer.name || orderData.customer_name,
+          email: customer.email || orderData.customer_email,
+          phone: orderData.customer_phone,
+          ID: orderId,
+          produtos_lista: orderData.product_type || "Tag Petloo",
+          valor_total: (orderData.order_amount / 100).toFixed(2),
+          quantidade_itens: orderData.product_quantity || tagQuantity,
+          tamanho_pet: orderData.pet_sizes || "",
+          sistema_operacional: orderData.device_type || "",
+          payment_method: "credit_card",
+          payment_status: "paid",
+          subscription_id: subscriptionId,
+          subscription_status: subscriptionStatus,
+          data_pedido: new Date().toISOString(),
+        }).catch(() => {})
+      }
+    } catch (sfError) {
+      console.warn("[Upsell] Sellflux dispatch falhou (não-bloqueante):", sfError)
+    }
+
     // ============================================
     // SUCESSO
     // ============================================

@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server"
 import { pagarmeRequest } from "@/lib/pagarme/api"
 import { PAGARME_CONFIG } from "@/lib/pagarme/config"
 import { supabase } from "@/lib/supabase"
+import { dispatchSellflux } from "@/lib/sellflux"
 
 // ============================================
 // WEBHOOK DA PAGAR.ME
@@ -159,6 +160,32 @@ export async function POST(request: NextRequest) {
 
       // Salvar subscription_id no pedido
       await saveSubscriptionToOrder(order.id, subscription.id)
+
+      // Disparar Sellflux — confirmação de pagamento PIX
+      const { data: orderData } = await supabase
+        .from("orders")
+        .select("customer_name, customer_email, customer_phone, order_amount, product_type, product_quantity, pet_sizes, device_type")
+        .eq("order_id", order.id)
+        .single()
+
+      if (orderData) {
+        dispatchSellflux({
+          name: order.customer?.name || orderData.customer_name,
+          email: order.customer?.email || orderData.customer_email,
+          phone: orderData.customer_phone,
+          ID: order.id,
+          produtos_lista: orderData.product_type || "Tag Petloo",
+          valor_total: (orderData.order_amount / 100).toFixed(2),
+          quantidade_itens: orderData.product_quantity || 1,
+          tamanho_pet: orderData.pet_sizes || "",
+          sistema_operacional: orderData.device_type || "",
+          payment_method: "pix",
+          payment_status: "paid",
+          subscription_id: subscription.id,
+          subscription_status: subscription.status,
+          data_pedido: new Date().toISOString(),
+        }).catch(() => {})
+      }
 
       console.log("=== ASSINATURA PIX CRIADA COM SUCESSO ===")
       console.log("Order:", order.id, "Subscription:", subscription.id)
