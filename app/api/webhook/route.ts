@@ -1,12 +1,16 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { pagarmeRequest } from "@/lib/pagarme/api"
-import { PAGARME_CONFIG } from "@/lib/pagarme/config"
-import { supabase } from "@/lib/supabase"
+import { confirmPaymentAndUpdateStatus } from "@/lib/order-actions"
 
 // ============================================
 // WEBHOOK DA PAGAR.ME
-// Recebe notificações de eventos e cria assinatura
-// após confirmação de pagamento PIX
+// Responsável por: receber eventos de pagamento confirmado
+// e disparar a atualização do status (Supabase + Shopify + Make.com).
+//
+// IMPORTANTE: a criação de assinatura PIX foi REMOVIDA deste webhook por
+// decisão do dono do projeto — ela nunca funcionou na prática (Pagar.me
+// rejeita subscription sem cartão) e gerava exceção que bloqueava o resto
+// do fluxo. A criação de assinatura para pedidos de cartão continua sendo
+// feita em /api/payment/route.ts (não é tocada aqui).
 // ============================================
 
 interface PagarmeWebhookPayload {
@@ -15,174 +19,139 @@ interface PagarmeWebhookPayload {
   created_at: string
   data: {
     id: string
-    code: string
+    code?: string
     status: string
-    amount: number
+    amount?: number
     customer?: {
       id: string
-      name: string
-      email: string
-      document: string
+      name?: string
+      email?: string
+      document?: string
     }
     charges?: Array<{
       id: string
       status: string
       payment_method: string
+      paid_at?: string
       last_transaction?: {
-        status: string
+        id?: string
+        status?: string
       }
     }>
     metadata?: Record<string, string>
   }
 }
 
-interface PagarmeSubscriptionResponse {
-  id: string
-  status: string
-  plan: { id: string; name: string }
-}
-
-/**
- * Cria uma assinatura via cartão de crédito do customer
- * Para PIX: o customer não tem cartão — cria a assinatura com trial
- * e o cliente deverá adicionar cartão ao final do trial.
- * Por ora, usamos o endpoint de subscriptions sem card_id (trial gratuito).
- */
-async function createSubscriptionForPixCustomer(
-  customerId: string
-): Promise<PagarmeSubscriptionResponse> {
-  const planId = process.env.PETLOO_PLAN_ID || PAGARME_CONFIG.subscription.planId
-
-  const subscriptionData = {
-    plan_id: planId,
-    customer_id: customerId,
-    payment_method: "credit_card",
-    metadata: {
-      source: "petloo-webhook-pix",
-      trial_days: PAGARME_CONFIG.subscription.trialDays.toString(),
-    },
-  }
-
-  console.log("=== CRIANDO ASSINATURA PIX NA PAGAR.ME ===")
-  console.log("Customer ID:", customerId)
-  console.log("Plan ID:", planId)
-
-  const response = await pagarmeRequest<PagarmeSubscriptionResponse>(
-    PAGARME_CONFIG.endpoints.subscriptions,
-    {
-      method: "POST",
-      body: JSON.stringify(subscriptionData),
-    }
-  )
-
-  console.log("Assinatura criada:", response.id, "Status:", response.status)
-  return response
-}
-
-/**
- * Verifica assinatura duplicada no Supabase (evita criar 2x pelo mesmo pedido)
- */
-async function subscriptionAlreadyExists(orderId: string): Promise<boolean> {
-  const { data } = await supabase
-    .from("orders")
-    .select("subscription_id")
-    .eq("order_id", orderId)
-    .single()
-
-  return !!data?.subscription_id
-}
-
-/**
- * Salva o subscription_id no pedido existente
- */
-async function saveSubscriptionToOrder(orderId: string, subscriptionId: string) {
-  const { error } = await supabase
-    .from("orders")
-    .update({ subscription_id: subscriptionId, order_status: "paid" })
-    .eq("order_id", orderId)
-
-  if (error) {
-    console.error("Erro ao salvar subscription no pedido:", error)
-  }
-}
-
 export async function POST(request: NextRequest) {
   try {
-    console.log("=== WEBHOOK PAGAR.ME RECEBIDO ===")
-
     const payload: PagarmeWebhookPayload = await request.json()
-    console.log("Evento:", payload.type)
-    console.log("Dados:", JSON.stringify(payload.data, null, 2))
 
-    // Verificar assinatura do webhook (opcional mas recomendado)
-    const webhookSecret = process.env.PAGARME_WEBHOOK_SECRET
-    if (webhookSecret) {
-      const signature = request.headers.get("x-hub-signature")
-      if (!signature) {
-        console.warn("Webhook sem assinatura — ignorando validação")
-      }
-      // TODO: validar HMAC SHA256 se necessário
+    console.log("=== WEBHOOK PAGAR.ME RECEBIDO ===")
+    console.log("Evento:", payload.type)
+    console.log("Order ID:", payload.data?.id)
+    console.log("Status:", payload.data?.status)
+
+    // ============================================
+    // Roteamento por tipo de evento
+    // ============================================
+    if (payload.type !== "order.paid") {
+      console.log(`[Webhook] Evento "${payload.type}" não tratado — respondendo 200 OK.`)
+      return NextResponse.json({ received: true, handled: false, reason: "event_not_handled" })
+    }
+
+    const order = payload.data
+    const orderId = order?.id
+
+    if (!orderId) {
+      console.error("[Webhook] ❌ Payload order.paid sem order_id. Ignorando.")
+      return NextResponse.json({ received: true, handled: false, reason: "missing_order_id" })
     }
 
     // ============================================
-    // EVENTO: order.paid — PIX confirmado
+    // Identificar se é PIX ou cartão
     // ============================================
-    if (payload.type === "order.paid") {
-      const order = payload.data
-      console.log("=== PEDIDO PAGO ===", order.id, "Status:", order.status)
+    const pixChargePaid = order.charges?.find(
+      (c) => c.payment_method === "pix" && c.status === "paid"
+    )
+    const cardChargePaid = order.charges?.find(
+      (c) => c.payment_method === "credit_card" && c.status === "paid"
+    )
 
-      // Verificar se é pagamento PIX
-      const pixCharge = order.charges?.find(
-        (c) => c.payment_method === "pix" && c.status === "paid"
+    // Para cartão: o /api/payment já salvou como "paid" no ato da cobrança,
+    // então o webhook é apenas redundância. Não precisamos fazer nada aqui.
+    if (cardChargePaid && !pixChargePaid) {
+      console.log(
+        `[Webhook] Pedido ${orderId} é cartão já processado em /api/payment. Ignorando (esperado).`
       )
-
-      if (!pixCharge) {
-        console.log("Não é pagamento PIX ou ainda não pago — ignorando")
-        return NextResponse.json({ received: true })
-      }
-
-      const customerId = order.customer?.id
-      if (!customerId) {
-        console.error("Customer ID não encontrado no payload")
-        return NextResponse.json({ error: "Customer ID ausente" }, { status: 400 })
-      }
-
-      // Evitar duplicatas
-      const alreadyDone = await subscriptionAlreadyExists(order.id)
-      if (alreadyDone) {
-        console.log("Assinatura já existe para pedido:", order.id, "— ignorando")
-        return NextResponse.json({ received: true, skipped: "duplicate" })
-      }
-
-      // Criar assinatura
-      const subscription = await createSubscriptionForPixCustomer(customerId)
-
-      // Salvar subscription_id no pedido
-      await saveSubscriptionToOrder(order.id, subscription.id)
-
-      console.log("=== ASSINATURA PIX CRIADA COM SUCESSO ===")
-      console.log("Order:", order.id, "Subscription:", subscription.id)
-
       return NextResponse.json({
         received: true,
-        orderId: order.id,
-        subscriptionId: subscription.id,
-        subscriptionStatus: subscription.status,
+        handled: false,
+        reason: "credit_card_already_handled",
       })
     }
 
-    // Outros eventos — apenas confirmar recebimento
-    console.log("Evento não tratado:", payload.type, "— ignorando")
-    return NextResponse.json({ received: true })
+    // Se não é PIX pago, ignora.
+    if (!pixChargePaid) {
+      console.log(
+        `[Webhook] Pedido ${orderId} não tem charge PIX com status "paid". Ignorando.`
+      )
+      return NextResponse.json({
+        received: true,
+        handled: false,
+        reason: "not_pix_paid",
+      })
+    }
 
+    // ============================================
+    // É PIX PAGO — disparar confirmação
+    // ============================================
+    console.log(`[Webhook] 💰 PIX PAGO CONFIRMADO para pedido ${orderId}. Disparando atualização...`)
+
+    const paymentDate = pixChargePaid.paid_at || new Date().toISOString()
+    const transactionId = pixChargePaid.last_transaction?.id || pixChargePaid.id || orderId
+
+    try {
+      const result = await confirmPaymentAndUpdateStatus({
+        order_id: orderId,
+        payment_status: "pix_paid",
+        payment_date: paymentDate,
+        transaction_id: transactionId,
+      })
+
+      console.log(`[Webhook] Resultado confirmPaymentAndUpdateStatus:`, result)
+
+      return NextResponse.json({
+        received: true,
+        handled: true,
+        order_id: orderId,
+        result,
+      })
+    } catch (updateError) {
+      console.error(
+        `[Webhook] ❌ Erro ao executar confirmPaymentAndUpdateStatus para pedido ${orderId}:`,
+        updateError
+      )
+      // Retornar 200 mesmo assim para a Pagar.me NÃO ficar retentando
+      // (o erro foi logado, e a gente pode processar manualmente se necessário).
+      return NextResponse.json(
+        {
+          received: true,
+          handled: false,
+          reason: "internal_error",
+          error: updateError instanceof Error ? updateError.message : "unknown",
+        },
+        { status: 200 }
+      )
+    }
   } catch (error) {
-    console.error("Erro no webhook Pagar.me:", error)
+    console.error("[Webhook] ❌ Erro fatal ao processar webhook Pagar.me:", error)
+    // Retorna 200 para não ficar em loop de retry da Pagar.me por erro nosso
     return NextResponse.json(
       {
-        error: "Erro interno no webhook",
-        details: error instanceof Error ? error.message : "Erro desconhecido",
+        received: true,
+        error: error instanceof Error ? error.message : "unknown",
       },
-      { status: 500 }
+      { status: 200 }
     )
   }
 }

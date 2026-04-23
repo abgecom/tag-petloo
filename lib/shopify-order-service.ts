@@ -420,3 +420,46 @@ export async function exportShopifyOrder(
 export function isShopifyConfigured(): boolean {
   return Boolean(SHOPIFY_STORE_URL && SHOPIFY_ACCESS_TOKEN)
 }
+
+/**
+ * Atualiza o financial_status de um pedido já existente na Shopify.
+ *
+ * Uso: quando o webhook da Pagar.me confirma o pagamento de um PIX,
+ * chamamos essa função para mudar o pedido Shopify de "pending" para "paid".
+ * Quando a Shopify muda para "paid", ela dispara automaticamente o email
+ * de confirmação para o cliente.
+ *
+ * @param shopifyOrderId - ID numérico do pedido na Shopify (string para evitar perda de precisão em JS)
+ * @param financialStatus - "paid", "pending", "refunded", "voided"
+ */
+export async function updateShopifyOrderFinancialStatus(
+  shopifyOrderId: string,
+  financialStatus: "paid" | "pending" | "refunded" | "voided"
+): Promise<{ success: boolean; orderId: string; status: string }> {
+  console.log(
+    `[Shopify Service] Atualizando pedido ${shopifyOrderId} para financial_status=${financialStatus}`
+  )
+
+  const result = await shopifyFetch<{ order: { id: number; financial_status: string } }>(
+    `/orders/${shopifyOrderId}.json`,
+    {
+      method: "PUT",
+      body: JSON.stringify({
+        order: {
+          id: Number(shopifyOrderId),
+          financial_status: financialStatus,
+        },
+      }),
+    }
+  )
+
+  console.log(
+    `[Shopify Service] ✅ Pedido ${shopifyOrderId} atualizado. Novo status: ${result.order.financial_status}`
+  )
+
+  return {
+    success: true,
+    orderId: String(result.order.id),
+    status: result.order.financial_status,
+  }
+}
