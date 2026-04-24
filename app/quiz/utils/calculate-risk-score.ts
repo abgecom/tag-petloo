@@ -7,36 +7,56 @@ export type RiskResult = {
   percentage: number
 }
 
-export function calculateRiskScore(answers: Record<string, string>): RiskResult {
+type AnswerMap = Record<string, string | string[] | undefined>
+
+/**
+ * Soma pontos de risco com base nos riskWeights dos steps.
+ * - Para steps com riskWeight como objeto: soma o peso correspondente à resposta
+ * - Para steps com riskWeight numérico (multi-select): soma N * número de seleções
+ *
+ * Thresholds (score max ≈ 35):
+ * - 0-15: moderate (amarelo)
+ * - 16-25: low (laranja)
+ * - 26+: critical (vermelho)
+ */
+export function calculateRiskScore(answers: AnswerMap): RiskResult {
   let score = 0
 
   for (const step of quizSteps) {
-    if (step.riskWeight && step.saveKey) {
-      const answer = answers[step.saveKey]
-      if (answer && step.riskWeight[answer] !== undefined) {
+    if (!step.saveKey || step.riskWeight === undefined) continue
+    const answer = answers[step.saveKey]
+
+    if (typeof step.riskWeight === "number") {
+      // multi-select: N pontos por seleção
+      if (Array.isArray(answer)) {
+        score += step.riskWeight * answer.length
+      }
+    } else {
+      // single-select: peso específico por resposta
+      if (typeof answer === "string" && step.riskWeight[answer] !== undefined) {
         score += step.riskWeight[answer]
       }
     }
   }
 
-  // Score range: 4-16 (4 steps com riskWeight, cada um 1-4)
+  // Score máximo estimado: ~35 pontos
+  const maxScore = 35
+
   let level: RiskResult["level"]
   let color: string
-  let percentage: number
 
-  if (score <= 7) {
+  if (score <= 15) {
     level = "moderate"
-    color = "#EAB308" // yellow
-    percentage = Math.round((score / 16) * 100)
-  } else if (score <= 12) {
+    color = "#EAB308"
+  } else if (score <= 25) {
     level = "low"
-    color = "#F97316" // orange
-    percentage = Math.round((score / 16) * 100)
+    color = "#F97316"
   } else {
     level = "critical"
-    color = "#EF4444" // red
-    percentage = Math.round((score / 16) * 100)
+    color = "#EF4444"
   }
+
+  const percentage = Math.min(100, Math.round((score / maxScore) * 100))
 
   return { score, level, color, percentage }
 }

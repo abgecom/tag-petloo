@@ -8,6 +8,8 @@ import QuizProgress from "./QuizProgress"
 import QuizTransition from "./QuizTransition"
 import TextInputStep from "./steps/TextInputStep"
 import SingleSelectStep from "./steps/SingleSelectStep"
+import MultiSelectStep from "./steps/MultiSelectStep"
+import ColorSelectStep from "./steps/ColorSelectStep"
 import InfoStep from "./steps/InfoStep"
 import LoadingStep from "./steps/LoadingStep"
 import ResultStep from "./steps/ResultStep"
@@ -18,27 +20,38 @@ export default function QuizEngine() {
   const currentIndex = quizData.currentStep
   const stepConfig = quizSteps[currentIndex]
 
-  // Interpolar {{petName}} e {{tutorName}} nos textos
+  // Interpolar variáveis dinâmicas em qualquer texto
   const interpolate = useCallback(
     (step: QuizStep): QuizStep => {
-      const pet = quizData.petName || "seu pet"
-      const tutor = quizData.tutorName || "você"
+      const vars: Record<string, string> = {
+        petName: quizData.petName || "seu pet",
+        tutorName: quizData.tutorName || "você",
+        petType: quizData.petType || "pet",
+        petGender: quizData.petGender || "",
+        petSize: quizData.petSize || "",
+        location: quizData.location || "",
+        tagColor: quizData.tagColor || "",
+      }
       const replace = (text: string) =>
-        text.replace(/\{\{petName\}\}/g, pet).replace(/\{\{tutorName\}\}/g, tutor)
+        text.replace(/\{\{(\w+)\}\}/g, (_, key) => vars[key] ?? "")
 
       return {
         ...step,
         title: replace(step.title),
         subtitle: step.subtitle ? replace(step.subtitle) : step.subtitle,
         content: step.content?.map(replace),
+        highlight: step.highlight ? replace(step.highlight) : step.highlight,
+        buttonText: step.buttonText ? replace(step.buttonText) : step.buttonText,
+        nextStepTeaser: step.nextStepTeaser ? replace(step.nextStepTeaser) : step.nextStepTeaser,
+        steps: step.steps?.map((s) => ({ ...s, text: replace(s.text) })),
       }
     },
-    [quizData.petName, quizData.tutorName]
+    [quizData]
   )
 
   const interpolatedConfig = useMemo(() => interpolate(stepConfig), [stepConfig, interpolate])
 
-  // Calcular progresso baseado apenas em steps que são perguntas
+  // Calcular progresso baseado em steps que são perguntas
   const questionIndex = useMemo(() => {
     let count = 0
     for (let i = 0; i < currentIndex; i++) {
@@ -55,8 +68,7 @@ export default function QuizEngine() {
 
   const handleBack = useCallback(() => {
     if (currentIndex === 0) {
-      // Voltar para welcome
-      goToStep(-1) // O context vai para step -1, o page.tsx verifica
+      goToStep(-1)
       return
     }
     goBack()
@@ -68,6 +80,10 @@ export default function QuizEngine() {
         return <TextInputStep config={interpolatedConfig} onNext={handleNext} />
       case "single-select":
         return <SingleSelectStep config={interpolatedConfig} onNext={handleNext} />
+      case "multi-select":
+        return <MultiSelectStep config={interpolatedConfig} onNext={handleNext} />
+      case "color-select":
+        return <ColorSelectStep config={interpolatedConfig} onNext={handleNext} />
       case "info":
         return <InfoStep config={interpolatedConfig} onNext={handleNext} />
       case "loading":
@@ -79,16 +95,21 @@ export default function QuizEngine() {
     }
   }
 
-  // Não mostrar progress na tela de resultado
-  const showProgress = stepConfig.type !== "result"
+  const isResult = stepConfig.type === "result"
+  const isLoading = stepConfig.type === "loading"
 
   return (
     <div className="min-h-screen bg-[#F8F7F4]">
-      <QuizHeader onBack={handleBack} showBack={stepConfig.type !== "result"} />
-      {showProgress && <QuizProgress current={questionIndex} total={totalQuestionSteps} />}
+      <QuizHeader onBack={handleBack} showBack={!isResult && !isLoading} />
+      {!isResult && <QuizProgress current={questionIndex} total={totalQuestionSteps} />}
       <div className="max-w-lg mx-auto px-4 py-8">
         <QuizTransition stepKey={stepConfig.id}>
           {renderStep()}
+          {interpolatedConfig.nextStepTeaser && !isResult && !isLoading && (
+            <p className="text-xs text-gray-400 text-center mt-4 italic">
+              {interpolatedConfig.nextStepTeaser}
+            </p>
+          )}
         </QuizTransition>
       </div>
     </div>

@@ -14,7 +14,7 @@ export default function TextInputStep({ config, onNext }: TextInputStepProps) {
   const [values, setValues] = useState<Record<string, string>>(() => {
     const initial: Record<string, string> = {}
     config.fields?.forEach((f) => {
-      initial[f.key] = (quizData as Record<string, string>)[f.key] || ""
+      initial[f.key] = ((quizData as unknown as Record<string, string>)[f.key] as string) || ""
     })
     return initial
   })
@@ -33,7 +33,7 @@ export default function TextInputStep({ config, onNext }: TextInputStepProps) {
       return
     }
 
-    updateQuizData(values as Record<string, string>)
+    updateQuizData(values as unknown as Record<string, string>)
     onNext()
   }
 

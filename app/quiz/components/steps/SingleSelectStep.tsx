@@ -12,13 +12,15 @@ interface SingleSelectStepProps {
 export default function SingleSelectStep({ config, onNext }: SingleSelectStepProps) {
   const { quizData, updateQuizData } = useQuiz()
   const [selected, setSelected] = useState<string>(
-    config.saveKey ? (quizData as Record<string, string>)[config.saveKey] || "" : ""
+    config.saveKey
+      ? ((quizData as unknown as Record<string, string>)[config.saveKey] as string) || ""
+      : ""
   )
 
   const handleSelect = (value: string) => {
     setSelected(value)
     if (config.saveKey) {
-      updateQuizData({ [config.saveKey]: value } as Record<string, string>)
+      updateQuizData({ [config.saveKey]: value } as unknown as Record<string, string>)
     }
     if (config.autoAdvance) {
       setTimeout(() => onNext(), 400)
@@ -47,7 +49,12 @@ export default function SingleSelectStep({ config, onNext }: SingleSelectStepPro
           >
             <div className="flex items-center gap-3">
               {option.icon && <span className="text-2xl">{option.icon}</span>}
-              <span className="text-base font-medium text-[#1A1A1A]">{option.label}</span>
+              <div className="flex-1">
+                <span className="text-base font-medium text-[#1A1A1A] block">{option.label}</span>
+                {option.description && (
+                  <span className="text-xs text-gray-500 mt-0.5 block">{option.description}</span>
+                )}
+              </div>
             </div>
           </button>
         ))}

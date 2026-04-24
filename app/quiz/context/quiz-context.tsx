@@ -3,20 +3,44 @@
 import { createContext, useState, useCallback, type ReactNode } from "react"
 
 export type QuizData = {
+  // Situacional
   tutorName: string
   petName: string
   petType: "cachorro" | "gato" | ""
+  petGender: "macho" | "femea" | ""
+  petSize: "pequeno" | "medio" | "grande" | ""
   location: string
-  alreadyLost: string
+
+  // Problema
   petRoutine: string
+  alreadyLost: string
+  riskSituations: string[]
   currentProtection: string
   biggestFear: string
+  timeToNotice: string
+
+  // Desejo
+  desiredFeeling: string
+  wouldInvest: string
+  priorities: string[]
+
+  // Mecanismo
   awareness: string
+
+  // Personalização
+  tagColor: "laranja" | "roxo" | ""
+
+  // Cálculos
   riskScore: number
+  riskLevel: "moderate" | "low" | "critical" | ""
+
+  // Controle
   currentStep: number
   started: boolean
   startedAt: string
   completedAt: string
+
+  // UTM + sessão
   utmSource: string
   utmMedium: string
   utmCampaign: string
@@ -35,13 +59,22 @@ const initialData: QuizData = {
   tutorName: "",
   petName: "",
   petType: "",
+  petGender: "",
+  petSize: "",
   location: "",
-  alreadyLost: "",
   petRoutine: "",
+  alreadyLost: "",
+  riskSituations: [],
   currentProtection: "",
   biggestFear: "",
+  timeToNotice: "",
+  desiredFeeling: "",
+  wouldInvest: "",
+  priorities: [],
   awareness: "",
+  tagColor: "",
   riskScore: 0,
+  riskLevel: "",
   currentStep: 0,
   started: false,
   startedAt: "",
@@ -62,7 +95,6 @@ export const QuizContext = createContext<QuizContextType>({
 
 export function QuizProvider({ children }: { children: ReactNode }) {
   const [quizData, setQuizData] = useState<QuizData>(() => {
-    // Tentar restaurar do sessionStorage como fallback
     if (typeof window !== "undefined") {
       const saved = sessionStorage.getItem("quiz_tagloo_data")
       if (saved) {
@@ -77,7 +109,6 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   const updateQuizData = useCallback((partial: Partial<QuizData>) => {
     setQuizData((prev) => {
       const updated = { ...prev, ...partial }
-      // Backup no sessionStorage
       if (typeof window !== "undefined") {
         sessionStorage.setItem("quiz_tagloo_data", JSON.stringify(updated))
       }
@@ -85,9 +116,12 @@ export function QuizProvider({ children }: { children: ReactNode }) {
     })
   }, [])
 
-  const goToStep = useCallback((step: number) => {
-    updateQuizData({ currentStep: step })
-  }, [updateQuizData])
+  const goToStep = useCallback(
+    (step: number) => {
+      updateQuizData({ currentStep: step })
+    },
+    [updateQuizData]
+  )
 
   const goBack = useCallback(() => {
     setQuizData((prev) => {
