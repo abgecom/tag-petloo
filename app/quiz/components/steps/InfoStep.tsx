@@ -45,7 +45,10 @@ function ProfileSummary() {
     quizData.tagColor === "laranja" ? "Laranja" : quizData.tagColor === "roxo" ? "Roxa" : "—"
 
   const items = [
-    { emoji: petEmoji, text: `${quizData.petName} — ${quizData.petType === "gato" ? "Gato" : "Cachorro"} ${genderLabel}, porte ${sizeLabel}` },
+    {
+      emoji: petEmoji,
+      text: `${quizData.petName} — ${quizData.petType === "gato" ? "Gato" : "Cachorro"} ${genderLabel}, porte ${sizeLabel}`,
+    },
     { emoji: "📍", text: `Mora em ${locationLabel}` },
     { emoji: colorEmoji, text: `Tag escolhida: ${colorLabel}` },
     { emoji: "🔒", text: "Nível de proteção atual: precisa de atenção" },
@@ -63,29 +66,34 @@ function ProfileSummary() {
   )
 }
 
+// Estilos por variant com paleta Petloo
+const variantStyles = {
+  warning: {
+    // Bordô Petloo
+    bg: "bg-[#75004A]/5",
+    text: "text-[#75004A]",
+    btn: "bg-[#75004A] hover:bg-[#5A0038]",
+    prefix: "⚠️ ",
+  },
+  positive: {
+    // Laranja Petloo
+    bg: "bg-[#F1542E]/10",
+    text: "text-[#7A2A15]",
+    btn: "bg-[#F1542E] hover:bg-[#D93D17]",
+    prefix: "✅ ",
+  },
+  neutral: {
+    // Roxo escuro Petloo
+    bg: "bg-[#461947]/5",
+    text: "text-[#461947]",
+    btn: "bg-[#F1542E] hover:bg-[#D93D17]",
+    prefix: "",
+  },
+} as const
+
 export default function InfoStep({ config, onNext }: InfoStepProps) {
-  const variant = config.variant || "neutral"
-  const styles: Record<string, { bg: string; text: string; btn: string; prefix: string }> = {
-    warning: {
-      bg: "bg-red-50",
-      text: "text-red-800",
-      btn: "bg-red-600 hover:bg-red-700",
-      prefix: "⚠️ ",
-    },
-    positive: {
-      bg: "bg-green-50",
-      text: "text-green-800",
-      btn: "bg-green-600 hover:bg-green-700",
-      prefix: "✅ ",
-    },
-    neutral: {
-      bg: "bg-blue-50",
-      text: "text-blue-900",
-      btn: "bg-[#2563EB] hover:bg-[#1D4ED8]",
-      prefix: "",
-    },
-  }
-  const s = styles[variant]
+  const variant = (config.variant || "neutral") as keyof typeof variantStyles
+  const s = variantStyles[variant]
 
   return (
     <div className="space-y-6">
@@ -94,6 +102,17 @@ export default function InfoStep({ config, onNext }: InfoStepProps) {
           {s.prefix}
           {config.title}
         </h2>
+
+        {/* Imagem ilustrativa (se configurada) */}
+        {config.imageUrl && (
+          <div className="mb-5 -mx-2 rounded-xl overflow-hidden">
+            <img
+              src={config.imageUrl}
+              alt={config.imageAlt || ""}
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        )}
 
         {config.dynamicContent ? (
           <ProfileSummary />

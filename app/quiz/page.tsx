@@ -49,9 +49,9 @@ function QuizContent() {
 
   return (
     <div className="min-h-screen bg-[#F8F7F4]">
-      {/* Hero com gradiente */}
-      <div className="bg-gradient-to-b from-[#1E3A8A] via-[#2563EB] to-[#3B82F6] text-white">
-        <div className="max-w-lg mx-auto px-4 py-8 pb-12">
+      {/* Hero com gradiente Petloo */}
+      <div className="bg-gradient-to-b from-[#461947] via-[#75004A] to-[#B03D5E] text-white">
+        <div className="max-w-lg mx-auto px-4 py-8">
           {/* Logo pequeno */}
           <div className="flex justify-center mb-6">
             <img
@@ -81,8 +81,17 @@ function QuizContent() {
             Descubra agora o nível de proteção do seu pet
           </h1>
 
+          {/* Hero image — logo abaixo da headline */}
+          <div className="mb-6 rounded-2xl overflow-hidden shadow-xl">
+            <img
+              src="/images/Gato_e_cachorro_202604232309.jpeg"
+              alt="Cachorro e gato protegidos"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+
           {/* Subtítulo */}
-          <p className="text-center text-base text-white/90 leading-relaxed mb-6">
+          <p className="text-center text-base text-white/90 leading-relaxed mb-4">
             Responda algumas perguntas rápidas e receba um diagnóstico personalizado com recomendações
             exclusivas para a segurança do seu melhor amigo.
           </p>
@@ -98,7 +107,7 @@ function QuizContent() {
             { number: "2.000+", text: "pets reencontrados com a Lootag" },
           ].map((stat) => (
             <div key={stat.number} className="bg-white rounded-xl p-3 shadow-sm border border-gray-100 text-center">
-              <p className="text-lg font-bold text-[#2563EB] leading-none">{stat.number}</p>
+              <p className="text-lg font-bold text-[#F1542E] leading-none">{stat.number}</p>
               <p className="text-[10px] text-gray-600 mt-1 leading-tight">{stat.text}</p>
             </div>
           ))}
@@ -109,7 +118,7 @@ function QuizContent() {
       <div className="max-w-lg mx-auto px-4 pb-8 space-y-3">
         <button
           onClick={handleStart}
-          className="w-full py-4 bg-[#10B981] text-white font-bold text-lg rounded-full hover:bg-[#059669] transition-all shadow-lg shadow-green-200 flex items-center justify-center gap-2 animate-pulse-slow"
+          className="w-full py-4 bg-[#F1542E] text-white font-bold text-lg rounded-full hover:bg-[#D93D17] transition-all shadow-lg shadow-orange-200 flex items-center justify-center gap-2 animate-pulse-slow"
         >
           COMEÇAR MEU DIAGNÓSTICO
           <ArrowRight className="w-5 h-5" />

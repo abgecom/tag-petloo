@@ -244,6 +244,8 @@ export const quizSteps: QuizStep[] = [
     phase: "problema",
     variant: "warning",
     title: "{{tutorName}}, isso é sério...",
+    imageUrl: "/images/step9_202604232315.jpeg",
+    imageAlt: "Pets em situação de risco",
     content: [
       "**1 a cada 3 pets foge de casa** pelo menos uma vez na vida.",
       "Desses, **apenas 10% são encontrados** quando não possuem nenhuma forma de identificação ou rastreamento.",
@@ -387,6 +389,8 @@ export const quizSteps: QuizStep[] = [
     phase: "mecanismo",
     variant: "positive",
     title: "{{tutorName}}, existe uma solução para tudo isso!",
+    imageUrl: "/images/step16_202604232315.jpeg",
+    imageAlt: "Pet protegido com tag de rastreamento",
     content: [
       "Tutores inteligentes estão usando **tags de rastreamento GPS** que permitem localizar o pet em **tempo real**, a qualquer momento, direto pelo celular.",
       "É simples: a tag vai na coleira do {{petName}} e você acompanha tudo pelo app — localização ao vivo, histórico de passeios e alertas se ele sair de uma área segura.",

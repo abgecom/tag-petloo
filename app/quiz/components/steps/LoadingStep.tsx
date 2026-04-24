@@ -65,7 +65,7 @@ export default function LoadingStep({ config, onNext }: LoadingStepProps) {
               cy="60"
               r="54"
               fill="none"
-              stroke="#2563EB"
+              stroke="#F1542E"
               strokeWidth="8"
               strokeLinecap="round"
               strokeDasharray={`${2 * Math.PI * 54}`}
@@ -74,7 +74,7 @@ export default function LoadingStep({ config, onNext }: LoadingStepProps) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold text-[#2563EB]">{progress}%</span>
+            <span className="text-2xl font-bold text-[#F1542E]">{progress}%</span>
           </div>
         </div>
       </div>

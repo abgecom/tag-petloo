@@ -55,14 +55,14 @@ export default function MultiSelectStep({ config, onNext }: MultiSelectStepProps
               onClick={() => toggle(option.value)}
               className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
                 isSelected
-                  ? "border-[#2563EB] bg-[#EFF6FF] shadow-sm"
+                  ? "border-[#F1542E] bg-[#FFF1ED] shadow-sm"
                   : "border-gray-200 bg-white hover:border-gray-300"
               }`}
             >
               <div className="flex items-center gap-3">
                 <div
                   className={`flex-shrink-0 w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors ${
-                    isSelected ? "bg-[#2563EB] border-[#2563EB]" : "border-gray-300"
+                    isSelected ? "bg-[#F1542E] border-[#F1542E]" : "border-gray-300"
                   }`}
                 >
                   {isSelected && <Check className="w-4 h-4 text-white" strokeWidth={3} />}
@@ -78,7 +78,7 @@ export default function MultiSelectStep({ config, onNext }: MultiSelectStepProps
       <button
         onClick={handleSubmit}
         disabled={selected.length < minSelections}
-        className="w-full py-4 bg-[#2563EB] text-white font-bold text-base rounded-full hover:bg-[#1D4ED8] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+        className="w-full py-4 bg-[#F1542E] text-white font-bold text-base rounded-full hover:bg-[#D93D17] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
       >
         {config.buttonText || "CONTINUAR →"}
       </button>

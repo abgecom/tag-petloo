@@ -43,7 +43,7 @@ export default function SingleSelectStep({ config, onNext }: SingleSelectStepPro
             onClick={() => handleSelect(option.value)}
             className={`w-full text-left p-4 rounded-xl border-2 transition-all duration-200 ${
               selected === option.value
-                ? "border-[#2563EB] bg-[#EFF6FF] shadow-sm"
+                ? "border-[#F1542E] bg-[#FFF1ED] shadow-sm"
                 : "border-gray-200 bg-white hover:border-gray-300"
             }`}
           >
@@ -64,7 +64,7 @@ export default function SingleSelectStep({ config, onNext }: SingleSelectStepPro
         <button
           onClick={onNext}
           disabled={!selected}
-          className="w-full py-4 bg-[#2563EB] text-white font-bold text-base rounded-full hover:bg-[#1D4ED8] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-4 bg-[#F1542E] text-white font-bold text-base rounded-full hover:bg-[#D93D17] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           CONTINUAR
         </button>

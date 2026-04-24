@@ -306,7 +306,7 @@ export default function ResultStep() {
       </div>
 
       {/* ========== 6. Oferta rápida ========== */}
-      <div className="bg-white rounded-2xl border-2 border-[#10B981] p-5 text-center">
+      <div className="bg-white rounded-2xl border-2 border-[#F1542E] p-5 text-center">
         <p className="text-sm text-gray-600">A solução completa para proteger o {petName} a partir de</p>
         <p className="text-4xl font-bold text-[#1A1A1A] my-1">R$ 89,87</p>
         <p className="text-xs text-gray-500">(ou 3x de R$ 29,96)</p>
@@ -316,7 +316,7 @@ export default function ResultStep() {
       {/* ========== 7. CTA inline (com botão sticky no bottom também) ========== */}
       <button
         onClick={handleCTA}
-        className="w-full py-4 bg-[#10B981] text-white font-bold text-lg rounded-full hover:bg-[#059669] transition-colors shadow-lg shadow-green-200"
+        className="w-full py-4 bg-[#F1542E] text-white font-bold text-lg rounded-full hover:bg-[#D93D17] transition-colors shadow-lg shadow-orange-200"
       >
         PROTEGER O {petName.toUpperCase()} AGORA →
       </button>
@@ -347,7 +347,7 @@ export default function ResultStep() {
         <div className="max-w-lg mx-auto">
           <button
             onClick={handleCTA}
-            className="w-full py-3.5 bg-[#10B981] text-white font-bold text-base rounded-full hover:bg-[#059669] transition-colors shadow-lg shadow-green-200"
+            className="w-full py-3.5 bg-[#F1542E] text-white font-bold text-base rounded-full hover:bg-[#D93D17] transition-colors shadow-lg shadow-orange-200"
           >
             PROTEGER O {petName.toUpperCase()} AGORA →
           </button>

@@ -60,7 +60,7 @@ export default function TextInputStep({ config, onNext }: TextInputStepProps) {
                 setErrors((prev) => ({ ...prev, [field.key]: "" }))
               }}
               placeholder={field.placeholder}
-              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#2563EB] focus:outline-none text-base transition-colors"
+              className="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:border-[#F1542E] focus:outline-none text-base transition-colors"
               maxLength={40}
             />
             {errors[field.key] && (
@@ -72,7 +72,7 @@ export default function TextInputStep({ config, onNext }: TextInputStepProps) {
 
       <button
         onClick={handleSubmit}
-        className="w-full py-4 bg-[#2563EB] text-white font-bold text-base rounded-full hover:bg-[#1D4ED8] transition-colors"
+        className="w-full py-4 bg-[#F1542E] text-white font-bold text-base rounded-full hover:bg-[#D93D17] transition-colors"
       >
         {config.buttonText || "CONTINUAR"}
       </button>

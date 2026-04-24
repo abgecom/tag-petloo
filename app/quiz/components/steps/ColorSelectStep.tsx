@@ -43,13 +43,13 @@ export default function ColorSelectStep({ config, onNext }: ColorSelectStepProps
               onClick={() => handleSelect(option.value)}
               className={`relative rounded-2xl p-5 border-2 transition-all duration-200 bg-white ${
                 isSelected
-                  ? "border-[#2563EB] shadow-lg scale-[1.02]"
+                  ? "border-[#F1542E] shadow-lg scale-[1.02]"
                   : "border-gray-200 hover:border-gray-300"
               }`}
               style={isSelected ? { boxShadow: `0 0 0 3px ${color}33` } : undefined}
             >
               {isSelected && (
-                <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#2563EB] flex items-center justify-center">
+                <div className="absolute top-2 right-2 w-6 h-6 rounded-full bg-[#F1542E] flex items-center justify-center">
                   <Check className="w-4 h-4 text-white" strokeWidth={3} />
                 </div>
               )}
@@ -79,7 +79,7 @@ export default function ColorSelectStep({ config, onNext }: ColorSelectStepProps
         <button
           onClick={onNext}
           disabled={!selected}
-          className="w-full py-4 bg-[#2563EB] text-white font-bold text-base rounded-full hover:bg-[#1D4ED8] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-4 bg-[#F1542E] text-white font-bold text-base rounded-full hover:bg-[#D93D17] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
         >
           CONTINUAR →
         </button>
