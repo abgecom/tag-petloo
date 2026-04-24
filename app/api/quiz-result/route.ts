@@ -23,6 +23,23 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: true })
     }
 
+    if (body.action === "progress") {
+      const { error } = await supabase
+        .from("quiz_tagloo_results")
+        .update({
+          last_step_id: body.last_step_id,
+          last_step_index: body.last_step_index,
+          last_step_at: body.last_step_at || new Date().toISOString(),
+        })
+        .eq("session_id", body.session_id)
+
+      if (error) {
+        console.error("[Quiz API] Erro no progress:", error)
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      return NextResponse.json({ success: true })
+    }
+
     if (body.action === "complete") {
       const { error } = await supabase
         .from("quiz_tagloo_results")

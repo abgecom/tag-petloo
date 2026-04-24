@@ -119,6 +119,28 @@ export function QuizProvider({ children }: { children: ReactNode }) {
   const goToStep = useCallback(
     (step: number) => {
       updateQuizData({ currentStep: step })
+      // Registrar progresso no Supabase (fire-and-forget, não bloqueia UX)
+      if (typeof window !== "undefined" && step >= 0) {
+        // Import dinâmico para evitar ciclo — usa fetch direto
+        import("../data/quiz-steps").then(({ quizSteps }) => {
+          const stepConfig = quizSteps[step]
+          if (!stepConfig) return
+          setQuizData((prev) => {
+            if (!prev.sessionId) return prev
+            fetch("/api/quiz-result", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                action: "progress",
+                session_id: prev.sessionId,
+                last_step_id: stepConfig.id,
+                last_step_index: step,
+              }),
+            }).catch(() => {})
+            return prev
+          })
+        })
+      }
     },
     [updateQuizData]
   )

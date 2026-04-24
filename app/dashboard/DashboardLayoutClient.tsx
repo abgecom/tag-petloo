@@ -19,7 +19,13 @@ export default function DashboardLayoutClient({
                 <h1 className="text-xl font-bold text-gray-900">Petloo Admin</h1>
               </div>
               <nav className="flex items-center space-x-4">
-                <a href="/" className="text-gray-600 hover:text-gray-900 transition-colors">
+                <a href="/dashboard" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+                  Pedidos
+                </a>
+                <a href="/dashboard/quiz" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
+                  Quiz Analytics
+                </a>
+                <a href="/" className="text-gray-600 hover:text-gray-900 transition-colors text-sm">
                   Voltar ao Site
                 </a>
                 <LogoutButton />
