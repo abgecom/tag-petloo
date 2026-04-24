@@ -7,21 +7,37 @@ import { quizSteps } from "@/app/quiz/data/quiz-steps"
  * quiz_tagloo_results. Retorna KPIs gerais e contagem por step,
  * permitindo identificar onde os usuários abandonam.
  *
- * Query params:
- * - days: filtra sessões iniciadas nos últimos N dias (default: 30)
+ * Query params (escolha uma forma):
+ * - days: últimos N dias (default: 30)
+ * - start_date + end_date: intervalo ISO (YYYY-MM-DD) — tem prioridade sobre days
  */
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url)
-    const days = Math.max(1, parseInt(searchParams.get("days") || "30", 10))
+    const startDateParam = searchParams.get("start_date")
+    const endDateParam = searchParams.get("end_date")
 
-    const since = new Date()
-    since.setDate(since.getDate() - days)
+    let since: Date
+    let until: Date
+
+    if (startDateParam && endDateParam) {
+      since = new Date(`${startDateParam}T00:00:00`)
+      until = new Date(`${endDateParam}T23:59:59.999`)
+    } else {
+      const days = Math.max(1, parseInt(searchParams.get("days") || "30", 10))
+      since = new Date()
+      since.setDate(since.getDate() - days)
+      since.setHours(0, 0, 0, 0)
+      until = new Date()
+    }
 
     const { data, error } = await supabase
       .from("quiz_tagloo_results")
-      .select("session_id, started_at, completed, completed_at, last_step_id, last_step_index, risk_level")
+      .select(
+        "session_id, started_at, completed, completed_at, last_step_id, last_step_index, risk_level"
+      )
       .gte("started_at", since.toISOString())
+      .lte("started_at", until.toISOString())
       .order("started_at", { ascending: false })
 
     if (error) {
@@ -34,15 +50,12 @@ export async function GET(request: NextRequest) {
     const totalCompletions = sessions.filter((s) => s.completed === true).length
     const completionRate = totalStarts > 0 ? (totalCompletions / totalStarts) * 100 : 0
 
-    // Para cada step, calcular quantas sessões chegaram até ali.
-    // "Chegou até o step X" = last_step_index >= X OU completed === true
     const stepFunnel = quizSteps.map((step, index) => {
       const reached = sessions.filter((s) => {
         if (s.completed === true) return true
         if (typeof s.last_step_index === "number") {
           return s.last_step_index >= index
         }
-        // Fallback: se não tem last_step_index, só conta o step 0 (start)
         return index === 0
       }).length
 
@@ -60,7 +73,6 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Drop-off entre steps consecutivos
     const stepFunnelWithDropoff = stepFunnel.map((step, i) => {
       const prev = i > 0 ? stepFunnel[i - 1] : null
       const dropoff = prev ? prev.reached - step.reached : 0
@@ -72,7 +84,6 @@ export async function GET(request: NextRequest) {
       }
     })
 
-    // Distribuição de risk_level entre os que completaram
     const riskDistribution = {
       moderate: sessions.filter((s) => s.completed && s.risk_level === "moderate").length,
       low: sessions.filter((s) => s.completed && s.risk_level === "low").length,
@@ -80,7 +91,10 @@ export async function GET(request: NextRequest) {
     }
 
     return NextResponse.json({
-      period_days: days,
+      period: {
+        start: since.toISOString(),
+        end: until.toISOString(),
+      },
       total_starts: totalStarts,
       total_completions: totalCompletions,
       completion_rate_pct: completionRate,
