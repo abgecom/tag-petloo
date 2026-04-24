@@ -197,7 +197,7 @@ function ObrigadoContent() {
                   {orderData.orderBumps?.personalization && (
                     <div className="flex justify-between items-center text-sm text-gray-600">
                       <span>Personalização</span>
-                      <span className="font-semibold">R$ 39,90</span>
+                      <span className="font-semibold">R$ 29,90</span>
                     </div>
                   )}
 

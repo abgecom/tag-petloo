@@ -230,7 +230,7 @@ function OrderSummaryContent({
   let bumpDisplayTotal = 0
   if (orderBumps.extraTag && v2Price) bumpDisplayTotal += v2Price / 2
   if (orderBumps.looapp) bumpDisplayTotal += 19.90
-  if (orderBumps.personalization) bumpDisplayTotal += 39.90
+  if (orderBumps.personalization) bumpDisplayTotal += 29.90
 
   const subtotal = productPrice + shippingPrice + bumpDisplayTotal
   const total = subtotal
@@ -542,7 +542,7 @@ function CheckoutForm({
     let total = getShippingCost()
     if (orderBumps.extraTag && v2Price) total += v2Price / 2
     if (orderBumps.looapp) total += 19.90
-    if (orderBumps.personalization) total += 39.90
+    if (orderBumps.personalization) total += 29.90
 
     if (total > 0) {
       const maxParcelas = ofertaAtual?.parcelas ?? 12
@@ -845,7 +845,7 @@ function CheckoutForm({
     let total = getShippingCost()
     if (orderBumps.extraTag && v2Price) total += v2Price / 2
     if (orderBumps.looapp) total += 19.90
-    if (orderBumps.personalization) total += 39.90
+    if (orderBumps.personalization) total += 29.90
     return total
   })()
 
@@ -1161,7 +1161,7 @@ function CheckoutForm({
       let bumpTotal = 0
       if (orderBumps.extraTag && v2Price) bumpTotal += Math.round(v2Price * 100 / 2)
       if (orderBumps.looapp) bumpTotal += 1990
-      if (orderBumps.personalization) bumpTotal += 3990
+      if (orderBumps.personalization) bumpTotal += 2990
       if (bumpTotal > 0) {
         productInfo.amount += bumpTotal
         console.log("🎁 Order bumps adicionados:", bumpTotal, "centavos. Novo total:", productInfo.amount)
@@ -1191,7 +1191,7 @@ function CheckoutForm({
           bumpValues: {
             extraTag: orderBumps.extraTag && v2Price ? v2Price / 2 : 0,
             looapp: orderBumps.looapp ? 19.90 : 0,
-            personalization: orderBumps.personalization ? 39.90 : 0,
+            personalization: orderBumps.personalization ? 29.90 : 0,
           },
         }
         sessionStorage.setItem("orderDataForPixPage", JSON.stringify(orderDataForPix))
@@ -1217,7 +1217,7 @@ function CheckoutForm({
           bumpValues: {
             extraTag: orderBumps.extraTag && v2Price ? v2Price / 2 : 0,
             looapp: orderBumps.looapp ? 19.90 : 0,
-            personalization: orderBumps.personalization ? 39.90 : 0,
+            personalization: orderBumps.personalization ? 29.90 : 0,
           },
         }
         sessionStorage.setItem("orderDataForObrigado", JSON.stringify(orderDataForObrigado))
@@ -2793,7 +2793,7 @@ function CheckoutForm({
                         id: "tag-upgrade",
                         color: "purple" as "orange" | "purple",
                         petName: name,
-                        price: 3990,
+                        price: 2990,
                       }]
                     })
                   }

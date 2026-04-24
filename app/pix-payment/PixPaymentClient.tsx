@@ -435,7 +435,7 @@ export default function PixPaymentClient({ orderId, amount }: { orderId: string;
                 {orderData?.orderBumps?.personalization && (
                   <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
                     <span>Personalização</span>
-                    <span className="font-semibold">R$ 39,90</span>
+                    <span className="font-semibold">R$ 29,90</span>
                   </div>
                 )}
 
