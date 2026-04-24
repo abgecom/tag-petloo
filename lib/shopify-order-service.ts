@@ -422,44 +422,122 @@ export function isShopifyConfigured(): boolean {
 }
 
 /**
- * Atualiza o financial_status de um pedido já existente na Shopify.
+ * Marca um pedido Shopify como pago criando uma transaction do tipo "sale".
  *
- * Uso: quando o webhook da Pagar.me confirma o pagamento de um PIX,
- * chamamos essa função para mudar o pedido Shopify de "pending" para "paid".
- * Quando a Shopify muda para "paid", ela dispara automaticamente o email
- * de confirmação para o cliente.
+ * Por que não usar PUT em /orders/{id}.json com financial_status?
+ * Porque a API da Shopify NÃO aceita esse campo via PUT — ele é derivado
+ * das transactions. Para marcar como pago, precisamos registrar uma
+ * transação de venda (sale/success) que corresponde ao valor total do pedido.
  *
- * @param shopifyOrderId - ID numérico do pedido na Shopify (string para evitar perda de precisão em JS)
- * @param financialStatus - "paid", "pending", "refunded", "voided"
+ * Fluxo:
+ * 1. GET /orders/{id}.json — buscar total_price, currency, financial_status atual
+ * 2. Se já está "paid", não faz nada (idempotência — webhook pode disparar 2x)
+ * 3. POST /orders/{id}/transactions.json — criar transaction "sale/success"
+ * 4. GET /orders/{id}.json — validar que financial_status virou "paid"
+ * 5. Retornar o status real (não "supostamente paid")
+ *
+ * @param shopifyOrderId - ID numérico do pedido na Shopify (em string)
+ * @param financialStatus - apenas "paid" é suportado por essa função
  */
 export async function updateShopifyOrderFinancialStatus(
   shopifyOrderId: string,
   financialStatus: "paid" | "pending" | "refunded" | "voided"
 ): Promise<{ success: boolean; orderId: string; status: string }> {
   console.log(
-    `[Shopify Service] Atualizando pedido ${shopifyOrderId} para financial_status=${financialStatus}`
+    `[Shopify Service] Requisição para marcar pedido ${shopifyOrderId} como ${financialStatus}`
   )
 
-  const result = await shopifyFetch<{ order: { id: number; financial_status: string } }>(
-    `/orders/${shopifyOrderId}.json`,
-    {
-      method: "PUT",
-      body: JSON.stringify({
-        order: {
-          id: Number(shopifyOrderId),
-          financial_status: financialStatus,
-        },
-      }),
+  // Essa função só suporta marcar como "paid" por enquanto.
+  // "pending", "refunded", "voided" exigem lógica diferente (voids, refunds, etc).
+  if (financialStatus !== "paid") {
+    console.warn(
+      `[Shopify Service] ⚠️ Status "${financialStatus}" não é suportado. Apenas "paid" funciona nessa função. Ignorando.`
+    )
+    return {
+      success: false,
+      orderId: shopifyOrderId,
+      status: financialStatus,
     }
-  )
+  }
+
+  // --- Passo 1: buscar pedido atual ---
+  const currentOrder = await shopifyFetch<{
+    order: {
+      id: number
+      total_price: string
+      currency: string
+      financial_status: string
+    }
+  }>(`/orders/${shopifyOrderId}.json`, { method: "GET" })
 
   console.log(
-    `[Shopify Service] ✅ Pedido ${shopifyOrderId} atualizado. Novo status: ${result.order.financial_status}`
+    `[Shopify Service] Pedido ${shopifyOrderId}: total_price=${currentOrder.order.total_price} ${currentOrder.order.currency}, financial_status atual=${currentOrder.order.financial_status}`
   )
 
+  // --- Passo 2: idempotência — se já está pago, não cria transação duplicada ---
+  if (currentOrder.order.financial_status === "paid") {
+    console.log(
+      `[Shopify Service] ✅ Pedido ${shopifyOrderId} já está "paid". Nada a fazer (idempotente).`
+    )
+    return {
+      success: true,
+      orderId: String(currentOrder.order.id),
+      status: "paid",
+    }
+  }
+
+  // --- Passo 3: criar transaction de venda ---
+  console.log(
+    `[Shopify Service] Criando transaction "sale/success" de ${currentOrder.order.total_price} ${currentOrder.order.currency} para pedido ${shopifyOrderId}...`
+  )
+
+  const transactionResult = await shopifyFetch<{
+    transaction: {
+      id: number
+      kind: string
+      status: string
+      amount: string
+    }
+  }>(`/orders/${shopifyOrderId}/transactions.json`, {
+    method: "POST",
+    body: JSON.stringify({
+      transaction: {
+        kind: "sale",
+        status: "success",
+        amount: currentOrder.order.total_price,
+        currency: currentOrder.order.currency,
+        gateway: "manual",
+      },
+    }),
+  })
+
+  console.log(
+    `[Shopify Service] Transaction criada: id=${transactionResult.transaction.id}, kind=${transactionResult.transaction.kind}, status=${transactionResult.transaction.status}, amount=${transactionResult.transaction.amount}`
+  )
+
+  // --- Passo 4: revalidar que o financial_status realmente mudou ---
+  const updatedOrder = await shopifyFetch<{
+    order: {
+      id: number
+      financial_status: string
+    }
+  }>(`/orders/${shopifyOrderId}.json`, { method: "GET" })
+
+  const finalStatus = updatedOrder.order.financial_status
+
+  if (finalStatus === "paid") {
+    console.log(
+      `[Shopify Service] ✅ Pedido ${shopifyOrderId} agora está "paid" na Shopify. Cliente deve receber email de confirmação.`
+    )
+  } else {
+    console.error(
+      `[Shopify Service] ❌ Transaction foi criada mas financial_status ainda é "${finalStatus}" (esperado: "paid"). Shopify pode ter rejeitado silenciosamente.`
+    )
+  }
+
   return {
-    success: true,
-    orderId: String(result.order.id),
-    status: result.order.financial_status,
+    success: finalStatus === "paid",
+    orderId: String(updatedOrder.order.id),
+    status: finalStatus,
   }
 }
