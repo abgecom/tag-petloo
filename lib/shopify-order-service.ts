@@ -422,20 +422,23 @@ export function isShopifyConfigured(): boolean {
 }
 
 /**
- * Marca um pedido Shopify como pago de forma robusta:
- * 1. Busca o pedido atual (total, moeda, status).
- * 2. Se já está "paid", não faz nada (idempotência).
- * 3. Busca as transactions existentes do pedido.
- * 4. Se existe uma authorization pendente, cria um capture com parent_id apontando pra ela.
- *    (Esse é o caso da maioria dos pedidos PIX, criados com financial_status="pending".)
- * 5. Se NÃO existe authorization, cria um sale direto (fallback raro).
- * 6. Revalida o financial_status após a transaction.
- * 7. Retorna success=true APENAS se o status realmente virou "paid".
+ * Marca um pedido Shopify como pago (v3).
  *
- * Por que esse caminho: pedidos criados com financial_status="pending" via API da
- * Shopify recebem automaticamente uma transaction de "authorization" interna. A API
- * então rejeita tentativas de criar um "sale" novo (erro: "sale is not a valid transaction").
- * O caminho aceito é criar um "capture" que completa a authorization existente.
+ * Aprendizado das tentativas anteriores:
+ * - Pedidos criados via API com financial_status="pending" e SEM transactions no payload
+ *   não recebem authorization automática da Shopify (lista de transactions vem vazia).
+ * - Mesmo assim, a API rejeita `kind: "sale"` com erro "sale is not a valid transaction".
+ *
+ * Estratégia v3:
+ * 1. Busca pedido + suas transactions existentes.
+ * 2. Se já está "paid", não faz nada (idempotência).
+ * 3. Se existe authorization pendente → cria capture com parent_id.
+ * 4. Se não existe nada → cria authorization + capture em sequência (caminho principal).
+ * 5. Se caminho principal falhar, tenta capture standalone (fallback).
+ * 6. Se capture standalone falhar, tenta sale (último recurso).
+ * 7. Revalida financial_status depois de qualquer tentativa bem-sucedida.
+ *
+ * Logs verbose em cada passo para facilitar diagnóstico se falhar de novo.
  */
 export async function updateShopifyOrderFinancialStatus(
   shopifyOrderId: string,
@@ -445,16 +448,11 @@ export async function updateShopifyOrderFinancialStatus(
     `[Shopify Service] Requisição para marcar pedido ${shopifyOrderId} como ${financialStatus}`
   )
 
-  // Essa função só suporta marcar como "paid" por enquanto.
   if (financialStatus !== "paid") {
     console.warn(
       `[Shopify Service] ⚠️ Status "${financialStatus}" não suportado. Apenas "paid" funciona. Ignorando.`
     )
-    return {
-      success: false,
-      orderId: shopifyOrderId,
-      status: financialStatus,
-    }
+    return { success: false, orderId: shopifyOrderId, status: financialStatus }
   }
 
   // --- Passo 1: buscar pedido atual ---
@@ -467,15 +465,16 @@ export async function updateShopifyOrderFinancialStatus(
     }
   }>(`/orders/${shopifyOrderId}.json`, { method: "GET" })
 
+  const totalPrice = currentOrder.order.total_price
+  const currency = currentOrder.order.currency
+
   console.log(
-    `[Shopify Service] Pedido ${shopifyOrderId}: total_price=${currentOrder.order.total_price} ${currentOrder.order.currency}, financial_status atual=${currentOrder.order.financial_status}`
+    `[Shopify Service] Pedido ${shopifyOrderId}: total=${totalPrice} ${currency}, financial_status=${currentOrder.order.financial_status}`
   )
 
   // --- Passo 2: idempotência ---
   if (currentOrder.order.financial_status === "paid") {
-    console.log(
-      `[Shopify Service] ✅ Pedido ${shopifyOrderId} já está "paid". Nada a fazer.`
-    )
+    console.log(`[Shopify Service] ✅ Pedido ${shopifyOrderId} já está "paid". Nada a fazer.`)
     return {
       success: true,
       orderId: String(currentOrder.order.id),
@@ -497,54 +496,133 @@ export async function updateShopifyOrderFinancialStatus(
 
   const existingTransactions = transactionsResult.transactions || []
   console.log(
-    `[Shopify Service] Pedido ${shopifyOrderId} tem ${existingTransactions.length} transaction(s) existente(s):`,
-    existingTransactions.map((t) => ({
-      id: t.id,
-      kind: t.kind,
-      status: t.status,
-      amount: t.amount,
-    }))
+    `[Shopify Service] Pedido ${shopifyOrderId} tem ${existingTransactions.length} transaction(s):`,
+    existingTransactions.map((t) => ({ id: t.id, kind: t.kind, status: t.status }))
   )
 
-  // --- Passo 4: decidir tipo de transação a criar ---
-  // Procura authorization com status "success" (padrão da Shopify pra pedidos pending)
   const parentAuthorization = existingTransactions.find(
     (t) => t.kind === "authorization" && t.status === "success"
   )
 
-  let transactionPayload: Record<string, unknown>
-  let strategy: string
+  // ============================================
+  // Camadas de tentativa
+  // ============================================
+  const attemptErrors: Array<{ strategy: string; error: string }> = []
 
+  // --- Caminho A1: já existe authorization → capture com parent_id ---
   if (parentAuthorization) {
-    strategy = `capture com parent_id=${parentAuthorization.id}`
-    transactionPayload = {
-      transaction: {
+    try {
+      console.log(
+        `[Shopify Service] Caminho A1: capture com parent_id=${parentAuthorization.id}`
+      )
+      await createShopifyTransaction(shopifyOrderId, {
         kind: "capture",
         status: "success",
-        amount: currentOrder.order.total_price,
-        currency: currentOrder.order.currency,
+        amount: totalPrice,
+        currency,
         parent_id: parentAuthorization.id,
-      },
-    }
-  } else {
-    strategy = "sale direto (sem authorization parent)"
-    transactionPayload = {
-      transaction: {
-        kind: "sale",
-        status: "success",
-        amount: currentOrder.order.total_price,
-        currency: currentOrder.order.currency,
-        gateway: "manual",
-      },
+      })
+      return await revalidateOrderStatus(shopifyOrderId)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error(`[Shopify Service] Caminho A1 falhou: ${msg}`)
+      attemptErrors.push({ strategy: "capture com parent_id existente", error: msg })
     }
   }
 
-  console.log(
-    `[Shopify Service] Estratégia escolhida para ${shopifyOrderId}: ${strategy}`
+  // --- Caminho A2: criar authorization + capture em sequência ---
+  try {
+    console.log(`[Shopify Service] Caminho A2: criar authorization + capture`)
+
+    const authResult = await createShopifyTransaction(shopifyOrderId, {
+      kind: "authorization",
+      status: "success",
+      amount: totalPrice,
+      currency,
+      gateway: "manual",
+    })
+
+    console.log(
+      `[Shopify Service] Authorization criada: id=${authResult.transaction.id}`
+    )
+
+    await createShopifyTransaction(shopifyOrderId, {
+      kind: "capture",
+      status: "success",
+      amount: totalPrice,
+      currency,
+      parent_id: authResult.transaction.id,
+    })
+
+    return await revalidateOrderStatus(shopifyOrderId)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`[Shopify Service] Caminho A2 falhou: ${msg}`)
+    attemptErrors.push({ strategy: "authorization + capture", error: msg })
+  }
+
+  // --- Caminho B: capture standalone (sem parent_id) ---
+  try {
+    console.log(`[Shopify Service] Caminho B: capture standalone`)
+    await createShopifyTransaction(shopifyOrderId, {
+      kind: "capture",
+      status: "success",
+      amount: totalPrice,
+      currency,
+      gateway: "manual",
+    })
+    return await revalidateOrderStatus(shopifyOrderId)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`[Shopify Service] Caminho B falhou: ${msg}`)
+    attemptErrors.push({ strategy: "capture standalone", error: msg })
+  }
+
+  // --- Caminho C: sale com gateway manual (último recurso) ---
+  try {
+    console.log(`[Shopify Service] Caminho C: sale com gateway=manual`)
+    await createShopifyTransaction(shopifyOrderId, {
+      kind: "sale",
+      status: "success",
+      amount: totalPrice,
+      currency,
+      gateway: "manual",
+    })
+    return await revalidateOrderStatus(shopifyOrderId)
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err)
+    console.error(`[Shopify Service] Caminho C falhou: ${msg}`)
+    attemptErrors.push({ strategy: "sale com gateway manual", error: msg })
+  }
+
+  // --- Todos os caminhos falharam ---
+  console.error(
+    `[Shopify Service] ❌ TODAS as tentativas falharam para pedido ${shopifyOrderId}:`,
+    JSON.stringify(attemptErrors, null, 2)
   )
 
-  // --- Passo 5: criar transaction ---
-  const transactionResult = await shopifyFetch<{
+  return {
+    success: false,
+    orderId: shopifyOrderId,
+    status: currentOrder.order.financial_status,
+  }
+}
+
+/**
+ * Helper: cria uma transaction na Shopify. Retorna o resultado ou lança erro.
+ */
+async function createShopifyTransaction(
+  shopifyOrderId: string,
+  transactionData: Record<string, unknown>
+): Promise<{
+  transaction: {
+    id: number
+    kind: string
+    status: string
+    amount: string
+  }
+}> {
+  return await shopifyFetch<{
     transaction: {
       id: number
       kind: string
@@ -553,30 +631,29 @@ export async function updateShopifyOrderFinancialStatus(
     }
   }>(`/orders/${shopifyOrderId}/transactions.json`, {
     method: "POST",
-    body: JSON.stringify(transactionPayload),
+    body: JSON.stringify({ transaction: transactionData }),
   })
+}
 
-  console.log(
-    `[Shopify Service] Transaction criada: id=${transactionResult.transaction.id}, kind=${transactionResult.transaction.kind}, status=${transactionResult.transaction.status}, amount=${transactionResult.transaction.amount}`
-  )
-
-  // --- Passo 6: revalidar financial_status ---
+/**
+ * Helper: busca o pedido na Shopify e retorna o status atualizado.
+ */
+async function revalidateOrderStatus(
+  shopifyOrderId: string
+): Promise<{ success: boolean; orderId: string; status: string }> {
   const updatedOrder = await shopifyFetch<{
-    order: {
-      id: number
-      financial_status: string
-    }
+    order: { id: number; financial_status: string }
   }>(`/orders/${shopifyOrderId}.json`, { method: "GET" })
 
   const finalStatus = updatedOrder.order.financial_status
 
   if (finalStatus === "paid") {
     console.log(
-      `[Shopify Service] ✅ Pedido ${shopifyOrderId} agora está "paid" na Shopify. Email de confirmação deve ser disparado.`
+      `[Shopify Service] ✅ Pedido ${shopifyOrderId} agora está "paid" na Shopify.`
     )
   } else {
     console.error(
-      `[Shopify Service] ❌ Transaction criada mas financial_status ainda é "${finalStatus}" (esperado: "paid"). Investigar transações existentes e gateway.`
+      `[Shopify Service] ❌ Transaction criada mas financial_status ainda é "${finalStatus}" (esperado: "paid").`
     )
   }
 
