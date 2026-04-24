@@ -1180,8 +1180,9 @@ function CheckoutForm({
           quantity: quantity,
           isPersonalized: personalizedTags.length > 0 || !!sessionStorage.getItem("personalizedProduct"),
           productName: ofertaAtual?.nome || productInfo.name || "Kit de Proteção Lootag",
-          productPrice: fromV2 && v2Price ? v2Price * quantity : (productInfo.amount - bumpTotal) / 100,
-          shippingPrice: 0,
+          productPrice: fromV2 && v2Price ? v2Price * quantity : (productInfo.amount - bumpTotal - shippingCentavos) / 100,
+          shippingPrice: shippingCentavos / 100,
+          totalAmount: productInfo.amount,
           orderBumps: {
             extraTag: orderBumps.extraTag,
             looapp: orderBumps.looapp,
@@ -1195,7 +1196,7 @@ function CheckoutForm({
         }
         sessionStorage.setItem("orderDataForPixPage", JSON.stringify(orderDataForPix))
 
-        // Salvar dados para a página de Obrigado
+        // Salvar dados para a página de Obrigado (mesmos detalhes da página PIX + dados do cliente)
         const orderDataForObrigado = {
           personalizedTags: personalizedTags,
           quantity: quantity,
@@ -1203,6 +1204,21 @@ function CheckoutForm({
           customerEmail: email,
           petSizes: petSizes.join(","),
           deviceType: deviceType || "",
+          isPersonalized: personalizedTags.length > 0 || !!sessionStorage.getItem("personalizedProduct"),
+          productName: ofertaAtual?.nome || productInfo.name || "Kit de Proteção Lootag",
+          productPrice: fromV2 && v2Price ? v2Price * quantity : (productInfo.amount - bumpTotal - shippingCentavos) / 100,
+          shippingPrice: shippingCentavos / 100,
+          totalAmount: productInfo.amount,
+          orderBumps: {
+            extraTag: orderBumps.extraTag,
+            looapp: orderBumps.looapp,
+            personalization: orderBumps.personalization,
+          },
+          bumpValues: {
+            extraTag: orderBumps.extraTag && v2Price ? v2Price / 2 : 0,
+            looapp: orderBumps.looapp ? 19.90 : 0,
+            personalization: orderBumps.personalization ? 39.90 : 0,
+          },
         }
         sessionStorage.setItem("orderDataForObrigado", JSON.stringify(orderDataForObrigado))
 

@@ -88,19 +88,13 @@ export function usePaymentStatusChecker({
           }
 
           // Tentar obter dados do pedido salvos no checkout
-          let personalizedTags = []
-          let quantity = 1
-          let customerName = ""
-          let customerEmail = ""
+          let savedData: Record<string, unknown> = {}
           try {
             const savedOrderData = sessionStorage.getItem("orderDataForObrigado")
             if (savedOrderData) {
-              const parsedData = JSON.parse(savedOrderData)
-              personalizedTags = parsedData.personalizedTags || []
-              quantity = parsedData.quantity || 1
-              customerName = parsedData.customerName || ""
-              customerEmail = parsedData.customerEmail || ""
-              sessionStorage.removeItem("orderDataForObrigado") // Limpar após o uso
+              savedData = JSON.parse(savedOrderData)
+              // Não remover ainda — a página /obrigado pode precisar se o cliente
+              // passar pelo /upsell-tag antes. A limpeza fica por conta da /obrigado.
             }
           } catch (storageError) {
             console.warn("⚠️ Erro ao ler dados salvos para a página de obrigado:", storageError)
@@ -109,18 +103,24 @@ export function usePaymentStatusChecker({
           // Salvar dados do pedido para página de obrigado
           const orderSummary = {
             orderId: data.order_id,
-            customerName: customerName,
-            customerEmail: customerEmail,
-            amount: data.amount,
+            customerName: savedData.customerName || "",
+            customerEmail: savedData.customerEmail || "",
+            amount: data.amount || savedData.totalAmount || 0,
             paymentMethod: "PIX",
-            personalizedTags: personalizedTags,
-            quantity: quantity,
+            personalizedTags: savedData.personalizedTags || [],
+            quantity: savedData.quantity || 1,
+            isPersonalized: savedData.isPersonalized || false,
+            productName: savedData.productName,
+            productPrice: savedData.productPrice,
+            shippingPrice: savedData.shippingPrice,
+            orderBumps: savedData.orderBumps,
+            bumpValues: savedData.bumpValues,
           }
 
           sessionStorage.setItem("orderSummary", JSON.stringify(orderSummary))
 
-          // Redirecionar para página de obrigado
-          router.push("/obrigado")
+          // Redirecionar para página de upsell de cadastro de cartão (fluxo PIX)
+          router.push(`/upsell-tag?orderId=${data.order_id}`)
           return
         }
       } else {

@@ -442,7 +442,11 @@ export default function PixPaymentClient({ orderId, amount }: { orderId: string;
                 {/* Frete */}
                 <div className="flex items-center justify-between text-sm text-gray-600 bg-white p-2 rounded-md border">
                   <span>Frete</span>
-                  <span className="font-semibold text-green-600">Grátis</span>
+                  {orderData?.shippingPrice && orderData.shippingPrice > 0 ? (
+                    <span className="font-semibold">R$ {orderData.shippingPrice.toFixed(2).replace(".", ",")}</span>
+                  ) : (
+                    <span className="font-semibold text-green-600">Grátis</span>
+                  )}
                 </div>
               </div>
             </div>

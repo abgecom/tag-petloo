@@ -23,6 +23,20 @@ interface OrderSummary {
   paymentMethod?: string
   personalizedTags?: PersonalizedTag[]
   quantity?: number
+  isPersonalized?: boolean
+  productName?: string
+  productPrice?: number
+  shippingPrice?: number
+  orderBumps?: {
+    extraTag?: boolean
+    looapp?: boolean
+    personalization?: boolean
+  }
+  bumpValues?: {
+    extraTag?: number
+    looapp?: number
+    personalization?: number
+  }
 }
 
 function ObrigadoContent() {
@@ -143,20 +157,62 @@ function ObrigadoContent() {
                   </div>
                 ))
               ) : (
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/image%20594-rIMxV2I0SZADJI938HxomgyWIUjTGg.png"
-                      alt="Tag rastreamento Petloo"
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                    <div>
-                      <p className="font-medium text-gray-800">Tag rastreamento Petloo + App</p>
-                      <p className="text-sm text-gray-600">Quantidade: {displayQuantity}</p>
+                <>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src="https://5txjuxzqkryxsbyq.public.blob.vercel-storage.com/LP%20looneca/Tag%20rastreamento/Fotos%20da%20LP/image%20594-rIMxV2I0SZADJI938HxomgyWIUjTGg.png"
+                        alt={orderData.productName || "Tag rastreamento Petloo"}
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                      <div>
+                        <p className="font-medium text-gray-800">
+                          {orderData.productName || "Tag rastreamento Petloo + App"}
+                        </p>
+                        <p className="text-sm text-gray-600">Quantidade: {displayQuantity}</p>
+                      </div>
                     </div>
+                    {orderData.productPrice ? (
+                      <span className="font-semibold text-gray-800">
+                        R$ {orderData.productPrice.toFixed(2).replace(".", ",")}
+                      </span>
+                    ) : null}
                   </div>
-                  {/* Para produto genérico, o valor total já inclui o frete, então não mostramos preço aqui */}
-                </div>
+
+                  {/* Order bumps */}
+                  {orderData.orderBumps?.extraTag && (
+                    <div className="flex justify-between items-center text-sm text-gray-600">
+                      <span>Tag extra (50% OFF)</span>
+                      <span className="font-semibold">
+                        R$ {(orderData.bumpValues?.extraTag || 0).toFixed(2).replace(".", ",")}
+                      </span>
+                    </div>
+                  )}
+                  {orderData.orderBumps?.looapp && (
+                    <div className="flex justify-between items-center text-sm text-gray-600">
+                      <span>Looapp Completo</span>
+                      <span className="font-semibold">R$ 19,90</span>
+                    </div>
+                  )}
+                  {orderData.orderBumps?.personalization && (
+                    <div className="flex justify-between items-center text-sm text-gray-600">
+                      <span>Personalização</span>
+                      <span className="font-semibold">R$ 39,90</span>
+                    </div>
+                  )}
+
+                  {/* Frete */}
+                  <div className="flex justify-between items-center text-sm text-gray-600">
+                    <span>Frete</span>
+                    {orderData.shippingPrice && orderData.shippingPrice > 0 ? (
+                      <span className="font-semibold">
+                        R$ {orderData.shippingPrice.toFixed(2).replace(".", ",")}
+                      </span>
+                    ) : (
+                      <span className="font-semibold text-green-600">Grátis</span>
+                    )}
+                  </div>
+                </>
               )}
 
               <hr className="border-gray-200" />

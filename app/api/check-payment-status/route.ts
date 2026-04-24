@@ -28,13 +28,19 @@ export async function GET(request: NextRequest) {
     // Otimização: verifica se o pedido já está pago no nosso DB
     const { data: existingOrder } = await supabase
       .from("orders")
-      .select("order_status")
+      .select("order_status, order_amount")
       .eq("order_id", orderId)
       .single()
 
     if (existingOrder?.order_status === "paid") {
       console.log(`[Check Status] Otimização: Pedido ${orderId} já está 'pago' no DB.`)
-      return NextResponse.json({ success: true, order_id: orderId, is_paid: true, status: "paid" })
+      return NextResponse.json({
+        success: true,
+        order_id: orderId,
+        is_paid: true,
+        status: "paid",
+        amount: existingOrder.order_amount || 0,
+      })
     }
 
     const appmaxToken = process.env.APPMAX_ACCESS_TOKEN
