@@ -325,6 +325,7 @@ function buildOrderPayload(
   const tags = [
     "petloo",
     "tag-rastreamento",
+    "app-petloo-sim",
     "importado",
     input.paymentMethod === "credit_card" ? "cartao" : "pix",
   ]
