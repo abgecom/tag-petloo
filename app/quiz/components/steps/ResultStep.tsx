@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation"
 import { useQuiz } from "../../hooks/useQuiz"
 import { calculateRiskScore } from "../../utils/calculate-risk-score"
 import { saveQuizComplete } from "../../utils/save-quiz-result"
+import { gtagEvent } from "@/lib/gtag"
 
 const sizeLabels: Record<string, string> = {
   pequeno: "Pequeno",
@@ -86,16 +87,13 @@ export default function ResultStep() {
       })
     }
 
-    // dataLayer
-    if (typeof window !== "undefined") {
-      ;((window as unknown as { dataLayer?: unknown[] }).dataLayer ||= []).push({
-        event: "quiz_complete",
-        risk_score: result.score,
-        risk_level: result.level,
-        pet_type: quizData.petType,
-        pet_size: quizData.petSize,
-      })
-    }
+    // GA4 (gtag nativo)
+    gtagEvent("quiz_complete", {
+      risk_score: result.score,
+      risk_level: result.level,
+      pet_type: quizData.petType,
+      pet_size: quizData.petSize,
+    })
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Countdown

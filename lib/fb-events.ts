@@ -1,4 +1,4 @@
-import { event as fbPixelEvent } from "@/lib/fpixel"
+import { event as fbPixelEvent, setAdvancedMatching } from "@/lib/fpixel"
 
 /**
  * Envia eventos para o Facebook Pixel (client-side) e CAPI (server-side)
@@ -20,7 +20,8 @@ export async function fbEvents(
 ) {
   const eventId = `${eventName}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`
 
-  // 1. Dispara no navegador (Pixel)
+  // 1. Dispara no navegador (Pixel) — com Advanced Matching quando há dados do cliente
+  if (userData) setAdvancedMatching(userData)
   fbPixelEvent(eventName, eventData, eventId)
 
   // 2. Dispara no servidor (CAPI) via API route

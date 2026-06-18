@@ -36,17 +36,26 @@ export default function RootLayout({
   }}
 />
         
-        {/* Google Tag Manager */}
+        {/*
+          GA4 nativo (gtag.js) — substitui o container GTM-MZ32BCCB removido.
+          O GTM alimentava o container server-side api.petloo.com.br (Stape),
+          que enviava CAPI do Facebook com fbclid expirado. Sem GTM, esse sender
+          deixa de ser alimentado por este projeto. GA4: G-CX4GKGS2GP.
+        */}
         <Script
-          id="gtm-script"
+          id="gtag-src"
+          strategy="afterInteractive"
+          src="https://www.googletagmanager.com/gtag/js?id=G-CX4GKGS2GP"
+        />
+        <Script
+          id="gtag-init"
           strategy="afterInteractive"
           dangerouslySetInnerHTML={{
             __html: `
-              (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','GTM-MZ32BCCB');
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-CX4GKGS2GP');
             `,
           }}
         />
@@ -65,23 +74,14 @@ export default function RootLayout({
               t.src=v;s=b.getElementsByTagName(e)[0];
               s.parentNode.insertBefore(t,s)}(window, document,'script',
               'https://connect.facebook.net/en_US/fbevents.js');
+              window.__fbPvEventId = 'pv.' + Date.now() + '.' + Math.random().toString(36).slice(2, 10);
               fbq('init', '1650496555439267');
-              fbq('track', 'PageView');
+              fbq('track', 'PageView', {}, { eventID: window.__fbPvEventId });
             `,
           }}
         />
       </head>
       <body>
-        {/* Google Tag Manager (noscript) */}
-        <noscript>
-          <iframe
-            src="https://www.googletagmanager.com/ns.html?id=GTM-MZ32BCCB"
-            height="0"
-            width="0"
-            style={{ display: "none", visibility: "hidden" }}
-          />
-        </noscript>
-
         {/* Meta Pixel (noscript) */}
         <noscript>
           <img
