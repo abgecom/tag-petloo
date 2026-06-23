@@ -60,6 +60,8 @@ export interface CheckoutInput {
   extraTagBump?: boolean
   /** Dispositivo do cliente (ios/android) — vai para as note_attributes da Shopify */
   deviceType?: string
+  /** Tamanho(s) da coleira/tag (ex: "M" ou "M,G") — vai para as note_attributes */
+  petSizes?: string
 }
 
 interface ShopifyCustomer {
@@ -324,6 +326,9 @@ function buildOrderPayload(
   }
   if (input.deviceType) {
     noteAttributes.push({ name: "Dispositivo", value: input.deviceType })
+  }
+  if (input.petSizes) {
+    noteAttributes.push({ name: "Tamanho da Coleira", value: input.petSizes })
   }
 
   // Tags do pedido
