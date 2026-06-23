@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { sendServerEvent, hashData } from "@/lib/fb-capi"
+import { sendServerEvent, hashData, sanitizeFbc } from "@/lib/fb-capi"
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +15,7 @@ export async function POST(request: NextRequest) {
 
     const cookies = request.cookies
     const fbp = cookies.get("_fbp")?.value
-    const fbc = cookies.get("_fbc")?.value
+    const fbc = sanitizeFbc(cookies.get("_fbc")?.value)
 
     const forwardedFor = request.headers.get("x-forwarded-for")
     const clientIp = forwardedFor?.split(",")[0]?.trim()

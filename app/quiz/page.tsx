@@ -6,6 +6,7 @@ import { useQuiz } from "./hooks/useQuiz"
 import { saveQuizStart } from "./utils/save-quiz-result"
 import QuizEngine from "./components/QuizEngine"
 import { MapPin, ArrowRight } from "lucide-react"
+import { gtagEvent } from "@/lib/gtag"
 
 function QuizContent() {
   const searchParams = useSearchParams()
@@ -40,11 +41,7 @@ function QuizContent() {
         content_name: "quiz-tagloo",
       })
     }
-    if (typeof window !== "undefined") {
-      ;((window as unknown as { dataLayer?: unknown[] }).dataLayer ||= []).push({
-        event: "quiz_start",
-      })
-    }
+    gtagEvent("quiz_start")
   }
 
   return (

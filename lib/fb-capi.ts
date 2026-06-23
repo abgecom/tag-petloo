@@ -7,6 +7,23 @@ export function hashData(data: string): string {
   return crypto.createHash("sha256").update(data.toLowerCase().trim()).digest("hex")
 }
 
+/**
+ * Valida o parâmetro fbc antes de enviar. Formato:
+ * `fb.<subdomainIndex>.<creationTimeMs>.<fbclid>`. Retorna undefined quando o
+ * formato é inválido ou o clique tem mais de 90 dias — evitando o erro
+ * "valor fbclid expirado no parâmetro fbc".
+ */
+export function sanitizeFbc(fbc?: string | null): string | undefined {
+  if (!fbc) return undefined
+  const parts = fbc.split(".")
+  if (parts.length < 4 || parts[0] !== "fb") return undefined
+  const creationTime = Number(parts[2])
+  if (!Number.isFinite(creationTime) || creationTime <= 0) return undefined
+  const NINETY_DAYS = 90 * 24 * 60 * 60 * 1000
+  if (Date.now() - creationTime > NINETY_DAYS) return undefined
+  return fbc
+}
+
 interface UserData {
   fbp?: string
   fbc?: string
@@ -61,7 +78,8 @@ export async function sendServerEvent({
     client_ip_address: userData.client_ip_address,
     client_user_agent: userData.client_user_agent,
     fbp: userData.fbp,
-    fbc: userData.fbc,
+    // Descarta fbc expirado/inválido para não disparar o aviso do Meta
+    fbc: sanitizeFbc(userData.fbc),
     external_id: externalId ? hashData(externalId) : undefined,
     country: hashData(userData.country || "br"),
   }
@@ -90,7 +108,7 @@ export async function sendServerEvent({
 
   try {
     const response = await fetch(
-      `https://graph.facebook.com/v18.0/${FB_PIXEL_ID}/events?access_token=${FB_ACCESS_TOKEN}`,
+      `https://graph.facebook.com/v21.0/${FB_PIXEL_ID}/events?access_token=${FB_ACCESS_TOKEN}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
