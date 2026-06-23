@@ -1350,6 +1350,8 @@ function CheckoutForm({
               hasLooapp: orderBumps.looapp,
               hasPersonalizationUpgrade: orderBumps.personalization,
               extraTagBump: orderBumps.extraTag,
+              deviceType: deviceType || "",
+              petSizes: petSizes.join(","),
             }
 
             // Chamar exportOrderToShopify em background (nao bloquear redirecionamento)
@@ -1525,6 +1527,8 @@ function CheckoutForm({
             hasLooapp: orderBumps.looapp,
             hasPersonalizationUpgrade: orderBumps.personalization,
             extraTagBump: orderBumps.extraTag,
+            deviceType: deviceType || "",
+            petSizes: petSizes.join(","),
           }
 
           // Chamar exportOrderToShopify (em background para nao bloquear)
